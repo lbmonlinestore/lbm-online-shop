@@ -1,0 +1,871 @@
+
+/* =================================
+   LBM ONLINE SHOP
+   LUXURY BLACK & GOLD DESIGN
+================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #111111;
+    color: #ffffff;
+    line-height: 1.6;
+}
+
+:root {
+    --gold: #d4af37;
+    --dark-gold: #b8962e;
+    --black: #111111;
+    --card: #1b1b1b;
+    --muted: #aaaaaa;
+}
+
+/* HEADER */
+
+.topbar {
+    min-height: 75px;
+    padding: 15px 6%;
+    background: #080808;
+    border-bottom: 1px solid #302716;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.brand {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 27px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.brand span {
+    display: block;
+    color: #ffffff;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-align: center;
+}
+
+.navigation {
+    display: flex;
+    gap: 25px;
+}
+
+.navigation a {
+    color: #eeeeee;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.navigation a:hover {
+    color: var(--gold);
+}
+
+.cart-button {
+    background: var(--gold);
+    color: #111111;
+    border: none;
+    padding: 11px 18px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* HERO SECTION */
+
+.hero {
+    min-height: 540px;
+    display: flex;
+    align-items: center;
+    padding: 70px 8%;
+    background:
+    linear-gradient(
+        rgba(0,0,0,0.45),
+        rgba(0,0,0,0.65)
+    ),
+    url("https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=85");
+
+background-size: cover;
+background-position: center;
+background-repeat: no-repeat;
+        ),
+        linear-gradient(135deg, #282116, #111111 65%);
+}
+
+.hero-content {
+    max-width: 650px;
+}
+
+.hero-label,
+.section-label {
+    color: var(--gold);
+    font-size: 12px;
+    letter-spacing: 4px;
+    font-weight: bold;
+    margin-bottom: 18px;
+}
+
+.hero h1 {
+    font-size: clamp(42px, 7vw, 76px);
+    line-height: 1.1;
+    margin-bottom: 22px;
+    font-weight: 800;
+}
+
+.hero h1 span {
+    color: var(--gold);
+}
+
+.hero-description {
+    color: #cccccc;
+    font-size: 16px;
+    max-width: 440px;
+    margin-bottom: 32px;
+}
+
+.shop-button {
+    display: inline-block;
+    background: var(--gold);
+    color: #111111;
+    text-decoration: none;
+    padding: 14px 32px;
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    border-radius: 3px;
+    transition: 0.3s;
+}
+
+.shop-button:hover {
+    background: #ffffff;
+    transform: translateY(-3px);
+}
+
+/* COLLECTION HEADING */
+
+.collection-heading {
+    text-align: center;
+    padding: 75px 20px 25px;
+}
+
+.collection-heading h2 {
+    font-size: 32px;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.collection-heading > p:last-child {
+    color: var(--muted);
+}
+
+/* PRODUCTS */
+
+.products {
+    padding: 25px 6% 75px;
+}
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(220px, 1fr)
+    );
+    gap: 25px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.product-card {
+    background: var(--card);
+    border: 1px solid #302716;
+    border-radius: 7px;
+    overflow: hidden;
+    transition: 0.3s;
+}
+
+.product-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-5px);
+}
+
+.product-card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    display: block;
+    background: #292929;
+}
+
+.product-info {
+    padding: 20px;
+}
+
+.product-info h3 {
+    font-size: 17px;
+    margin-bottom: 8px;
+}
+
+.product-description {
+    color: var(--muted);
+    font-size: 13px;
+    min-height: 42px;
+}
+
+.product-price {
+    color: var(--gold);
+    font-size: 20px;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.add-button {
+    width: 100%;
+    padding: 12px;
+    background: var(--gold);
+    color: #111111;
+    border: none;
+    border-radius: 3px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.add-button:hover {
+    background: #ffffff;
+}
+
+/* SHOPPING CART */
+
+.cart-section {
+    display: none;
+    max-width: 850px;
+    margin: 30px auto 70px;
+    padding: 30px;
+    background: #1b1b1b;
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+}
+
+.cart-section.open {
+    display: block;
+}
+
+.cart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    border-bottom: 1px solid #444444;
+    padding-bottom: 20px;
+}
+
+.cart-header h2 {
+    font-size: 21px;
+    color: var(--gold);
+}
+
+.close-cart {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid #666666;
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+.cart-items {
+    padding: 20px 0;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #333333;
+}
+
+.cart-item strong {
+    display: block;
+}
+
+.cart-item small {
+    color: var(--gold);
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.quantity-controls button {
+    width: 30px;
+    height: 30px;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.cart-summary {
+    border-top: 1px solid #444444;
+    padding-top: 20px;
+}
+
+.cart-summary h3 {
+    margin-bottom: 20px;
+}
+
+.cart-summary h3 span {
+    color: var(--gold);
+}
+
+.checkout-button {
+    width: 100%;
+    padding: 15px;
+    background: var(--gold);
+    color: #111111;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.checkout-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ABOUT */
+
+.about {
+    text-align: center;
+    padding: 75px 20px;
+    background: #191919;
+}
+
+.about h2 {
+    color: var(--gold);
+    font-size: 32px;
+    margin-bottom: 18px;
+}
+
+.about > p:last-child {
+    color: #bbbbbb;
+    max-width: 650px;
+    margin: auto;
+}
+
+/* FOOTER */
+
+.footer {
+    text-align: center;
+    background: #080808;
+    border-top: 1px solid #302716;
+    padding: 35px 20px;
+}
+
+.footer-brand {
+    color: var(--gold);
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    letter-spacing: 2px;
+}
+
+.footer p {
+    color: #999999;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.copyright {
+    margin-top: 20px !important;
+}
+
+/* MOBILE RESPONSIVENESS */
+
+@media (max-width: 650px) {
+
+    .topbar {
+        padding: 12px 4%;
+        flex-wrap: wrap;
+    }
+
+    .brand {
+        font-size: 22px;
+    }
+
+    .navigation {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        gap: 25px;
+    }
+
+    .cart-button {
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+
+    .hero {
+        min-height: 450px;
+        padding: 55px 7%;
+    }
+
+    .hero h1 {
+        font-size: 45px;
+    }
+
+    .collection-heading h2 {
+        font-size: 25px;
+    }
+
+    .products {
+        padding: 20px 5% 55px;
+    }
+
+    .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 13px;
+    }
+
+    .product-card img {
+        height: 160px;
+    }
+
+    .product-info {
+        padding: 12px;
+    }
+
+    .product-info h3 {
+        font-size: 14px;
+    }
+
+    .product-description {
+        font-size: 11px;
+    }
+
+    .product-price {
+        font-size: 17px;
+    }
+
+    .add-button {
+        padding: 10px 5px;
+        font-size: 12px;
+    }
+
+    .cart-section {
+        margin: 20px 4%;
+        padding: 18px;
+    }
+
+    .cart-header h2 {
+        font-size: 16px;
+    }
+
+    .cart-item {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* WHATSAPP CONTACT BUTTONS */
+
+.header-whatsapp {
+    background: #d4af37;
+    color: #111;
+    padding: 10px 16px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+
+.whatsapp-button {
+    display: inline-block;
+    background: #25D366;
+    color: #ffffff;
+    padding: 14px 22px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.whatsapp-button:hover {
+    background: #1da851;
+    transform: translateY(-3px);
+}
+
+/* CONTACT SECTION */
+
+.contact {
+    text-align: center;
+    padding: 75px 20px;
+    background: #111111;
+}
+
+.contact h2 {
+    color: #d4af37;
+    font-size: 30px;
+    margin-bottom: 15px;
+}
+
+.contact p {
+    color: #bbbbbb;
+    margin-bottom: 15px;
+}
+
+.contact .contact-number {
+    color: #d4af37;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+/* MOBILE CONTACT LAYOUT */
+
+@media (max-width: 650px) {
+    .header-whatsapp {
+        padding: 9px 12px;
+        font-size: 11px;
+    }
+
+    .hero-actions {
+        align-items: flex-start;
+    }
+
+    .hero {
+        background-position: center;
+    }
+}/* MAIN FASHION MODEL */
+.hero-model {
+    width: 100%;
+    height: 450px;
+    background-image: url("images/man-in-suit.png");
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    border-radius: 12px;
+    position: relative;
+}
+
+/* MOBILE DISPLAY */
+@media (max-width: 600px) {
+    .hero-model {
+        height: 350px;
+        background-position: center top;
+    }
+}/* LBM LUXURY BLUE & GOLD THEME */
+
+:root {
+    --primary-color: #123B5D;
+    --secondary-color: #1B5278;
+    --gold-color: #D4AF37;
+    --light-gold: #F5D778;
+    --background-color: #EAF2F8;
+    --text-color: #FFFFFF;
+}
+
+/* Main website background */
+body {
+    background-color: var(--background-color);
+    color: #123B5D;
+}
+
+/* Header */
+.topbar {
+    background: #123B5D;
+    color: white;
+}
+
+/* Brand name */
+.brand {
+    color: #FFFFFF;
+}
+
+.brand span {
+    color: var(--gold-color);
+}
+
+/* Buttons */
+button,
+.cart-button {
+    background: var(--gold-color);
+    color: #123B5D;
+    border: none;
+    font-weight: bold;
+}
+
+/* Product cards */
+.product-card {
+    background: #FFFFFF;
+    border: 1px solid #D4AF37;
+    border-radius: 12px;
+}
+
+/* Headings */
+h1, h2, h3 {
+    color: #123B5D;
+}
+
+/* Main fashion section */
+.hero-model {
+    border: 2px solid var(--gold-color);
+}
+
+/* Footer */
+footer {
+    background: #123B5D;
+    color: white;
+}
+
+footer a {
+    color: var(--light-gold);
+}/* REMOVE REMAINING BLACK BACKGROUNDS */
+
+footer,
+.bottom-bar,
+.bottom-nav,
+.navbar,
+.site-footer {
+    background: #123B5D !important;
+    color: #FFFFFF !important;
+}
+
+footer a,
+.bottom-bar a,
+.bottom-nav a {
+    color: #D4AF37 !important;
+}
+
+html,
+body {
+    background-color: #EAF2F8 !important;
+}/* LBM CONTACT SECTION - BLUE & GOLD */
+
+.contact {
+    background: #123B5D !important;
+    color: #FFFFFF !important;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.contact h2 {
+    color: #D4AF37 !important;
+}
+
+.contact p {
+    color: #FFFFFF !important;
+}
+
+.contact .section-label {
+    color: #F5D778 !important;
+}
+
+.contact .contact-number {
+    color: #D4AF37 !important;
+    font-weight: bold;
+}
+
+.contact .whatsapp-button {
+    background: #D4AF37 !important;
+    color: #123B5D !important;
+    border: 2px solid #D4AF37 !important;
+    border-radius: 8px;
+    padding: 14px 22px;
+    display: inline-block;
+    text-decoration: none;
+    font-weight: bold;
+}
+/* =================================
+   LBM PREMIUM PRODUCT CARDS
+================================= */
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    padding: 15px;
+}
+
+.product-card {
+    background: #FFFFFF;
+    border: 1px solid #D4AF37;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(18, 59, 93, 0.12);
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+}
+
+.product-image {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    background: #EAF2F8;
+}
+
+.product-info {
+    padding: 14px;
+}
+
+.product-card h3 {
+    color: #123B5D;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.product-description {
+    color: #64748B;
+    font-size: 13px;
+}
+
+.product-price {
+    color: #B28A20;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 12px 0;
+}
+
+.add-button {
+    width: 100%;
+    background: #123B5D !important;
+    color: #D4AF37 !important;
+    border: 1px solid #D4AF37 !important;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background: #D4AF37 !important;
+    color: #123B5D !important;
+}
+
+/* Mobile adjustments */
+@media (max-width: 380px) {
+    .product-grid {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .product-image {
+        height: 160px;
+    }
+}
+
+/* =================================
+   LBM PREMIUM SHOPPING CART
+================================= */
+
+.cart-section {
+    background: #123B5D !important;
+    color: #FFFFFF !important;
+    border: 2px solid #D4AF37;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+}
+
+.cart-section h2,
+.cart-section h3 {
+    color: #D4AF37 !important;
+}
+
+#cart-items {
+    color: #FFFFFF;
+}
+
+#cart-items > div {
+    background: #1B5278;
+    border: 1px solid #D4AF37;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+#cart-total {
+    color: #F5D778 !important;
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+#checkout-button {
+    background: #D4AF37 !important;
+    color: #123B5D !important;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    width: 100%;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#close-cart {
+    background: #D4AF37 !important;
+    color: #123B5D !important;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.cart-section button {
+    cursor: pointer;
+}
+/* PREMIUM CHECKOUT BUTTON */
+
+.checkout-button {
+    width: 100%;
+    padding: 15px;
+    background: #D4AF37 !important;
+    color: #123B5D !important;
+    border: 2px solid #D4AF37 !important;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.checkout-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.checkout-button:not(:disabled):hover {
+    background: #F5D778 !important;
+}

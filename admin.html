@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LBM Online Shop - Admin</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #090909;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+}
+
+.admin-header {
+    background: #111111;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #b99745;
+}
+
+.brand {
+    font-size: 23px;
+    font-weight: bold;
+    color: #d4af37;
+}
+
+.brand span {
+    color: white;
+    font-size: 13px;
+}
+
+.shop-link {
+    color: #d4af37;
+    text-decoration: none;
+    border: 1px solid #d4af37;
+    padding: 10px 14px;
+    border-radius: 6px;
+}
+
+.dashboard {
+    max-width: 1100px;
+    margin: auto;
+    padding: 25px 16px;
+}
+
+.welcome {
+    margin-bottom: 30px;
+}
+
+.eyebrow {
+    color: #d4af37;
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+}
+
+.welcome h1 {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: #aaaaaa;
+    line-height: 1.6;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 35px;
+}
+
+.stat-card {
+    background: #171717;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.stat-card p {
+    color: #bbbbbb;
+    font-size: 13px;
+}
+
+.stat-card h2 {
+    color: #d4af37;
+    font-size: 28px;
+    margin: 15px 0 8px;
+}
+
+.stat-card span {
+    color: #888888;
+    font-size: 12px;
+}
+
+.dashboard-section {
+    background: #151515;
+    border: 1px solid #333333;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.section-heading {
+    margin-bottom: 20px;
+}
+
+.section-heading h2 {
+    color: #d4af37;
+    font-size: 19px;
+    margin-bottom: 8px;
+}
+
+.section-heading span {
+    color: #999999;
+    font-size: 12px;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 400px;
+}
+
+th, td {
+    text-align: left;
+    padding: 14px 10px;
+    border-bottom: 1px solid #333333;
+    font-size: 13px;
+}
+
+th {
+    color: #d4af37;
+}
+
+.empty-message {
+    color: #888888;
+    text-align: center;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.actions-grid button {
+    background: #d4af37;
+    color: #111111;
+    border: none;
+    padding: 15px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.actions-grid button:active {
+    background: #ffffff;
+}
+
+footer {
+    text-align: center;
+    color: #777777;
+    padding: 30px 10px;
+    font-size: 12px;
+}
+
+footer p {
+    margin-top: 8px;
+}
+
+@media (min-width: 650px) {
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="admin-header">
+    <div class="brand">
+        LBM <span>ADMIN</span>
+    </div>
+
+    <a href="index.html" class="shop-link">
+        View Shop
+    </a>
+</header>
+
+<main class="dashboard">
+
+    <section class="welcome">
+        <p class="eyebrow">ADMINISTRATION</p>
+        <h1>Dashboard</h1>
+        <p class="subtitle">
+            Welcome to your LBM Online Shop control centre.
+        </p>
+    </section>
+
+    <section class="stats-grid">
+
+        <div class="stat-card">
+            <p>Total Orders</p>
+            <h2 id="total-orders">0</h2>
+            <span>Customer orders</span>
+        </div>
+
+        <div class="stat-card">
+            <p>Total Revenue</p>
+            <h2 id="total-revenue">K0.00</h2>
+            <span>Recorded sales</span>
+        </div>
+
+        <div class="stat-card">
+            <p>Total Products</p>
+            <h2 id="total-products">0</h2>
+            <span>Shop catalogue</span>
+        </div>
+
+        <div class="stat-card">
+            <p>Pending Orders</p>
+            <h2 id="pending-orders">0</h2>
+            <span>Awaiting processing</span>
+        </div>
+
+    </section>
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+            <h2>Recent Orders</h2>
+            <span>Latest customer purchases</span>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="orders-list">
+                    <tr>
+                        <td colspan="4" class="empty-message">
+                            No orders recorded yet.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+            <h2>Quick Actions</h2>
+            <span>Manage your online shop</span>
+        </div>
+
+        <div class="actions-grid">
+
+            <button onclick="alert('Product management coming next!')">
+                Manage Products
+            </button>
+
+            <button onclick="alert('Order management coming next!')">
+                Manage Orders
+            </button>
+
+            <button onclick="alert('Sales reports coming next!')">
+                Sales Reports
+            </button>
+
+        </div>
+
+    </section>
+
+    <footer>
+        LBM ONLINE SHOP &copy; 2026
+        <p>Admin Dashboard</p>
+    </footer>
+
+</main>
+
+<script src="admin.js"></script>
+
+</body>
+</html>
