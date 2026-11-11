@@ -1,0 +1,20 @@
+
+{
+  "name": "LBM Online Store",
+  "short_name": "LBM Store",
+  "description": "Shop fashion, footwear and accessories at LBM Online Store.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080808",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
