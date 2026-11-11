@@ -4,313 +4,1565 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#173D70">
+<title>LBM Online Shop | Admin Dashboard</title>
 
-<title>LBM Online Shop - Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background: #090909;
-    color: #ffffff;
-    font-family: Arial, sans-serif;
-}
-
-.admin-header {
-    background: #111111;
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #b99745;
-}
-
-.brand {
-    font-size: 23px;
-    font-weight: bold;
-    color: #d4af37;
-}
-
-.brand span {
-    color: white;
-    font-size: 13px;
-}
-
-.shop-link {
-    color: #d4af37;
-    text-decoration: none;
-    border: 1px solid #d4af37;
-    padding: 10px 14px;
-    border-radius: 6px;
-}
-
-.dashboard {
-    max-width: 1100px;
-    margin: auto;
-    padding: 25px 16px;
-}
-
-.welcome {
-    margin-bottom: 30px;
-}
-
-.eyebrow {
-    color: #d4af37;
-    font-size: 12px;
-    letter-spacing: 3px;
-    margin-bottom: 10px;
-}
-
-.welcome h1 {
-    font-size: 30px;
-    margin-bottom: 10px;
-}
-
-.subtitle {
-    color: #aaaaaa;
-    line-height: 1.6;
-}
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 35px;
-}
-
-.stat-card {
-    background: #171717;
-    border: 1px solid #333333;
-    border-radius: 12px;
-    padding: 20px;
-}
-
-.stat-card p {
-    color: #bbbbbb;
-    font-size: 13px;
-}
-
-.stat-card h2 {
-    color: #d4af37;
-    font-size: 28px;
-    margin: 15px 0 8px;
-}
-
-.stat-card span {
-    color: #888888;
-    font-size: 12px;
-}
-
-.dashboard-section {
-    background: #151515;
-    border: 1px solid #333333;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 25px;
-}
-
-.section-heading {
-    margin-bottom: 20px;
-}
-
-.section-heading h2 {
-    color: #d4af37;
-    font-size: 19px;
-    margin-bottom: 8px;
-}
-
-.section-heading span {
-    color: #999999;
-    font-size: 12px;
-}
-
-.table-container {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 400px;
-}
-
-th, td {
-    text-align: left;
-    padding: 14px 10px;
-    border-bottom: 1px solid #333333;
-    font-size: 13px;
-}
-
-th {
-    color: #d4af37;
-}
-
-.empty-message {
-    color: #888888;
-    text-align: center;
-}
-
-.actions-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 12px;
-}
-
-.actions-grid button {
-    background: #d4af37;
-    color: #111111;
-    border: none;
-    padding: 15px;
-    border-radius: 7px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.actions-grid button:active {
-    background: #ffffff;
-}
-
-footer {
-    text-align: center;
-    color: #777777;
-    padding: 30px 10px;
-    font-size: 12px;
-}
-
-footer p {
-    margin-top: 8px;
-}
-
-@media (min-width: 650px) {
-    .stats-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-
-    .actions-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f3f6fb;color:#202b3c}
+header{background:#173d70;color:white;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header h2{font-size:19px}
+header a,header button{color:white;text-decoration:none;border:1px solid #ffffff70;background:transparent;padding:9px 13px;border-radius:7px;cursor:pointer}
+.container{max-width:1150px;margin:22px auto;padding:0 15px}
+.panel{background:white;padding:20px;border-radius:12px;box-shadow:0 3px 14px #172b4d0d;margin-bottom:20px}
+h2,h3{margin-bottom:15px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #ccd5e2;border-radius:7px;font-size:15px;margin:7px 0 14px;background:white;color:#202b3c}
+textarea{min-height:85px;resize:vertical}
+label{font-weight:bold;font-size:14px}
+button{border:0;border-radius:7px;padding:11px 15px;background:#173d70;color:white;font-size:14px;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.secondary{background:#68778b}
+button.danger{background:#c0392b}
+button.success{background:#16834b}
+.hidden{display:none!important}
+.message{padding:12px;border-radius:7px;margin:12px 0;background:#edf3ff;color:#173d70;overflow-wrap:anywhere;font-size:14px}
+.error{background:#fff0f0;color:#b42318}
+.success-message{background:#eaf8ef;color:#176b38}
+.small{font-size:12px;color:#68778b;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{background:#edf3fb;padding:17px;border-radius:9px}
+.stat p{font-size:13px;color:#59677a;margin-bottom:8px}
+.stat strong{font-size:23px;color:#173d70}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tabs button{background:#dce5f1;color:#173d70}
+.tabs button.active{background:#173d70;color:white}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.product{display:flex;gap:13px;align-items:center;border-bottom:1px solid #e6ebf1;padding:13px 0}
+.product img{width:75px;height:85px;object-fit:cover;border-radius:7px;background:#edf1f6}
+.product-info{flex:1;min-width:0}
+.product-info p{font-size:13px;color:#68778b;margin-top:5px}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.actions button{padding:8px 11px;font-size:12px}
+.preview{width:100%;height:220px;object-fit:cover;border-radius:9px;border:1px solid #ccd5e2;background:#f3f6fb;margin:8px 0 12px}
+.image-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin:12px 0}
+.image-item{position:relative}
+.image-item img{width:100%;height:105px;object-fit:cover;border-radius:8px;border:1px solid #ccd5e2}
+.image-item button{position:absolute;top:4px;right:4px;background:#c0392b;padding:3px 9px;border-radius:50%;font-size:17px}
+.upload-note{font-size:12px;color:#68778b;margin:-7px 0 12px}
+.order{border-bottom:1px solid #e6ebf1;padding:14px 0}
+.order p{font-size:13px;margin:5px 0;color:#526174;overflow-wrap:anywhere}
+.order select{max-width:200px}
+.empty{padding:20px;text-align:center;color:#68778b}
+@media(max-width:750px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
+@media(max-width:420px){.stat strong{font-size:19px}.panel{padding:15px}header h2{font-size:16px}}
 </style>
 </head>
 
 <body>
 
-<header class="admin-header">
-    <div class="brand">
-        LBM <span>ADMIN</span>
+<header>
+    <h2>LBM ADMIN DASHBOARD</h2>
+    <div style="display:flex;gap:8px">
+        <a href="index.html">View Shop</a>
+        <button id="logoutButton" class="hidden">Logout</button>
     </div>
-
-    <a href="index.html" class="shop-link">
-        View Shop
-    </a>
 </header>
 
-<main class="dashboard">
+<div class="container">
 
-    <section class="welcome">
-        <p class="eyebrow">ADMINISTRATION</p>
-        <h1>Dashboard</h1>
-        <p class="subtitle">
-            Welcome to your LBM Online Shop control centre.
+<!-- LOGIN -->
+
+<section id="loginSection" class="panel" style="max-width:450px;margin:45px auto">
+    <h2>Administrator Login</h2>
+    <p class="small">Sign in using your administrator account.</p>
+
+    <form id="loginForm">
+        <label>Email Address</label>
+        <input type="email" id="email"
+        value="bernardmwansa97@gmail.com" required>
+
+        <label>Password</label>
+        <input type="password" id="password"
+        placeholder="Enter your password" required>
+
+        <button type="submit" id="loginButton" style="width:100%">
+            Login
+        </button>
+    </form>
+
+    <div id="loginMessage" class="message hidden"></div>
+</section>
+
+<!-- DASHBOARD -->
+
+<main id="dashboard" class="hidden">
+
+<div id="mainMessage" class="message hidden"></div>
+
+<div class="tabs">
+    <button class="active" data-tab="overview">Overview</button>
+    <button data-tab="products">Manage Products</button>
+    <button data-tab="orders">Manage Orders</button>
+    <button data-tab="background">Manage Background</button>
+    <button data-tab="social">Manage Social Media</button>
+</div>
+
+<!-- OVERVIEW -->
+
+<section id="overviewTab" class="tab-content">
+
+    <div class="panel">
+        <h2>Shop Analytics</h2>
+
+        <div class="stats">
+            <div class="stat">
+                <p>Total Products</p>
+                <strong id="totalProducts">0</strong>
+            </div>
+
+            <div class="stat">
+                <p>Total Orders</p>
+                <strong id="totalOrders">0</strong>
+            </div>
+
+            <div class="stat">
+                <p>Total Sales</p>
+                <strong id="totalSales">K0.00</strong>
+            </div>
+
+            <div class="stat">
+                <p>Pending Orders</p>
+                <strong id="pendingOrders">0</strong>
+            </div>
+        </div>
+
+        <br>
+        <button onclick="refreshAll()">Refresh Analytics</button>
+    </div>
+
+    <div class="panel">
+        <h3>Recent Orders</h3>
+        <div id="recentOrders" class="empty">Loading orders...</div>
+    </div>
+
+</section>
+
+<!-- PRODUCTS -->
+
+<section id="productsTab" class="tab-content hidden">
+
+<div class="grid">
+
+    <div class="panel">
+        <h2 id="formHeading">Add New Product</h2>
+
+        <form id="productForm">
+
+            <input type="hidden" id="productId">
+
+            <label>Product Name</label>
+            <input id="productName" type="text"
+            placeholder="e.g. Classic Men's Shirt" required>
+
+            <label>Description</label>
+            <textarea id="productDescription"
+            placeholder="Describe your product"></textarea>
+
+            <label>Category</label>
+            <select id="productCategory" required>
+                <option value="">Select category</option>
+                <option>Men's Clothing</option>
+                <option>Women's Clothing</option>
+                <option>Men's Shoes</option>
+                <option>Women's Shoes</option>
+                <option>Shoes</option>
+                <option>Accessories</option>
+                <option>Other</option>
+            </select>
+
+            <label>Price (ZMW)</label>
+            <input id="productPrice" type="number"
+            min="0" step="0.01" required>
+
+            <label>Stock Quantity</label>
+            <input id="productStock" type="number"
+            min="0" step="1" required>
+
+            <label>Product Photos</label>
+            <input id="productImageFile" type="file"
+            accept="image/jpeg,image/png,image/webp" multiple>
+
+            <p class="upload-note">
+                Select multiple photos from your phone Gallery.
+                JPG, PNG or WEBP. Maximum 5 MB each.
+            </p>
+
+            <div id="imagePreviewContainer" class="image-grid"></div>
+
+            <p id="existingImageNote" class="small"></p>
+
+            <button type="submit" id="saveButton" style="width:100%">
+                Save Product
+            </button>
+
+            <button type="button" id="cancelEdit"
+            class="secondary hidden" style="width:100%;margin-top:8px">
+                Cancel Editing
+            </button>
+
+        </form>
+
+        <div id="productMessage" class="message hidden"></div>
+    </div>
+
+    <div class="panel">
+        <h2>Product Instructions</h2>
+
+        <p style="line-height:1.8;font-size:14px">
+            1. Enter your product details.<br><br>
+            2. Select photographs from your phone Gallery.<br><br>
+            3. You can select multiple photographs.<br><br>
+            4. Press Save Product.<br><br>
+            5. The photographs will upload to Supabase Storage.<br><br>
+            6. Your product will be saved to the shop database.
         </p>
-    </section>
 
-    <section class="stats-grid">
+        <br>
+        <p class="small">
+            When editing a product, existing photographs are retained
+            unless you remove them.
+        </p>
+    </div>
 
-        <div class="stat-card">
-            <p>Total Orders</p>
-            <h2 id="total-orders">0</h2>
-            <span>Customer orders</span>
-        </div>
+</div>
 
-        <div class="stat-card">
-            <p>Total Revenue</p>
-            <h2 id="total-revenue">K0.00</h2>
-            <span>Recorded sales</span>
-        </div>
+<div class="panel">
+    <h2>All Products</h2>
+    <button id="refreshProducts" class="secondary">Refresh Products</button>
+    <div id="productList" class="empty">Loading products...</div>
+</div>
 
-        <div class="stat-card">
-            <p>Total Products</p>
-            <h2 id="total-products">0</h2>
-            <span>Shop catalogue</span>
-        </div>
+</section>
 
-        <div class="stat-card">
-            <p>Pending Orders</p>
-            <h2 id="pending-orders">0</h2>
-            <span>Awaiting processing</span>
-        </div>
+<!-- ORDERS -->
 
-    </section>
+<section id="ordersTab" class="tab-content hidden">
 
-    <section class="dashboard-section">
+    <div class="panel">
+        <h2>Customer Orders</h2>
+        <button id="refreshOrders" class="secondary">Refresh Orders</button>
+        <div id="ordersList" class="empty">Loading orders...</div>
+    </div>
 
-        <div class="section-heading">
-            <h2>Recent Orders</h2>
-            <span>Latest customer purchases</span>
-        </div>
+</section>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Order</th>
-                        <th>Customer</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
+<!-- BACKGROUND -->
 
-                <tbody id="orders-list">
-                    <tr>
-                        <td colspan="4" class="empty-message">
-                            No orders recorded yet.
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+<section id="backgroundTab" class="tab-content hidden">
 
-    </section>
+    <div class="panel">
+        <h2>Manage Shop Background</h2>
 
-    <section class="dashboard-section">
+        <p class="small">
+            Upload a background photograph for your online shop.
+        </p>
 
-        <div class="section-heading">
-            <h2>Quick Actions</h2>
-            <span>Manage your online shop</span>
-        </div>
+        <br>
 
-        <div class="actions-grid">
+        <label>Choose Background Photo</label>
+        <input type="file" id="backgroundImageFile"
+        accept="image/jpeg,image/png,image/webp">
 
-            <button onclick="alert('Product management coming next!')">
-                Manage Products
-            </button>
+        <p class="upload-note">JPG, PNG or WEBP. Maximum 5 MB.</p>
 
-            <button onclick="alert('Order management coming next!')">
-                Manage Orders
-            </button>
+        <h3>Background Preview</h3>
 
-            <button onclick="alert('Sales reports coming next!')">
-                Sales Reports
-            </button>
+        <img id="backgroundPreview" class="preview"
+        alt="Background preview">
 
-        </div>
+        <div id="backgroundMessage" class="message hidden"></div>
 
-    </section>
+        <button id="saveBackground" class="success" style="width:100%">
+            Save Background
+        </button>
 
-    <footer>
-        LBM ONLINE SHOP &copy; 2026
-        <p>Admin Dashboard</p>
-    </footer>
+        <button id="resetBackground" class="secondary"
+        style="width:100%;margin-top:8px">
+            Remove Background
+        </button>
+    </div>
+
+</section>
+
+<!-- SOCIAL MEDIA -->
+
+<section id="socialTab" class="tab-content hidden">
+
+    <div class="panel">
+        <h2>Manage Social Media</h2>
+
+        <p class="small">
+            Add or update the official LBM Online Shop links.
+        </p>
+
+        <br>
+
+        <label>Facebook Page URL</label>
+        <input type="url" id="facebookUrl"
+        placeholder="https://www.facebook.com/yourpage">
+
+        <label>Instagram Page URL</label>
+        <input type="url" id="instagramUrl"
+        placeholder="https://www.instagram.com/yourpage">
+
+        <label>WhatsApp Link</label>
+        <input type="url" id="whatsappUrl"
+        placeholder="https://wa.me/260...">
+
+        <div id="socialMessage" class="message hidden"></div>
+
+        <button id="saveSocial" class="success" style="width:100%">
+            Save Social Media Links
+        </button>
+    </div>
+
+</section>
 
 </main>
+</div>
 
-<script src="admin.js"></script>
+<script>
+
+/* =========================================
+   LBM ONLINE SHOP ADMIN
+   COMPLETE SUPABASE DASHBOARD
+========================================= */
+
+/* SUPABASE CONNECTION */
+
+const SUPABASE_URL =
+"https://toovotqrcsulhgdrcsmn.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const BUCKET = "product-images";
+
+let currentUser = null;
+let productsCache = [];
+let ordersCache = [];
+let selectedProductFiles = [];
+let existingProductImages = [];
+let currentBackgroundUrl = "";
+
+/* ELEMENTS */
+
+const $ = id => document.getElementById(id);
+
+const loginSection = $("loginSection");
+const dashboard = $("dashboard");
+const loginMessage = $("loginMessage");
+const mainMessage = $("mainMessage");
+const productMessage = $("productMessage");
+
+function showMessage(element, message, type = "") {
+    element.textContent = message;
+    element.className = "message";
+
+    if(type === "error") element.classList.add("error");
+    if(type === "success") element.classList.add("success-message");
+}
+
+function hideMessage(element) {
+    element.classList.add("hidden");
+}
+
+function money(value) {
+    return "K" + Number(value || 0).toLocaleString("en-ZM", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, character => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+    })[character]);
+}
+
+/* =========================================
+   AUTHENTICATION
+========================================= */
+
+async function checkAdmin(user) {
+
+    const { data, error } = await db
+        .from("admin_users")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if(error) {
+        throw new Error(
+            "Administrator verification failed: " + error.message
+        );
+    }
+
+    if(!data) {
+        throw new Error(
+            "This account is not registered as an administrator."
+        );
+    }
+
+    return true;
+}
+
+async function enterDashboard(user) {
+
+    try {
+
+        await checkAdmin(user);
+
+        currentUser = user;
+
+        loginSection.classList.add("hidden");
+        dashboard.classList.remove("hidden");
+
+        $("logoutButton").classList.remove("hidden");
+
+        hideMessage(loginMessage);
+
+        await refreshAll();
+
+        await loadBackground();
+        await loadSocialLinks();
+
+    } catch(error) {
+
+        currentUser = null;
+
+        dashboard.classList.add("hidden");
+        loginSection.classList.remove("hidden");
+
+        $("logoutButton").classList.add("hidden");
+
+        await db.auth.signOut();
+
+        showMessage(loginMessage, error.message, "error");
+    }
+}
+
+$("loginForm").addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const button = $("loginButton");
+
+    button.disabled = true;
+    button.textContent = "Signing in...";
+
+    hideMessage(loginMessage);
+
+    try {
+
+        const email = $("email").value.trim();
+        const password = $("password").value;
+
+        const { data, error } = await db.auth.signInWithPassword({
+            email,
+            password
+        });
+
+        if(error) throw error;
+
+        await enterDashboard(data.user);
+
+    } catch(error) {
+
+        showMessage(loginMessage, error.message, "error");
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = "Login";
+
+    }
+
+});
+
+$("logoutButton").addEventListener("click", async function() {
+
+    this.disabled = true;
+
+    const { error } = await db.auth.signOut();
+
+    this.disabled = false;
+
+    if(error) {
+        showMessage(mainMessage, error.message, "error");
+        return;
+    }
+
+    currentUser = null;
+
+    dashboard.classList.add("hidden");
+    loginSection.classList.remove("hidden");
+
+    this.classList.add("hidden");
+
+});
+
+/* RESTORE EXISTING SESSION */
+
+async function restoreSession() {
+
+    const { data, error } = await db.auth.getSession();
+
+    if(error) {
+        showMessage(loginMessage, error.message, "error");
+        return;
+    }
+
+    if(data.session) {
+        await enterDashboard(data.session.user);
+    }
+
+}
+
+db.auth.onAuthStateChange((event) => {
+
+    if(event === "SIGNED_OUT") {
+
+        currentUser = null;
+
+        dashboard.classList.add("hidden");
+        loginSection.classList.remove("hidden");
+
+        $("logoutButton").classList.add("hidden");
+
+    }
+
+});
+
+restoreSession();
+
+/* =========================================
+   DASHBOARD TABS
+========================================= */
+
+document.querySelectorAll("[data-tab]").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document.querySelectorAll("[data-tab]").forEach(item => {
+            item.classList.remove("active");
+        });
+
+        button.classList.add("active");
+
+        document.querySelectorAll(".tab-content").forEach(section => {
+            section.classList.add("hidden");
+        });
+
+        $(button.dataset.tab + "Tab").classList.remove("hidden");
+
+    });
+
+});
+
+/* =========================================
+   IMAGE FUNCTIONS
+========================================= */
+
+function getProductImageUrls(product) {
+
+    let images = [];
+
+    if(Array.isArray(product.images)) {
+        images = product.images.filter(url =>
+            typeof url === "string" && url.trim() !== ""
+        );
+    }
+
+    if(product.image && !images.includes(product.image)) {
+        images.unshift(product.image);
+    }
+
+    return [...new Set(images)];
+}
+
+function renderProductImagePreviews() {
+
+    $("imagePreviewContainer").innerHTML = "";
+
+    const allImages = [
+        ...existingProductImages.map((url, index) => ({
+            type:"existing",
+            value:url,
+            index
+        })),
+        ...selectedProductFiles.map((file, index) => ({
+            type:"new",
+            value:URL.createObjectURL(file),
+            index
+        }))
+    ];
+
+    allImages.forEach(item => {
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "image-item";
+
+        const image = document.createElement("img");
+        image.src = item.value;
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.textContent = "×";
+
+        removeButton.addEventListener("click", () => {
+
+            if(item.type === "existing") {
+                existingProductImages.splice(item.index, 1);
+            } else {
+                selectedProductFiles.splice(item.index, 1);
+            }
+
+            renderProductImagePreviews();
+
+        });
+
+        wrapper.append(image, removeButton);
+
+        $("imagePreviewContainer").appendChild(wrapper);
+
+    });
+
+    if(allImages.length === 0) {
+        $("imagePreviewContainer").innerHTML =
+            '<p class="small">No product photos selected.</p>';
+    }
+
+}
+
+$("productImageFile").addEventListener("change", function() {
+
+    const files = Array.from(this.files || []);
+
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
+
+    for(const file of files) {
+
+        if(!allowedTypes.includes(file.type)) {
+            showMessage(productMessage, "Use JPG, PNG or WEBP images only.", "error");
+            this.value = "";
+            return;
+        }
+
+        if(file.size > 5 * 1024 * 1024) {
+            showMessage(productMessage, file.name + " exceeds 5 MB.", "error");
+            this.value = "";
+            return;
+        }
+
+    }
+
+    selectedProductFiles = files;
+
+    hideMessage(productMessage);
+    renderProductImagePreviews();
+
+});
+
+/* =========================================
+   SUPABASE IMAGE UPLOAD
+========================================= */
+
+async function uploadProductImage(file) {
+
+    if(!currentUser) {
+        throw new Error("Please log in again.");
+    }
+
+    const extensions = {
+        "image/jpeg":"jpg",
+        "image/png":"png",
+        "image/webp":"webp"
+    };
+
+    const extension = extensions[file.type];
+
+    if(!extension) {
+        throw new Error("Unsupported image format.");
+    }
+
+    if(file.size > 5 * 1024 * 1024) {
+        throw new Error("Image must not exceed 5 MB.");
+    }
+
+    const filePath =
+        currentUser.id + "/" +
+        Date.now() + "-" +
+        Math.random().toString(36).substring(2, 10) +
+        "." + extension;
+
+    const { data, error } = await db.storage
+        .from(BUCKET)
+        .upload(filePath, file, {
+            cacheControl:"3600",
+            upsert:false,
+            contentType:file.type
+        });
+
+    if(error) {
+        throw new Error("Image upload failed: " + error.message);
+    }
+
+    const { data: publicData } = db.storage
+        .from(BUCKET)
+        .getPublicUrl(data.path);
+
+    return publicData.publicUrl;
+
+}
+
+/* =========================================
+   LOAD PRODUCTS
+========================================= */
+
+async function loadProducts() {
+
+    const list = $("productList");
+
+    list.textContent = "Loading products...";
+
+    const { data, error } = await db
+        .from("products")
+        .select("*")
+        .order("id", {ascending:false});
+
+    if(error) {
+
+        list.textContent = "Could not load products: " + error.message;
+        return;
+
+    }
+
+    productsCache = data || [];
+
+    $("totalProducts").textContent = productsCache.length;
+
+    if(productsCache.length === 0) {
+
+        list.innerHTML = '<p class="empty">No products added yet.</p>';
+        return;
+
+    }
+
+    list.innerHTML = "";
+
+    productsCache.forEach(product => {
+
+        const item = document.createElement("div");
+        item.className = "product";
+
+        const image = document.createElement("img");
+
+        image.src = getProductImageUrls(product)[0] || "";
+        image.alt = product.name || "Product";
+
+        image.onerror = function() {
+            this.style.display = "none";
+        };
+
+        const info = document.createElement("div");
+        info.className = "product-info";
+
+        const name = document.createElement("strong");
+        name.textContent = product.name || "Unnamed product";
+
+        const details = document.createElement("p");
+
+        details.textContent =
+            money(product.price) +
+            " | Stock: " + (product.stock ?? 0) +
+            " | " + (product.category || "Uncategorised");
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const editButton = document.createElement("button");
+        editButton.textContent = "Edit";
+
+        editButton.addEventListener("click", () => {
+            editProduct(product.id);
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete";
+        deleteButton.className = "danger";
+
+        deleteButton.addEventListener("click", () => {
+            deleteProduct(product.id);
+        });
+
+        actions.append(editButton, deleteButton);
+        info.append(name, details, actions);
+
+        item.append(image, info);
+        list.appendChild(item);
+
+    });
+
+}
+
+/* =========================================
+   RESET PRODUCT FORM
+========================================= */
+
+function resetProductForm() {
+
+    $("productForm").reset();
+
+    $("productId").value = "";
+
+    $("formHeading").textContent = "Add New Product";
+    $("saveButton").textContent = "Save Product";
+
+    $("cancelEdit").classList.add("hidden");
+
+    selectedProductFiles = [];
+    existingProductImages = [];
+
+    $("existingImageNote").textContent = "";
+
+    $("productImageFile").value = "";
+
+    renderProductImagePreviews();
+
+    hideMessage(productMessage);
+
+}
+
+/* =========================================
+   EDIT PRODUCT
+========================================= */
+
+function editProduct(id) {
+
+    const product = productsCache.find(item =>
+        String(item.id) === String(id)
+    );
+
+    if(!product) return;
+
+    $("productId").value = product.id;
+    $("productName").value = product.name || "";
+    $("productDescription").value = product.description || "";
+    $("productCategory").value = product.category || "";
+    $("productPrice").value = product.price ?? "";
+    $("productStock").value = product.stock ?? "";
+
+    existingProductImages = getProductImageUrls(product);
+    selectedProductFiles = [];
+
+    $("productImageFile").value = "";
+
+    renderProductImagePreviews();
+
+    $("existingImageNote").textContent =
+        existingProductImages.length +
+        " existing photo(s). Remove any you no longer want.";
+
+    $("formHeading").textContent = "Edit Product";
+    $("saveButton").textContent = "Update Product";
+
+    $("cancelEdit").classList.remove("hidden");
+
+    $("productForm").scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+
+}
+
+$("cancelEdit").addEventListener("click", resetProductForm);
+
+/* =========================================
+   SAVE PRODUCT
+========================================= */
+
+$("productForm").addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const button = $("saveButton");
+    button.disabled = true;
+
+    const id = $("productId").value;
+
+    try {
+
+        const name = $("productName").value.trim();
+        const description = $("productDescription").value.trim();
+        const category = $("productCategory").value;
+        const price = Number($("productPrice").value);
+        const stock = Number($("productStock").value);
+
+        if(!name) throw new Error("Enter a product name.");
+        if(!category) throw new Error("Select a category.");
+
+        if(!Number.isFinite(price) || price < 0) {
+            throw new Error("Enter a valid price.");
+        }
+
+        if(!Number.isInteger(stock) || stock < 0) {
+            throw new Error("Enter a valid stock quantity.");
+        }
+
+        const productData = {
+            name,
+            description,
+            category,
+            price,
+            stock
+        };
+
+        let uploadedImages = [];
+
+        for(let i = 0; i < selectedProductFiles.length; i++) {
+
+            button.textContent =
+                "Uploading photo " + (i + 1) +
+                " of " + selectedProductFiles.length + "...";
+
+            const url = await uploadProductImage(selectedProductFiles[i]);
+
+            uploadedImages.push(url);
+
+        }
+
+        const allImages = [
+            ...existingProductImages,
+            ...uploadedImages
+        ];
+
+        productData.images = allImages;
+        productData.image = allImages[0] || null;
+
+        button.textContent = id ? "Updating..." : "Saving...";
+
+        let result;
+
+        if(id) {
+
+            result = await db
+                .from("products")
+                .update(productData)
+                .eq("id", id);
+
+        } else {
+
+            result = await db
+                .from("products")
+                .insert([productData]);
+
+        }
+
+        if(result.error) {
+            throw new Error(result.error.message);
+        }
+
+        resetProductForm();
+
+        showMessage(
+            mainMessage,
+            id ? "Product updated successfully!" : "Product added successfully!",
+            "success"
+        );
+
+        await loadProducts();
+
+    } catch(error) {
+
+        showMessage(productMessage, error.message, "error");
+
+    } finally {
+
+        button.disabled = false;
+
+        button.textContent =
+            $("productId").value ? "Update Product" : "Save Product";
+
+    }
+
+});
+
+/* =========================================
+   DELETE PRODUCT
+========================================= */
+
+async function deleteProduct(id) {
+
+    const product = productsCache.find(item =>
+        String(item.id) === String(id)
+    );
+
+    if(!product) return;
+
+    if(!confirm("Delete " + product.name + "?")) return;
+
+    const { error } = await db
+        .from("products")
+        .delete()
+        .eq("id", id);
+
+    if(error) {
+
+        showMessage(mainMessage, error.message, "error");
+        return;
+
+    }
+
+    showMessage(mainMessage, "Product deleted successfully.", "success");
+
+    await loadProducts();
+
+}
+
+/* =========================================
+   ORDER HELPERS
+========================================= */
+
+function getOrderValue(order, keys, fallback = "") {
+
+    for(const key of keys) {
+
+        if(order[key] !== undefined && order[key] !== null) {
+            return order[key];
+        }
+
+    }
+
+    return fallback;
+
+}
+
+function getOrderStatus(order) {
+
+    return String(getOrderValue(
+        order,
+        ["status", "order_status", "payment_status"],
+        "Pending"
+    ));
+
+}
+
+function getOrderTotal(order) {
+
+    return Number(getOrderValue(
+        order,
+        ["total", "total_amount", "amount", "grand_total", "total_price"],
+        0
+    )) || 0;
+
+}
+
+function getOrderCustomer(order) {
+
+    return getOrderValue(
+        order,
+        ["customer_name", "name", "full_name", "customer", "buyer_name"],
+        "Customer"
+    );
+
+}
+
+function getOrderDate(order) {
+
+    return getOrderValue(
+        order,
+        ["created_at", "order_date", "date"],
+        "Not provided"
+    );
+
+}
+
+/* =========================================
+   LOAD ORDERS
+========================================= */
+
+async function loadOrders() {
+
+    const list = $("ordersList");
+    const recent = $("recentOrders");
+
+    list.textContent = "Loading orders...";
+
+    const { data, error } = await db
+        .from("orders")
+        .select("*")
+        .order("created_at", {ascending:false})
+        .limit(100);
+
+    if(error) {
+
+        list.textContent = "Could not load orders: " + error.message;
+        recent.textContent = "Orders could not be loaded.";
+
+        return;
+
+    }
+
+    ordersCache = data || [];
+
+    $("totalOrders").textContent = ordersCache.length;
+
+    const sales = ordersCache
+        .filter(order =>
+            !["cancelled", "canceled"].includes(
+                getOrderStatus(order).toLowerCase()
+            )
+        )
+        .reduce((sum, order) => sum + getOrderTotal(order), 0);
+
+    $("totalSales").textContent = money(sales);
+
+    const pending = ordersCache.filter(order =>
+        getOrderStatus(order).toLowerCase() === "pending"
+    ).length;
+
+    $("pendingOrders").textContent = pending;
+
+    if(ordersCache.length === 0) {
+
+        list.innerHTML = '<p class="empty">No orders found.</p>';
+        recent.innerHTML = '<p class="empty">No recent orders.</p>';
+
+        return;
+
+    }
+
+    list.innerHTML = "";
+
+    ordersCache.forEach(order => {
+
+        const box = document.createElement("div");
+        box.className = "order";
+
+        const title = document.createElement("strong");
+
+        title.textContent =
+            "Order #" + (order.id ?? "—") +
+            " - " + getOrderCustomer(order);
+
+        const total = document.createElement("p");
+        total.textContent = "Total: " + money(getOrderTotal(order));
+
+        const date = document.createElement("p");
+        date.textContent = "Date: " + getOrderDate(order);
+
+        const status = document.createElement("p");
+        status.textContent = "Status: " + getOrderStatus(order);
+
+        box.append(title, total, date, status);
+
+        const statusKey = ["status", "order_status"].find(key =>
+            Object.prototype.hasOwnProperty.call(order, key)
+        );
+
+        if(statusKey) {
+
+            const select = document.createElement("select");
+
+            ["Pending", "Processing", "Completed", "Cancelled"].forEach(value => {
+
+                const option = document.createElement("option");
+
+                option.value = value;
+                option.textContent = value;
+
+                select.appendChild(option);
+
+            });
+
+            select.value = getOrderStatus(order);
+
+            const updateButton = document.createElement("button");
+
+            updateButton.textContent = "Update Status";
+
+            updateButton.addEventListener("click", async () => {
+
+                updateButton.disabled = true;
+
+                const { error: updateError } = await db
+                    .from("orders")
+                    .update({[statusKey]:select.value})
+                    .eq("id", order.id);
+
+                updateButton.disabled = false;
+
+                if(updateError) {
+
+                    showMessage(mainMessage, updateError.message, "error");
+                    return;
+
+                }
+
+                showMessage(mainMessage, "Order status updated.", "success");
+
+                await loadOrders();
+
+            });
+
+            box.append(select, updateButton);
+
+        }
+
+        list.appendChild(box);
+
+    });
+
+    recent.innerHTML = "";
+
+    ordersCache.slice(0, 5).forEach(order => {
+
+        const item = document.createElement("div");
+        item.className = "order";
+
+        const title = document.createElement("strong");
+
+        title.textContent =
+            "Order #" + (order.id ?? "—") +
+            " - " + getOrderCustomer(order);
+
+        const detail = document.createElement("p");
+
+        detail.textContent =
+            money(getOrderTotal(order)) +
+            " | " + getOrderStatus(order);
+
+        item.append(title, detail);
+
+        recent.appendChild(item);
+
+    });
+
+}
+
+/* =========================================
+   REFRESH DASHBOARD
+========================================= */
+
+async function refreshAll() {
+
+    if(!currentUser) return;
+
+    await Promise.all([
+        loadProducts(),
+        loadOrders()
+    ]);
+
+}
+
+$("refreshProducts").addEventListener("click", loadProducts);
+$("refreshOrders").addEventListener("click", loadOrders);
+
+/* =========================================
+   MANAGE SHOP BACKGROUND
+========================================= */
+
+const backgroundInput = $("backgroundImageFile");
+const backgroundPreview = $("backgroundPreview");
+const backgroundMessage = $("backgroundMessage");
+
+async function loadBackground() {
+
+    const { data, error } = await db
+        .from("site_settings")
+        .select("setting_value")
+        .eq("setting_key", "shop_background")
+        .maybeSingle();
+
+    if(error) {
+
+        showMessage(backgroundMessage, error.message, "error");
+        return;
+
+    }
+
+    currentBackgroundUrl = data?.setting_value || "";
+
+    if(currentBackgroundUrl) {
+        backgroundPreview.src = currentBackgroundUrl;
+    } else {
+        backgroundPreview.removeAttribute("src");
+    }
+
+}
+
+backgroundInput.addEventListener("change", function() {
+
+    const file = this.files[0];
+
+    if(!file) return;
+
+    if(!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+
+        showMessage(backgroundMessage, "Choose JPG, PNG or WEBP.", "error");
+
+        this.value = "";
+        return;
+
+    }
+
+    if(file.size > 5 * 1024 * 1024) {
+
+        showMessage(backgroundMessage, "Image must not exceed 5 MB.", "error");
+
+        this.value = "";
+        return;
+
+    }
+
+    backgroundPreview.src = URL.createObjectURL(file);
+
+    hideMessage(backgroundMessage);
+
+});
+
+$("saveBackground").addEventListener("click", async function() {
+
+    if(!currentUser) {
+        showMessage(backgroundMessage, "Please log in again.", "error");
+        return;
+    }
+
+    const file = backgroundInput.files[0];
+
+    if(!file && !currentBackgroundUrl) {
+
+        showMessage(backgroundMessage, "Choose a background photo first.", "error");
+        return;
+
+    }
+
+    this.disabled = true;
+    this.textContent = "Saving...";
+
+    try {
+
+        let imageUrl = currentBackgroundUrl;
+
+        if(file) {
+            imageUrl = await uploadProductImage(file);
+        }
+
+        const { error } = await db
+            .from("site_settings")
+            .upsert({
+                setting_key:"shop_background",
+                setting_value:imageUrl
+            }, {
+                onConflict:"setting_key"
+            });
+
+        if(error) throw error;
+
+        currentBackgroundUrl = imageUrl;
+        backgroundInput.value = "";
+
+        showMessage(backgroundMessage, "Background saved successfully!", "success");
+
+    } catch(error) {
+
+        showMessage(backgroundMessage, error.message, "error");
+
+    } finally {
+
+        this.disabled = false;
+        this.textContent = "Save Background";
+
+    }
+
+});
+
+$("resetBackground").addEventListener("click", async function() {
+
+    if(!confirm("Remove the shop background?")) return;
+
+    this.disabled = true;
+
+    try {
+
+        const { error } = await db
+            .from("site_settings")
+            .delete()
+            .eq("setting_key", "shop_background");
+
+        if(error) throw error;
+
+        currentBackgroundUrl = "";
+
+        backgroundInput.value = "";
+        backgroundPreview.removeAttribute("src");
+
+        showMessage(backgroundMessage, "Background removed successfully.", "success");
+
+    } catch(error) {
+
+        showMessage(backgroundMessage, error.message, "error");
+
+    } finally {
+
+        this.disabled = false;
+
+    }
+
+});
+
+/* =========================================
+   MANAGE SOCIAL MEDIA
+========================================= */
+
+const facebookUrl = $("facebookUrl");
+const instagramUrl = $("instagramUrl");
+const whatsappUrl = $("whatsappUrl");
+const socialMessage = $("socialMessage");
+
+async function loadSocialLinks() {
+
+    const { data, error } = await db
+        .from("site_settings")
+        .select("setting_key, setting_value")
+        .in("setting_key", [
+            "social_facebook",
+            "social_instagram",
+            "social_whatsapp"
+        ]);
+
+    if(error) {
+
+        showMessage(socialMessage, error.message, "error");
+        return;
+
+    }
+
+    const settings = data || [];
+
+    facebookUrl.value =
+        settings.find(item => item.setting_key === "social_facebook")?.setting_value || "";
+
+    instagramUrl.value =
+        settings.find(item => item.setting_key === "social_instagram")?.setting_value || "";
+
+    whatsappUrl.value =
+        settings.find(item => item.setting_key === "social_whatsapp")?.setting_value || "";
+
+}
+
+$("saveSocial").addEventListener("click", async function() {
+
+    if(!currentUser) {
+
+        showMessage(socialMessage, "Please log in again.", "error");
+        return;
+
+    }
+
+    const facebook = facebookUrl.value.trim();
+    const instagram = instagramUrl.value.trim();
+    const whatsapp = whatsappUrl.value.trim();
+
+    function validateUrl(value, platform, allowedHosts) {
+
+        if(!value) return;
+
+        try {
+
+            const url = new URL(value);
+
+            if(url.protocol !== "https:") throw new Error();
+
+            if(!allowedHosts.includes(url.hostname.toLowerCase())) {
+                throw new Error();
+            }
+
+        } catch {
+
+            throw new Error("Enter a valid " + platform + " URL.");
+
+        }
+
+    }
+
+    try {
+
+        validateUrl(
+            facebook,
+            "Facebook",
+            ["facebook.com", "www.facebook.com", "m.facebook.com", "fb.com", "www.fb.com"]
+        );
+
+        validateUrl(
+            instagram,
+            "Instagram",
+            ["instagram.com", "www.instagram.com"]
+        );
+
+        validateUrl(
+            whatsapp,
+            "WhatsApp",
+            ["wa.me", "www.wa.me"]
+        );
+
+        this.disabled = true;
+        this.textContent = "Saving...";
+
+        const settings = [
+            {setting_key:"social_facebook", setting_value:facebook},
+            {setting_key:"social_instagram", setting_value:instagram},
+            {setting_key:"social_whatsapp", setting_value:whatsapp}
+        ];
+
+        const { error } = await db
+            .from("site_settings")
+            .upsert(settings, {onConflict:"setting_key"});
+
+        if(error) throw error;
+
+        showMessage(socialMessage, "Social media links saved successfully!", "success");
+
+    } catch(error) {
+
+        showMessage(socialMessage, error.message, "error");
+
+    } finally {
+
+        this.disabled = false;
+        this.textContent = "Save Social Media Links";
+
+    }
+
+});
+
+</script>
 
 </body>
 </html>
