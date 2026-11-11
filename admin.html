@@ -54,34 +54,103 @@ button.success{background:#16834b}
 .order{border-bottom:1px solid #e6ebf1;padding:14px 0}
 .order p{font-size:13px;margin:5px 0;color:#526174;overflow-wrap:anywhere}
 .order select{max-width:200px}
-  .order-product {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid #e6ebf1;
-}
-
-.order-product img {
-    width: 75px;
-    height: 85px;
-    object-fit: cover;
-    border-radius: 7px;
-    flex-shrink: 0;
-}
-
-.order-product-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.order-product-info p {
-    font-size: 13px;
-    margin: 5px 0;
-}
+.order-product{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #e6ebf1}
+.order-product img{width:75px;height:85px;object-fit:cover;border-radius:7px;flex-shrink:0;background:#edf1f6;cursor:zoom-in}
+.order-product-info{flex:1;min-width:0}
+.order-product-info p{font-size:13px;margin:5px 0}
+.order-product-info a{font-size:12px;display:inline-block;margin-top:5px;color:#173d70;cursor:pointer}
 .empty{padding:20px;text-align:center;color:#68778b}
-@media(max-width:750px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
-@media(max-width:420px){.stat strong{font-size:19px}.panel{padding:15px}header h2{font-size:16px}}
+
+/* =========================================
+   SECTION 17 — RESPONSIVE ORDER IMAGE VIEWER
+========================================= */
+
+.image-viewer{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    background:rgba(0,0,0,.88);
+}
+
+.image-viewer.active{
+    display:flex;
+}
+
+.image-viewer-content{
+    position:relative;
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.image-viewer img{
+    display:block;
+    max-width:100%;
+    max-height:calc(100vh - 60px);
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    border-radius:8px;
+    background:#fff;
+}
+
+.image-viewer-close{
+    position:absolute;
+    top:5px;
+    right:5px;
+    z-index:2;
+    width:42px;
+    height:42px;
+    padding:0;
+    border-radius:50%;
+    background:#fff;
+    color:#173d70;
+    font-size:27px;
+    line-height:42px;
+    text-align:center;
+    box-shadow:0 2px 10px #0005;
+}
+
+.image-viewer-close:hover{
+    background:#e8edf5;
+}
+
+.image-viewer-caption{
+    position:absolute;
+    bottom:5px;
+    left:0;
+    right:0;
+    color:white;
+    text-align:center;
+    font-size:12px;
+    padding:8px;
+    overflow-wrap:anywhere;
+}
+
+body.image-viewer-open{
+    overflow:hidden;
+}
+
+@media(max-width:750px){
+    .stats{grid-template-columns:1fr 1fr}
+    .grid{grid-template-columns:1fr}
+    .image-viewer{padding:12px}
+    .image-viewer img{max-width:100%;max-height:calc(100dvh - 75px)}
+}
+
+@media(max-width:420px){
+    .stat strong{font-size:19px}
+    .panel{padding:15px}
+    header h2{font-size:16px}
+    .order-product{gap:9px}
+    .order-product img{width:65px;height:75px}
+}
 </style>
 </head>
 
@@ -104,19 +173,13 @@ button.success{background:#16834b}
     <p class="small">Sign in using your administrator account.</p>
 
     <form id="loginForm">
-       
-<label>Email Address</label>
-<input type="email" id="email"
-placeholder="Enter your email address" required>
-
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="Enter your email address" required>
 
         <label>Password</label>
-        <input type="password" id="password"
-        placeholder="Enter your password" required>
+        <input type="password" id="password" placeholder="Enter your password" required>
 
-        <button type="submit" id="loginButton" style="width:100%">
-            Login
-        </button>
+        <button type="submit" id="loginButton" style="width:100%">Login</button>
     </form>
 
     <div id="loginMessage" class="message hidden"></div>
@@ -148,17 +211,14 @@ placeholder="Enter your email address" required>
                 <p>Total Products</p>
                 <strong id="totalProducts">0</strong>
             </div>
-
             <div class="stat">
                 <p>Total Orders</p>
                 <strong id="totalOrders">0</strong>
             </div>
-
             <div class="stat">
                 <p>Total Sales</p>
                 <strong id="totalSales">K0.00</strong>
             </div>
-
             <div class="stat">
                 <p>Pending Orders</p>
                 <strong id="pendingOrders">0</strong>
@@ -190,12 +250,10 @@ placeholder="Enter your email address" required>
             <input type="hidden" id="productId">
 
             <label>Product Name</label>
-            <input id="productName" type="text"
-            placeholder="e.g. Classic Men's Shirt" required>
+            <input id="productName" type="text" placeholder="e.g. Classic Men's Shirt" required>
 
             <label>Description</label>
-            <textarea id="productDescription"
-            placeholder="Describe your product"></textarea>
+            <textarea id="productDescription" placeholder="Describe your product"></textarea>
 
             <label>Category</label>
             <select id="productCategory" required>
@@ -210,19 +268,37 @@ placeholder="Enter your email address" required>
             </select>
 
             <label>Price (ZMW)</label>
-            <input id="productPrice" type="number"
-            min="0" step="0.01" required>
+            <input id="productPrice" type="number" min="0" step="0.01" required>
 
             <label>Stock Quantity</label>
-            <input id="productStock" type="number"
-            min="0" step="1" required>
+            <input id="productStock" type="number" min="0" step="1" required>
 
-            <label>Product Photos</label>
-            <input id="productImageFile" type="file"
-            accept="image/jpeg,image/png,image/webp" multiple>
+            <label>Size Format</label>
+            <select id="productSizeType">
+                <option value="none">No Sizes</option>
+                <option value="numeric">Numeric Sizes (Shoes)</option>
+                <option value="letters">Letter Sizes (Clothing)</option>
+            </select>
+
+            <label>Available Sizes</label>
+            <input type="text" id="productAvailableSizes" placeholder="Example: 38, 39, 40, 41, 42">
 
             <p class="upload-note">
-                Select multiple photos from your phone Gallery.
+                Separate each size with a comma. For letters, use XS, S, M, L, XL, XXL.
+            </p>
+
+            <label>Available Colours</label>
+            <input type="text" id="productAvailableColours" placeholder="Example: Black, Blue, White, Grey">
+
+            <p class="upload-note">
+                Separate each colour with a comma. Only colours entered here will be available to customers.
+            </p>
+
+            <label>Product Photos</label>
+            <input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+
+            <p class="upload-note">
+                Select multiple photographs from your phone Gallery.
                 JPG, PNG or WEBP. Maximum 5 MB each.
             </p>
 
@@ -230,12 +306,9 @@ placeholder="Enter your email address" required>
 
             <p id="existingImageNote" class="small"></p>
 
-            <button type="submit" id="saveButton" style="width:100%">
-                Save Product
-            </button>
+            <button type="submit" id="saveButton" style="width:100%">Save Product</button>
 
-            <button type="button" id="cancelEdit"
-            class="secondary hidden" style="width:100%;margin-top:8px">
+            <button type="button" id="cancelEdit" class="secondary hidden" style="width:100%;margin-top:8px">
                 Cancel Editing
             </button>
 
@@ -249,17 +322,17 @@ placeholder="Enter your email address" required>
 
         <p style="line-height:1.8;font-size:14px">
             1. Enter your product details.<br><br>
-            2. Select photographs from your phone Gallery.<br><br>
-            3. You can select multiple photographs.<br><br>
-            4. Press Save Product.<br><br>
-            5. The photographs will upload to Supabase Storage.<br><br>
-            6. Your product will be saved to the shop database.
+            2. Choose the correct size format.<br><br>
+            3. Enter available sizes and colours.<br><br>
+            4. Select photographs from your phone Gallery.<br><br>
+            5. Press Save Product.<br><br>
+            6. The photographs will upload to Supabase Storage.<br><br>
+            7. Your product will be saved to the shop database.
         </p>
 
         <br>
         <p class="small">
-            When editing a product, existing photographs are retained
-            unless you remove them.
+            When editing a product, existing photographs are retained unless you remove them.
         </p>
     </div>
 
@@ -276,110 +349,86 @@ placeholder="Enter your email address" required>
 <!-- ORDERS -->
 
 <section id="ordersTab" class="tab-content hidden">
-
     <div class="panel">
         <h2>Customer Orders</h2>
         <button id="refreshOrders" class="secondary">Refresh Orders</button>
         <div id="ordersList" class="empty">Loading orders...</div>
     </div>
-
 </section>
 
 <!-- BACKGROUND -->
 
 <section id="backgroundTab" class="tab-content hidden">
-
     <div class="panel">
         <h2>Manage Shop Background</h2>
-
-        <p class="small">
-            Upload a background photograph for your online shop.
-        </p>
-
+        <p class="small">Upload a background photograph for your online shop.</p>
         <br>
 
         <label>Choose Background Photo</label>
-        <input type="file" id="backgroundImageFile"
-        accept="image/jpeg,image/png,image/webp">
+        <input type="file" id="backgroundImageFile" accept="image/jpeg,image/png,image/webp">
 
         <p class="upload-note">JPG, PNG or WEBP. Maximum 5 MB.</p>
 
         <h3>Background Preview</h3>
-
-        <img id="backgroundPreview" class="preview"
-        alt="Background preview">
+        <img id="backgroundPreview" class="preview" alt="Background preview">
 
         <div id="backgroundMessage" class="message hidden"></div>
 
-        <button id="saveBackground" class="success" style="width:100%">
-            Save Background
-        </button>
-
-        <button id="resetBackground" class="secondary"
-        style="width:100%;margin-top:8px">
+        <button id="saveBackground" class="success" style="width:100%">Save Background</button>
+        <button id="resetBackground" class="secondary" style="width:100%;margin-top:8px">
             Remove Background
         </button>
     </div>
-
 </section>
 
 <!-- SOCIAL MEDIA -->
 
 <section id="socialTab" class="tab-content hidden">
-
     <div class="panel">
         <h2>Manage Social Media</h2>
-
-        <p class="small">
-            Add or update the official LBM Online Shop links.
-        </p>
-
+        <p class="small">Add or update the official LBM Online Shop links.</p>
         <br>
 
         <label>Facebook Page URL</label>
-        <input type="url" id="facebookUrl"
-        placeholder="https://www.facebook.com/yourpage">
+        <input type="url" id="facebookUrl" placeholder="https://www.facebook.com/yourpage">
 
         <label>Instagram Page URL</label>
-        <input type="url" id="instagramUrl"
-        placeholder="https://www.instagram.com/yourpage">
+        <input type="url" id="instagramUrl" placeholder="https://www.instagram.com/yourpage">
 
         <label>WhatsApp Link</label>
-        <input type="url" id="whatsappUrl"
-        placeholder="https://wa.me/260...">
+        <input type="url" id="whatsappUrl" placeholder="https://wa.me/260...">
 
         <div id="socialMessage" class="message hidden"></div>
 
-        <button id="saveSocial" class="success" style="width:100%">
-            Save Social Media Links
-        </button>
+        <button id="saveSocial" class="success" style="width:100%">Save Social Media Links</button>
     </div>
-
 </section>
 
 </main>
 </div>
 
+<!-- =========================================
+     SECTION 18 — IMAGE VIEWER HTML
+========================================= -->
+
+<div id="imageViewer" class="image-viewer" role="dialog" aria-modal="true" aria-label="Product image preview">
+    <div class="image-viewer-content">
+        <button type="button" id="closeImageViewer" class="image-viewer-close" aria-label="Close image preview">×</button>
+        <img id="imageViewerPhoto" src="" alt="Ordered product enlarged preview">
+        <div id="imageViewerCaption" class="image-viewer-caption"></div>
+    </div>
+</div>
+
 <script>
 
 /* =========================================
-   LBM ONLINE SHOP ADMIN
-   COMPLETE SUPABASE DASHBOARD
+   SECTION 1 — SUPABASE CONNECTION
 ========================================= */
 
-/* SUPABASE CONNECTION */
+const SUPABASE_URL = "https://toovotqrcsulhgdrcsmn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
 
-const SUPABASE_URL =
-"https://toovotqrcsulhgdrcsmn.supabase.co";
-
-const SUPABASE_KEY =
-"sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
-
-const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const BUCKET = "product-images";
 
 let currentUser = null;
@@ -388,8 +437,6 @@ let ordersCache = [];
 let selectedProductFiles = [];
 let existingProductImages = [];
 let currentBackgroundUrl = "";
-
-/* ELEMENTS */
 
 const $ = id => document.getElementById(id);
 
@@ -403,8 +450,8 @@ function showMessage(element, message, type = "") {
     element.textContent = message;
     element.className = "message";
 
-    if(type === "error") element.classList.add("error");
-    if(type === "success") element.classList.add("success-message");
+    if (type === "error") element.classList.add("error");
+    if (type === "success") element.classList.add("success-message");
 }
 
 function hideMessage(element) {
@@ -420,68 +467,57 @@ function money(value) {
 
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, character => ({
-        "&":"&amp;",
-        "<":"&lt;",
-        ">":"&gt;",
-        '"':"&quot;",
-        "'":"&#039;"
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
     })[character]);
 }
 
 /* =========================================
-   AUTHENTICATION
+   SECTION 2 — AUTHENTICATION
 ========================================= */
 
 async function checkAdmin(user) {
-
     const { data, error } = await db
         .from("admin_users")
         .select("user_id")
         .eq("user_id", user.id)
         .maybeSingle();
 
-    if(error) {
-        throw new Error(
-            "Administrator verification failed: " + error.message
-        );
+    if (error) {
+        throw new Error("Administrator verification failed: " + error.message);
     }
 
-    if(!data) {
-        throw new Error(
-            "This account is not registered as an administrator."
-        );
+    if (!data) {
+        throw new Error("This account is not registered as an administrator.");
     }
 
     return true;
 }
 
 async function enterDashboard(user) {
-
     try {
-
         await checkAdmin(user);
 
         currentUser = user;
 
         loginSection.classList.add("hidden");
         dashboard.classList.remove("hidden");
-
         $("logoutButton").classList.remove("hidden");
 
         hideMessage(loginMessage);
 
         await refreshAll();
-
         await loadBackground();
         await loadSocialLinks();
 
-    } catch(error) {
-
+    } catch (error) {
         currentUser = null;
 
         dashboard.classList.add("hidden");
         loginSection.classList.remove("hidden");
-
         $("logoutButton").classList.add("hidden");
 
         await db.auth.signOut();
@@ -491,18 +527,15 @@ async function enterDashboard(user) {
 }
 
 $("loginForm").addEventListener("submit", async function(event) {
-
     event.preventDefault();
 
     const button = $("loginButton");
-
     button.disabled = true;
     button.textContent = "Signing in...";
 
     hideMessage(loginMessage);
 
     try {
-
         const email = $("email").value.trim();
         const password = $("password").value;
 
@@ -511,87 +544,67 @@ $("loginForm").addEventListener("submit", async function(event) {
             password
         });
 
-        if(error) throw error;
+        if (error) throw error;
 
         await enterDashboard(data.user);
 
-    } catch(error) {
-
+    } catch (error) {
         showMessage(loginMessage, error.message, "error");
 
     } finally {
-
         button.disabled = false;
         button.textContent = "Login";
-
     }
-
 });
 
 $("logoutButton").addEventListener("click", async function() {
-
     this.disabled = true;
 
     const { error } = await db.auth.signOut();
 
     this.disabled = false;
 
-    if(error) {
+    if (error) {
         showMessage(mainMessage, error.message, "error");
         return;
     }
 
     currentUser = null;
-
     dashboard.classList.add("hidden");
     loginSection.classList.remove("hidden");
-
     this.classList.add("hidden");
-
 });
 
-/* RESTORE EXISTING SESSION */
-
 async function restoreSession() {
-
     const { data, error } = await db.auth.getSession();
 
-    if(error) {
+    if (error) {
         showMessage(loginMessage, error.message, "error");
         return;
     }
 
-    if(data.session) {
+    if (data.session) {
         await enterDashboard(data.session.user);
     }
-
 }
 
 db.auth.onAuthStateChange((event) => {
-
-    if(event === "SIGNED_OUT") {
-
+    if (event === "SIGNED_OUT") {
         currentUser = null;
-
         dashboard.classList.add("hidden");
         loginSection.classList.remove("hidden");
-
         $("logoutButton").classList.add("hidden");
-
     }
-
 });
 
 restoreSession();
 
 /* =========================================
-   DASHBOARD TABS
+   SECTION 3 — DASHBOARD TABS
 ========================================= */
 
 document.querySelectorAll("[data-tab]").forEach(button => {
-
     button.addEventListener("click", () => {
-
         document.querySelectorAll("[data-tab]").forEach(item => {
             item.classList.remove("active");
         });
@@ -603,26 +616,23 @@ document.querySelectorAll("[data-tab]").forEach(button => {
         });
 
         $(button.dataset.tab + "Tab").classList.remove("hidden");
-
     });
-
 });
 
 /* =========================================
-   IMAGE FUNCTIONS
+   SECTION 4 — IMAGE FUNCTIONS
 ========================================= */
 
 function getProductImageUrls(product) {
-
     let images = [];
 
-    if(Array.isArray(product.images)) {
+    if (Array.isArray(product.images)) {
         images = product.images.filter(url =>
             typeof url === "string" && url.trim() !== ""
         );
     }
 
-    if(product.image && !images.includes(product.image)) {
+    if (product.image && !images.includes(product.image)) {
         images.unshift(product.image);
     }
 
@@ -630,24 +640,22 @@ function getProductImageUrls(product) {
 }
 
 function renderProductImagePreviews() {
-
     $("imagePreviewContainer").innerHTML = "";
 
     const allImages = [
         ...existingProductImages.map((url, index) => ({
-            type:"existing",
-            value:url,
+            type: "existing",
+            value: url,
             index
         })),
         ...selectedProductFiles.map((file, index) => ({
-            type:"new",
-            value:URL.createObjectURL(file),
+            type: "new",
+            value: URL.createObjectURL(file),
             index
         }))
     ];
 
     allImages.forEach(item => {
-
         const wrapper = document.createElement("div");
         wrapper.className = "image-item";
 
@@ -659,32 +667,26 @@ function renderProductImagePreviews() {
         removeButton.textContent = "×";
 
         removeButton.addEventListener("click", () => {
-
-            if(item.type === "existing") {
+            if (item.type === "existing") {
                 existingProductImages.splice(item.index, 1);
             } else {
                 selectedProductFiles.splice(item.index, 1);
             }
 
             renderProductImagePreviews();
-
         });
 
         wrapper.append(image, removeButton);
-
         $("imagePreviewContainer").appendChild(wrapper);
-
     });
 
-    if(allImages.length === 0) {
+    if (allImages.length === 0) {
         $("imagePreviewContainer").innerHTML =
             '<p class="small">No product photos selected.</p>';
     }
-
 }
 
 $("productImageFile").addEventListener("change", function() {
-
     const files = Array.from(this.files || []);
 
     const allowedTypes = [
@@ -693,52 +695,48 @@ $("productImageFile").addEventListener("change", function() {
         "image/webp"
     ];
 
-    for(const file of files) {
-
-        if(!allowedTypes.includes(file.type)) {
+    for (const file of files) {
+        if (!allowedTypes.includes(file.type)) {
             showMessage(productMessage, "Use JPG, PNG or WEBP images only.", "error");
             this.value = "";
             return;
         }
 
-        if(file.size > 5 * 1024 * 1024) {
+        if (file.size > 5 * 1024 * 1024) {
             showMessage(productMessage, file.name + " exceeds 5 MB.", "error");
             this.value = "";
             return;
         }
-
     }
 
     selectedProductFiles = files;
 
     hideMessage(productMessage);
     renderProductImagePreviews();
-
 });
 
 /* =========================================
-   SUPABASE IMAGE UPLOAD
+   SECTION 5 — SUPABASE IMAGE UPLOAD
 ========================================= */
 
 async function uploadProductImage(file) {
-
-    if(!currentUser) {
+    if (!currentUser) {
         throw new Error("Please log in again.");
     }
 
     const extensions = {
-        "image/jpeg":"jpg",
-        "image/png":"png",
-        "image/webp":"webp"
+        "image/jpeg": "jpg",
+        "image/png": "png",
+        "image/webp": "webp"
     };
 
     const extension = extensions[file.type];
 
-    if(!extension) {
+    if (!extension) {
         throw new Error("Unsupported image format.");
     }
 
-    if(file.size > 5 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
         throw new Error("Image must not exceed 5 MB.");
     }
 
@@ -751,12 +749,12 @@ async function uploadProductImage(file) {
     const { data, error } = await db.storage
         .from(BUCKET)
         .upload(filePath, file, {
-            cacheControl:"3600",
-            upsert:false,
-            contentType:file.type
+            cacheControl: "3600",
+            upsert: false,
+            contentType: file.type
         });
 
-    if(error) {
+    if (error) {
         throw new Error("Image upload failed: " + error.message);
     }
 
@@ -765,51 +763,41 @@ async function uploadProductImage(file) {
         .getPublicUrl(data.path);
 
     return publicData.publicUrl;
-
 }
 
 /* =========================================
-   LOAD PRODUCTS
+   SECTION 6 — LOAD PRODUCTS
 ========================================= */
 
 async function loadProducts() {
-
     const list = $("productList");
-
     list.textContent = "Loading products...";
 
     const { data, error } = await db
         .from("products")
         .select("*")
-        .order("id", {ascending:false});
+        .order("id", { ascending: false });
 
-    if(error) {
-
+    if (error) {
         list.textContent = "Could not load products: " + error.message;
         return;
-
     }
 
     productsCache = data || [];
-
     $("totalProducts").textContent = productsCache.length;
 
-    if(productsCache.length === 0) {
-
+    if (productsCache.length === 0) {
         list.innerHTML = '<p class="empty">No products added yet.</p>';
         return;
-
     }
 
     list.innerHTML = "";
 
     productsCache.forEach(product => {
-
         const item = document.createElement("div");
         item.className = "product";
 
         const image = document.createElement("img");
-
         image.src = getProductImageUrls(product)[0] || "";
         image.alt = product.name || "Product";
 
@@ -824,79 +812,80 @@ async function loadProducts() {
         name.textContent = product.name || "Unnamed product";
 
         const details = document.createElement("p");
-
         details.textContent =
             money(product.price) +
             " | Stock: " + (product.stock ?? 0) +
             " | " + (product.category || "Uncategorised");
+
+        const sizeDetails = document.createElement("p");
+        const sizes = Array.isArray(product.available_sizes)
+            ? product.available_sizes.join(", ")
+            : "";
+
+        const colours = Array.isArray(product.available_colours)
+            ? product.available_colours.join(", ")
+            : "";
+
+        sizeDetails.textContent =
+            "Sizes: " + (sizes || "None") +
+            " | Colours: " + (colours || "None");
 
         const actions = document.createElement("div");
         actions.className = "actions";
 
         const editButton = document.createElement("button");
         editButton.textContent = "Edit";
-
-        editButton.addEventListener("click", () => {
-            editProduct(product.id);
-        });
+        editButton.addEventListener("click", () => editProduct(product.id));
 
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "Delete";
         deleteButton.className = "danger";
-
-        deleteButton.addEventListener("click", () => {
-            deleteProduct(product.id);
-        });
+        deleteButton.addEventListener("click", () => deleteProduct(product.id));
 
         actions.append(editButton, deleteButton);
-        info.append(name, details, actions);
-
+        info.append(name, details, sizeDetails, actions);
         item.append(image, info);
+
         list.appendChild(item);
-
     });
-
 }
 
 /* =========================================
-   RESET PRODUCT FORM
+   SECTION 7 — RESET PRODUCT FORM
 ========================================= */
 
 function resetProductForm() {
-
     $("productForm").reset();
 
+    $("productSizeType").value = "none";
+    $("productAvailableSizes").value = "";
+    $("productAvailableColours").value = "";
     $("productId").value = "";
 
     $("formHeading").textContent = "Add New Product";
     $("saveButton").textContent = "Save Product";
-
     $("cancelEdit").classList.add("hidden");
 
     selectedProductFiles = [];
     existingProductImages = [];
 
     $("existingImageNote").textContent = "";
-
     $("productImageFile").value = "";
 
     renderProductImagePreviews();
-
     hideMessage(productMessage);
-
 }
 
 /* =========================================
-   EDIT PRODUCT
+   SECTION 8 — EDIT PRODUCT
 ========================================= */
 
 function editProduct(id) {
-
     const product = productsCache.find(item =>
         String(item.id) === String(id)
     );
 
-    if(!product) return;
+    if (!product) return;
 
     $("productId").value = product.id;
     $("productName").value = product.name || "";
@@ -904,6 +893,17 @@ function editProduct(id) {
     $("productCategory").value = product.category || "";
     $("productPrice").value = product.price ?? "";
     $("productStock").value = product.stock ?? "";
+    $("productSizeType").value = product.size_type || "none";
+
+    $("productAvailableSizes").value =
+        Array.isArray(product.available_sizes)
+            ? product.available_sizes.join(", ")
+            : "";
+
+    $("productAvailableColours").value =
+        Array.isArray(product.available_colours)
+            ? product.available_colours.join(", ")
+            : "";
 
     existingProductImages = getProductImageUrls(product);
     selectedProductFiles = [];
@@ -918,24 +918,21 @@ function editProduct(id) {
 
     $("formHeading").textContent = "Edit Product";
     $("saveButton").textContent = "Update Product";
-
     $("cancelEdit").classList.remove("hidden");
 
     $("productForm").scrollIntoView({
-        behavior:"smooth",
-        block:"start"
+        behavior: "smooth",
+        block: "start"
     });
-
 }
 
 $("cancelEdit").addEventListener("click", resetProductForm);
 
 /* =========================================
-   SAVE PRODUCT
+   SECTION 9 — SAVE PRODUCT
 ========================================= */
 
 $("productForm").addEventListener("submit", async function(event) {
-
     event.preventDefault();
 
     const button = $("saveButton");
@@ -944,44 +941,90 @@ $("productForm").addEventListener("submit", async function(event) {
     const id = $("productId").value;
 
     try {
-
         const name = $("productName").value.trim();
         const description = $("productDescription").value.trim();
         const category = $("productCategory").value;
         const price = Number($("productPrice").value);
         const stock = Number($("productStock").value);
 
-        if(!name) throw new Error("Enter a product name.");
-        if(!category) throw new Error("Select a category.");
+        if (!name) throw new Error("Enter a product name.");
+        if (!category) throw new Error("Select a category.");
 
-        if(!Number.isFinite(price) || price < 0) {
+        if (!Number.isFinite(price) || price < 0) {
             throw new Error("Enter a valid price.");
         }
 
-        if(!Number.isInteger(stock) || stock < 0) {
+        if (!Number.isInteger(stock) || stock < 0) {
             throw new Error("Enter a valid stock quantity.");
         }
+
+        const sizeType = $("productSizeType").value;
+
+        if (!["none", "numeric", "letters"].includes(sizeType)) {
+            throw new Error("Select a valid size format.");
+        }
+
+        let availableSizes = $("productAvailableSizes").value
+            .split(",")
+            .map(size => size.trim())
+            .filter(Boolean);
+
+        if (sizeType === "letters") {
+            availableSizes = availableSizes.map(size => size.toUpperCase());
+        }
+
+        if (sizeType === "numeric") {
+            const invalidSize = availableSizes.some(size =>
+                !Number.isFinite(Number(size))
+            );
+
+            if (invalidSize) {
+                throw new Error("Numeric sizes must contain numbers only.");
+            }
+        }
+
+        availableSizes = [...new Set(availableSizes)];
+
+        if (sizeType !== "none" && availableSizes.length === 0) {
+            throw new Error("Enter at least one available size.");
+        }
+
+        if (sizeType === "none") availableSizes = [];
+
+        const colourEntries = $("productAvailableColours").value
+            .split(",")
+            .map(colour => colour.trim())
+            .filter(Boolean);
+
+        const uniqueColours = [
+            ...new Map(
+                colourEntries.map(colour => [
+                    colour.toLowerCase(),
+                    colour
+                ])
+            ).values()
+        ];
 
         const productData = {
             name,
             description,
             category,
             price,
-            stock
+            stock,
+            size_type: sizeType,
+            available_sizes: availableSizes,
+            available_colours: uniqueColours
         };
 
         let uploadedImages = [];
 
-        for(let i = 0; i < selectedProductFiles.length; i++) {
-
+        for (let i = 0; i < selectedProductFiles.length; i++) {
             button.textContent =
                 "Uploading photo " + (i + 1) +
                 " of " + selectedProductFiles.length + "...";
 
             const url = await uploadProductImage(selectedProductFiles[i]);
-
             uploadedImages.push(url);
-
         }
 
         const allImages = [
@@ -996,24 +1039,18 @@ $("productForm").addEventListener("submit", async function(event) {
 
         let result;
 
-        if(id) {
-
+        if (id) {
             result = await db
                 .from("products")
                 .update(productData)
                 .eq("id", id);
-
         } else {
-
             result = await db
                 .from("products")
                 .insert([productData]);
-
         }
 
-        if(result.error) {
-            throw new Error(result.error.message);
-        }
+        if (result.error) throw new Error(result.error.message);
 
         resetProductForm();
 
@@ -1025,110 +1062,146 @@ $("productForm").addEventListener("submit", async function(event) {
 
         await loadProducts();
 
-    } catch(error) {
-
-        showMessage(productMessage, error.message, "error");
+    } catch (error) {
+        showMessage(
+            productMessage,
+            error.message || "Something went wrong while saving the product.",
+            "error"
+        );
 
     } finally {
-
         button.disabled = false;
-
         button.textContent =
             $("productId").value ? "Update Product" : "Save Product";
-
     }
-
 });
 
 /* =========================================
-   DELETE PRODUCT
+   SECTION 10 — DELETE PRODUCT
 ========================================= */
 
 async function deleteProduct(id) {
-
     const product = productsCache.find(item =>
         String(item.id) === String(id)
     );
 
-    if(!product) return;
+    if (!product) return;
 
-    if(!confirm("Delete " + product.name + "?")) return;
+    if (!confirm("Delete " + product.name + "?")) return;
 
     const { error } = await db
         .from("products")
         .delete()
         .eq("id", id);
 
-    if(error) {
-
+    if (error) {
         showMessage(mainMessage, error.message, "error");
         return;
-
     }
 
     showMessage(mainMessage, "Product deleted successfully.", "success");
-
     await loadProducts();
-
 }
 
 /* =========================================
-   ORDER HELPERS
+   SECTION 11 — ORDER HELPERS
 ========================================= */
 
 function getOrderValue(order, keys, fallback = "") {
-
-    for(const key of keys) {
-
-        if(order[key] !== undefined && order[key] !== null) {
+    for (const key of keys) {
+        if (order[key] !== undefined && order[key] !== null) {
             return order[key];
         }
-
     }
 
     return fallback;
-
 }
 
 function getOrderStatus(order) {
-
     return String(getOrderValue(
         order,
         ["status", "order_status", "payment_status"],
         "Pending"
     ));
-
 }
 
 function getOrderTotal(order) {
-
     return Number(getOrderValue(
         order,
         ["total", "total_amount", "amount", "grand_total", "total_price"],
         0
     )) || 0;
-
 }
 
 function getOrderCustomer(order) {
-
     return getOrderValue(
         order,
         ["customer_name", "name", "full_name", "customer", "buyer_name"],
         "Customer"
     );
-
 }
 
 function getOrderDate(order) {
-
     return getOrderValue(
         order,
         ["created_at", "order_date", "date"],
         "Not provided"
     );
-
 }
+
+/* =========================================
+   SECTION 12 — RESPONSIVE IMAGE VIEWER
+========================================= */
+
+const imageViewer = $("imageViewer");
+const imageViewerPhoto = $("imageViewerPhoto");
+const imageViewerCaption = $("imageViewerCaption");
+
+function openOrderImage(imageURL, caption = "Ordered product") {
+    if (
+        typeof imageURL !== "string" ||
+        !/^https?:\/\//i.test(imageURL)
+    ) {
+        return;
+    }
+
+    imageViewerPhoto.src = imageURL;
+    imageViewerPhoto.alt = caption;
+    imageViewerCaption.textContent = caption;
+
+    imageViewer.classList.add("active");
+    document.body.classList.add("image-viewer-open");
+}
+
+function closeOrderImage() {
+    imageViewer.classList.remove("active");
+    document.body.classList.remove("image-viewer-open");
+
+    imageViewerPhoto.removeAttribute("src");
+    imageViewerCaption.textContent = "";
+}
+
+$("closeImageViewer").addEventListener("click", closeOrderImage);
+
+imageViewer.addEventListener("click", function(event) {
+    if (event.target === imageViewer) {
+        closeOrderImage();
+    }
+});
+
+imageViewerPhoto.addEventListener("click", function(event) {
+    event.stopPropagation();
+});
+
+document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape" && imageViewer.classList.contains("active")) {
+        closeOrderImage();
+    }
+});
+
+/* =========================================
+   SECTION 13 — DISPLAY ORDER PRODUCTS
+========================================= */
 
 function renderOrderItems(order) {
     const container = document.createElement("div");
@@ -1136,6 +1209,7 @@ function renderOrderItems(order) {
 
     const heading = document.createElement("h4");
     heading.textContent = "Ordered Products";
+
     container.appendChild(heading);
 
     let items = order.items || [];
@@ -1163,7 +1237,16 @@ function renderOrderItems(order) {
             String(product.id) === String(item.product_id)
         );
 
-        let imageURL = item.image || item.image_url || "";
+        /*
+           Prefer the exact picture selected by the customer.
+           Fall back to the product's main picture only when
+           the order does not contain an image URL.
+        */
+
+        let imageURL =
+            item.image_url ||
+            item.image ||
+            "";
 
         if (!imageURL && Array.isArray(item.images)) {
             imageURL = item.images[0] || "";
@@ -1174,14 +1257,23 @@ function renderOrderItems(order) {
         }
 
         const image = document.createElement("img");
+        image.alt = item.name || "Ordered product";
 
-        if (typeof imageURL === "string" && /^https?:\/\//i.test(imageURL)) {
+        if (
+            typeof imageURL === "string" &&
+            /^https?:\/\//i.test(imageURL)
+        ) {
             image.src = imageURL;
+
+            image.addEventListener("click", () => {
+                openOrderImage(imageURL, item.name || "Ordered product");
+            });
+
+            image.title = "Tap to view product image";
         } else {
             image.style.display = "none";
         }
 
-        image.alt = item.name || "Ordered product";
         image.onerror = function() {
             this.style.display = "none";
         };
@@ -1192,8 +1284,34 @@ function renderOrderItems(order) {
         const name = document.createElement("strong");
         name.textContent = item.name || "Unnamed product";
 
+        info.appendChild(name);
+
+        const selectedSize =
+            item.size ??
+            item.selected_size ??
+            item.product_size;
+
+        if (selectedSize) {
+            const size = document.createElement("p");
+            size.textContent = "Size: " + selectedSize;
+            info.appendChild(size);
+        }
+
+        const selectedColour =
+            item.colour ??
+            item.color ??
+            item.selected_colour ??
+            item.selected_color;
+
+        if (selectedColour) {
+            const colour = document.createElement("p");
+            colour.textContent = "Colour: " + selectedColour;
+            info.appendChild(colour);
+        }
+
         const quantity = document.createElement("p");
-        quantity.textContent = "Quantity: " + Number(item.quantity || 0);
+        quantity.textContent =
+            "Quantity: " + Number(item.quantity || 0);
 
         const price = document.createElement("p");
         price.textContent = "Unit Price: " + money(item.price);
@@ -1204,14 +1322,22 @@ function renderOrderItems(order) {
             Number(item.price || 0) * Number(item.quantity || 0)
         );
 
-        info.append(name, quantity, price, subtotal);
+        info.append(quantity, price, subtotal);
 
-        if (imageURL && /^https?:\/\//i.test(imageURL)) {
+        if (
+            typeof imageURL === "string" &&
+            /^https?:\/\//i.test(imageURL)
+        ) {
             const link = document.createElement("a");
-            link.href = imageURL;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.textContent = "Open product image";
+
+            link.href = "#";
+            link.textContent = "View product image";
+
+            link.addEventListener("click", event => {
+                event.preventDefault();
+                openOrderImage(imageURL, item.name || "Ordered product");
+            });
+
             info.appendChild(link);
         }
 
@@ -1221,13 +1347,12 @@ function renderOrderItems(order) {
 
     return container;
 }
-  
+
 /* =========================================
-   LOAD ORDERS
+   SECTION 14 — LOAD ORDERS
 ========================================= */
 
 async function loadOrders() {
-
     const list = $("ordersList");
     const recent = $("recentOrders");
 
@@ -1236,16 +1361,13 @@ async function loadOrders() {
     const { data, error } = await db
         .from("orders")
         .select("*")
-        .order("created_at", {ascending:false})
+        .order("created_at", { ascending: false })
         .limit(100);
 
-    if(error) {
-
+    if (error) {
         list.textContent = "Could not load orders: " + error.message;
         recent.textContent = "Orders could not be loaded.";
-
         return;
-
     }
 
     ordersCache = data || [];
@@ -1268,24 +1390,19 @@ async function loadOrders() {
 
     $("pendingOrders").textContent = pending;
 
-    if(ordersCache.length === 0) {
-
+    if (ordersCache.length === 0) {
         list.innerHTML = '<p class="empty">No orders found.</p>';
         recent.innerHTML = '<p class="empty">No recent orders.</p>';
-
         return;
-
     }
 
     list.innerHTML = "";
 
     ordersCache.forEach(order => {
-
         const box = document.createElement("div");
         box.className = "order";
 
         const title = document.createElement("strong");
-
         title.textContent =
             "Order #" + (order.id ?? "—") +
             " - " + getOrderCustomer(order);
@@ -1300,117 +1417,107 @@ async function loadOrders() {
         status.textContent = "Status: " + getOrderStatus(order);
 
         box.append(
-    title,
-    total,
-    date,
-    renderOrderItems(order),
-    status
-);
+            title,
+            total,
+            date,
+            renderOrderItems(order),
+            status
+        );
 
         const statusKey = ["status", "order_status"].find(key =>
             Object.prototype.hasOwnProperty.call(order, key)
         );
 
-        if(statusKey) {
-
+        if (statusKey) {
             const select = document.createElement("select");
 
             ["Pending", "Processing", "Completed", "Cancelled"].forEach(value => {
-
                 const option = document.createElement("option");
-
                 option.value = value;
                 option.textContent = value;
-
                 select.appendChild(option);
-
             });
 
-            select.value = getOrderStatus(order);
+            const currentStatus = getOrderStatus(order).toLowerCase();
+
+            const matchingStatus = [
+                "Pending",
+                "Processing",
+                "Completed",
+                "Cancelled"
+            ].find(value => value.toLowerCase() === currentStatus);
+
+            if (matchingStatus) {
+                select.value = matchingStatus;
+            }
 
             const updateButton = document.createElement("button");
-
             updateButton.textContent = "Update Status";
 
             updateButton.addEventListener("click", async () => {
-
                 updateButton.disabled = true;
 
                 const { error: updateError } = await db
                     .from("orders")
-                    .update({[statusKey]:select.value})
+                    .update({ [statusKey]: select.value })
                     .eq("id", order.id);
 
                 updateButton.disabled = false;
 
-                if(updateError) {
-
+                if (updateError) {
                     showMessage(mainMessage, updateError.message, "error");
                     return;
-
                 }
 
                 showMessage(mainMessage, "Order status updated.", "success");
-
                 await loadOrders();
-
             });
 
             box.append(select, updateButton);
-
         }
 
         list.appendChild(box);
-
     });
 
     recent.innerHTML = "";
 
     ordersCache.slice(0, 5).forEach(order => {
-
         const item = document.createElement("div");
         item.className = "order";
 
         const title = document.createElement("strong");
-
         title.textContent =
             "Order #" + (order.id ?? "—") +
             " - " + getOrderCustomer(order);
 
         const detail = document.createElement("p");
-
         detail.textContent =
             money(getOrderTotal(order)) +
             " | " + getOrderStatus(order);
 
         item.append(title, detail);
-
         recent.appendChild(item);
-
     });
-
 }
 
 /* =========================================
-   REFRESH DASHBOARD
+   SECTION 15 — REFRESH DASHBOARD
 ========================================= */
 
 async function refreshAll() {
-
-    if(!currentUser) return;
+    if (!currentUser) return;
 
     await Promise.all([
         loadProducts(),
         loadOrders()
     ]);
-
 }
 
 $("refreshProducts").addEventListener("click", loadProducts);
 $("refreshOrders").addEventListener("click", loadOrders);
 
 /* =========================================
-   MANAGE SHOP BACKGROUND
+   SECTION 16 — MANAGE SHOP BACKGROUND
 ========================================= */
 
 const backgroundInput = $("backgroundImageFile");
@@ -1418,152 +1525,124 @@ const backgroundPreview = $("backgroundPreview");
 const backgroundMessage = $("backgroundMessage");
 
 async function loadBackground() {
-
     const { data, error } = await db
         .from("site_settings")
         .select("setting_value")
         .eq("setting_key", "shop_background")
         .maybeSingle();
 
-    if(error) {
-
+    if (error) {
         showMessage(backgroundMessage, error.message, "error");
         return;
-
     }
 
     currentBackgroundUrl = data?.setting_value || "";
 
-    if(currentBackgroundUrl) {
+    if (currentBackgroundUrl) {
         backgroundPreview.src = currentBackgroundUrl;
     } else {
         backgroundPreview.removeAttribute("src");
     }
-
 }
 
 backgroundInput.addEventListener("change", function() {
-
     const file = this.files[0];
 
-    if(!file) return;
+    if (!file) return;
 
-    if(!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
         showMessage(backgroundMessage, "Choose JPG, PNG or WEBP.", "error");
-
         this.value = "";
         return;
-
     }
 
-    if(file.size > 5 * 1024 * 1024) {
-
+    if (file.size > 5 * 1024 * 1024) {
         showMessage(backgroundMessage, "Image must not exceed 5 MB.", "error");
-
         this.value = "";
         return;
-
     }
 
     backgroundPreview.src = URL.createObjectURL(file);
-
     hideMessage(backgroundMessage);
-
 });
 
 $("saveBackground").addEventListener("click", async function() {
-
-    if(!currentUser) {
+    if (!currentUser) {
         showMessage(backgroundMessage, "Please log in again.", "error");
         return;
     }
 
     const file = backgroundInput.files[0];
 
-    if(!file && !currentBackgroundUrl) {
-
+    if (!file && !currentBackgroundUrl) {
         showMessage(backgroundMessage, "Choose a background photo first.", "error");
         return;
-
     }
 
     this.disabled = true;
     this.textContent = "Saving...";
 
     try {
-
         let imageUrl = currentBackgroundUrl;
 
-        if(file) {
+        if (file) {
             imageUrl = await uploadProductImage(file);
         }
 
         const { error } = await db
             .from("site_settings")
             .upsert({
-                setting_key:"shop_background",
-                setting_value:imageUrl
+                setting_key: "shop_background",
+                setting_value: imageUrl
             }, {
-                onConflict:"setting_key"
+                onConflict: "setting_key"
             });
 
-        if(error) throw error;
+        if (error) throw error;
 
         currentBackgroundUrl = imageUrl;
         backgroundInput.value = "";
 
         showMessage(backgroundMessage, "Background saved successfully!", "success");
 
-    } catch(error) {
-
+    } catch (error) {
         showMessage(backgroundMessage, error.message, "error");
 
     } finally {
-
         this.disabled = false;
         this.textContent = "Save Background";
-
     }
-
 });
 
 $("resetBackground").addEventListener("click", async function() {
-
-    if(!confirm("Remove the shop background?")) return;
+    if (!confirm("Remove the shop background?")) return;
 
     this.disabled = true;
 
     try {
-
         const { error } = await db
             .from("site_settings")
             .delete()
             .eq("setting_key", "shop_background");
 
-        if(error) throw error;
+        if (error) throw error;
 
         currentBackgroundUrl = "";
-
         backgroundInput.value = "";
         backgroundPreview.removeAttribute("src");
 
         showMessage(backgroundMessage, "Background removed successfully.", "success");
 
-    } catch(error) {
-
+    } catch (error) {
         showMessage(backgroundMessage, error.message, "error");
 
     } finally {
-
         this.disabled = false;
-
     }
-
 });
 
 /* =========================================
-   MANAGE SOCIAL MEDIA
+   SECTION 17 — MANAGE SOCIAL MEDIA
 ========================================= */
 
 const facebookUrl = $("facebookUrl");
@@ -1572,7 +1651,6 @@ const whatsappUrl = $("whatsappUrl");
 const socialMessage = $("socialMessage");
 
 async function loadSocialLinks() {
-
     const { data, error } = await db
         .from("site_settings")
         .select("setting_key, setting_value")
@@ -1582,11 +1660,9 @@ async function loadSocialLinks() {
             "social_whatsapp"
         ]);
 
-    if(error) {
-
+    if (error) {
         showMessage(socialMessage, error.message, "error");
         return;
-
     }
 
     const settings = data || [];
@@ -1599,16 +1675,12 @@ async function loadSocialLinks() {
 
     whatsappUrl.value =
         settings.find(item => item.setting_key === "social_whatsapp")?.setting_value || "";
-
 }
 
 $("saveSocial").addEventListener("click", async function() {
-
-    if(!currentUser) {
-
+    if (!currentUser) {
         showMessage(socialMessage, "Please log in again.", "error");
         return;
-
     }
 
     const facebook = facebookUrl.value.trim();
@@ -1616,29 +1688,23 @@ $("saveSocial").addEventListener("click", async function() {
     const whatsapp = whatsappUrl.value.trim();
 
     function validateUrl(value, platform, allowedHosts) {
-
-        if(!value) return;
+        if (!value) return;
 
         try {
-
             const url = new URL(value);
 
-            if(url.protocol !== "https:") throw new Error();
+            if (url.protocol !== "https:") throw new Error();
 
-            if(!allowedHosts.includes(url.hostname.toLowerCase())) {
+            if (!allowedHosts.includes(url.hostname.toLowerCase())) {
                 throw new Error();
             }
 
         } catch {
-
             throw new Error("Enter a valid " + platform + " URL.");
-
         }
-
     }
 
     try {
-
         validateUrl(
             facebook,
             "Facebook",
@@ -1661,30 +1727,26 @@ $("saveSocial").addEventListener("click", async function() {
         this.textContent = "Saving...";
 
         const settings = [
-            {setting_key:"social_facebook", setting_value:facebook},
-            {setting_key:"social_instagram", setting_value:instagram},
-            {setting_key:"social_whatsapp", setting_value:whatsapp}
+            { setting_key: "social_facebook", setting_value: facebook },
+            { setting_key: "social_instagram", setting_value: instagram },
+            { setting_key: "social_whatsapp", setting_value: whatsapp }
         ];
 
         const { error } = await db
             .from("site_settings")
-            .upsert(settings, {onConflict:"setting_key"});
+            .upsert(settings, { onConflict: "setting_key" });
 
-        if(error) throw error;
+        if (error) throw error;
 
         showMessage(socialMessage, "Social media links saved successfully!", "success");
 
-    } catch(error) {
-
+    } catch (error) {
         showMessage(socialMessage, error.message, "error");
 
     } finally {
-
         this.disabled = false;
         this.textContent = "Save Social Media Links";
-
     }
-
 });
 
 </script>
