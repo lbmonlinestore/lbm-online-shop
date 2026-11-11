@@ -54,6 +54,31 @@ button.success{background:#16834b}
 .order{border-bottom:1px solid #e6ebf1;padding:14px 0}
 .order p{font-size:13px;margin:5px 0;color:#526174;overflow-wrap:anywhere}
 .order select{max-width:200px}
+  .order-product {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e6ebf1;
+}
+
+.order-product img {
+    width: 75px;
+    height: 85px;
+    object-fit: cover;
+    border-radius: 7px;
+    flex-shrink: 0;
+}
+
+.order-product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.order-product-info p {
+    font-size: 13px;
+    margin: 5px 0;
+}
 .empty{padding:20px;text-align:center;color:#68778b}
 @media(max-width:750px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
 @media(max-width:420px){.stat strong{font-size:19px}.panel{padding:15px}header h2{font-size:16px}}
@@ -1105,6 +1130,98 @@ function getOrderDate(order) {
 
 }
 
+function renderOrderItems(order) {
+    const container = document.createElement("div");
+    container.className = "order-items";
+
+    const heading = document.createElement("h4");
+    heading.textContent = "Ordered Products";
+    container.appendChild(heading);
+
+    let items = order.items || [];
+
+    if (typeof items === "string") {
+        try {
+            items = JSON.parse(items);
+        } catch {
+            items = [];
+        }
+    }
+
+    if (!Array.isArray(items) || items.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "No product details available.";
+        container.appendChild(empty);
+        return container;
+    }
+
+    items.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "order-product";
+
+        const product = productsCache.find(product =>
+            String(product.id) === String(item.product_id)
+        );
+
+        let imageURL = item.image || item.image_url || "";
+
+        if (!imageURL && Array.isArray(item.images)) {
+            imageURL = item.images[0] || "";
+        }
+
+        if (!imageURL && product) {
+            imageURL = getProductImageUrls(product)[0] || "";
+        }
+
+        const image = document.createElement("img");
+
+        if (typeof imageURL === "string" && /^https?:\/\//i.test(imageURL)) {
+            image.src = imageURL;
+        } else {
+            image.style.display = "none";
+        }
+
+        image.alt = item.name || "Ordered product";
+        image.onerror = function() {
+            this.style.display = "none";
+        };
+
+        const info = document.createElement("div");
+        info.className = "order-product-info";
+
+        const name = document.createElement("strong");
+        name.textContent = item.name || "Unnamed product";
+
+        const quantity = document.createElement("p");
+        quantity.textContent = "Quantity: " + Number(item.quantity || 0);
+
+        const price = document.createElement("p");
+        price.textContent = "Unit Price: " + money(item.price);
+
+        const subtotal = document.createElement("p");
+        subtotal.textContent = "Subtotal: " + money(
+            item.subtotal ??
+            Number(item.price || 0) * Number(item.quantity || 0)
+        );
+
+        info.append(name, quantity, price, subtotal);
+
+        if (imageURL && /^https?:\/\//i.test(imageURL)) {
+            const link = document.createElement("a");
+            link.href = imageURL;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = "Open product image";
+            info.appendChild(link);
+        }
+
+        row.append(image, info);
+        container.appendChild(row);
+    });
+
+    return container;
+}
+  
 /* =========================================
    LOAD ORDERS
 ========================================= */
@@ -1182,7 +1299,13 @@ async function loadOrders() {
         const status = document.createElement("p");
         status.textContent = "Status: " + getOrderStatus(order);
 
-        box.append(title, total, date, status);
+        box.append(
+    title,
+    total,
+    date,
+    renderOrderItems(order),
+    status
+);
 
         const statusKey = ["status", "order_status"].find(key =>
             Object.prototype.hasOwnProperty.call(order, key)
