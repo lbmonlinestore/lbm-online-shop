@@ -869,3 +869,48 @@ body {
 .checkout-button:not(:disabled):hover {
     background: #F5D778 !important;
 }
+
+/* =================================
+   LBM CART IMAGE SIZE FIX
+================================= */
+
+.cart-item {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+}
+
+.cart-item > img {
+    width: 76px !important;
+    height: 76px !important;
+    max-width: 76px;
+    object-fit: cover;
+    display: block;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.cart-item-details {
+    min-width: 0;
+}
+
+.cart-item > strong {
+    white-space: nowrap;
+}
+
+@media (max-width: 450px) {
+    .cart-item {
+        grid-template-columns: 60px minmax(0, 1fr);
+    }
+
+    .cart-item > img {
+        width: 60px !important;
+        height: 60px !important;
+        max-width: 60px;
+    }
+
+    .cart-item > strong {
+        grid-column: 2;
+    }
+}
