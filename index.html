@@ -4,8 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#111111">
+    <meta name="theme-color" content="#080808">
+    <meta name="theme-color" content="#D4AF37">
 
+<link rel="manifest" href="./manifest.json">
+
+<link rel="icon" type="image/png" href="./icons/icon-192.png">
+
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-title" content="LBM Store">
+  
     <title>LBM Online Shop | Fashion & Style</title>
 
     <meta name="description" content="Discover stylish clothing, footwear and accessories at LBM Online Shop. Serving customers across Zambia.">
@@ -231,38 +242,34 @@
 
 <body>
 
-    <!-- HEADER -->
+    
+<!-- HEADER -->
+<header class="topbar">
 
-    <header class="topbar">
+    <a href="#home" class="brand">
+        LBM <span>ONLINE SHOP</span>
+    </a>
 
-        <a href="#home" class="brand">
-            LBM <span>ONLINE SHOP</span>
-        </a>
+    <nav class="navigation">
+        <a href="#home">Home</a>
+        <a href="#products">Shop</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
 
-        <nav class="navigation">
-    <a href="#home">Home</a>
-    <a href="#products">Shop</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-</nav>
-    <a href="#home">Home</a>
-    <a href="#products">Shop</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-</nav>    </nav>
+    <a class="header-whatsapp"
+       href="https://wa.me/260969034955"
+       target="_blank"
+       rel="noopener">
+        WhatsApp
+    </a>
 
-        <a class="header-whatsapp"
-           href="https://wa.me/260969034955"
-           target="_blank"
-           rel="noopener">
-            WhatsApp
-        </a>
+    <button class="cart-button" id="cart-button">
+        Cart (<span id="cart-count">0</span>)
+    </button>
 
-        <button class="cart-button" id="cart-button">
-            Cart (<span id="cart-count">0</span>)
-        </button>
+</header>
 
-    </header>
 
 
     <!-- MAIN CONTENT -->
@@ -576,14 +583,24 @@
 
     </footer>
 
-<div class="admin-access">
-    <a href="admin.html">Admin Login</a>
-</div>
     <!-- JAVASCRIPT -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script src="script.js"></script>
-
+    <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(registration => {
+        console.log("LBM App Service Worker registered:", registration.scope);
+      })
+      .catch(error => {
+        console.error("LBM App registration failed:", error);
+      });
+  });
+}
+</script>
+  
 </body>
 </html>
