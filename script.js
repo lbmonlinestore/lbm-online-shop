@@ -1,349 +1,267 @@
 
 /* =====================================
-   LBM ONLINE SHOP
-   SHOPPING SYSTEM
+   LBM ONLINE SHOP - ADMIN DASHBOARD
+   BLACK & GOLD LUXURY DESIGN
 ===================================== */
 
-// YOUR WHATSAPP NUMBER
-const WHATSAPP_NUMBER = "260969034955";
-
-// 
-// ======================================
-// LBM ONLINE SHOP - PRODUCT CATALOGUE
-// ======================================
-
-const products = [
-    {
-        id: 1,
-        name: "Classic Men's Shirt",
-        description: "Smart casual shirt for everyday wear.",
-        price: 450,
-        image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-        id: 2,
-        name: "Ladies Fashion Dress",
-        description: "A stylish dress for different occasions.",
-        price: 550,
-        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-        id: 3,
-        name: "Casual T-Shirt",
-        description: "Comfortable everyday T-shirt.",
-        price: 180,
-        image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-        id: 4,
-        name: "Ladies Handbag",
-        description: "A fashionable accessory for your outfit.",
-        price: 450,
-        image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-        id: 5,
-        name: "Men's Sneakers",
-        description: "Casual footwear for everyday style.",
-        price: 1450,
-        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-        id: 6,
-        name: "Ladies Top",
-        description: "A versatile top for casual outfits.",
-        price: 500,
-        image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-        id: 7,
-        name: "Premium Men's Suit",
-        description: "Elegant formal suit for business, weddings and special occasions.",
-        price: 1900,
-        image: "https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&w=700&q=80"
-    },
-    {
-        id: 8,
-        name: "Elegant Women's Dress",
-        description: "Beautiful and stylish dress for special occasions.",
-        price: 650,
-        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=700&q=80"
-    }
-];
-
-// SHOPPING CART
-let cart = [];
-
-// HTML ELEMENTS
-const productList = document.getElementById("product-list");
-const cartSection = document.getElementById("cart-section");
-const cartItems = document.getElementById("cart-items");
-const cartCount = document.getElementById("cart-count");
-const cartTotal = document.getElementById("cart-total");
-const checkoutButton = document.getElementById("checkout-button");
-
-// FORMAT PRICE IN KWACHA
-function formatPrice(amount) {
-    return "K" + amount.toFixed(2);
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-// DISPLAY PRODUCTS
-function displayProducts() {
-
-    productList.innerHTML = products.map(product => `
-        <article class="product-card">
-
-            <img
-                src="${product.image}"
-                alt="${product.name}"
-                loading="lazy"
-            >
-
-            <div class="product-info">
-
-                <h3>${product.name}</h3>
-
-                <p class="product-description">
-                    ${product.description}
-                </p>
-
-                <p class="product-price">
-                    ${formatPrice(product.price)}
-                </p>
-
-                <button
-                    class="add-button"
-                    onclick="addToCart(${product.id})"
-                >
-                    ADD TO CART
-                </button>
-
-            </div>
-        </article>
-    `).join("");
+body {
+    font-family: Arial, sans-serif;
+    background: #080808;
+    color: #f5f5f5;
+    min-height: 100vh;
 }
 
-// ADD PRODUCT TO CART
-function addToCart(productId) {
+/* HEADER */
 
-    const product = products.find(
-        item => item.id === productId
-    );
-
-    if (!product) return;
-
-    const existingItem = cart.find(
-        item => item.id === productId
-    );
-
-    if (existingItem) {
-        existingItem.quantity++;
-    } else {
-        cart.push({
-            ...product,
-            quantity: 1
-        });
-    }
-
-    updateCart();
-
-    cartSection.classList.add("open");
-
-    cartSection.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-    });
+.admin-header {
+    background: #111;
+    padding: 22px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #d4af37;
 }
 
-// CHANGE PRODUCT QUANTITY
-function changeQuantity(productId, change) {
-
-    const item = cart.find(
-        product => product.id=== productId
-    );
-
-    if (!item) return;
-
-    item.quantity += change;
-
-    if (item.quantity <= 0) {
-        cart = cart.filter(
-            product => product.id !== productId
-        );
-    }
-
-    updateCart();
+.brand {
+    color: #d4af37;
+    font-size: 25px;
+    font-weight: bold;
+    letter-spacing: 2px;
 }
 
-// UPDATE SHOPPING CART
-function updateCart() {
-
-    const totalItems = cart.reduce(
-        (sum, item) => sum + item.quantity,
-        0
-    );
-
-    const totalPrice = cart.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
-
-    cartCount.textContent = totalItems;
-
-    cartTotal.textContent = formatPrice(totalPrice);
-
-    // EMPTY CART
-    if (cart.length === 0) {
-
-        cartItems.innerHTML = `
-            <p>Your cart is empty.</p>
-        `;
-
-    } else {
-
-        // DISPLAY CART ITEMS
-        cartItems.innerHTML = cart.map(item => `
-            <div class="cart-item">
-
-                <div>
-                    <strong>${item.name}</strong>
-
-                    <small>
-                        ${formatPrice(item.price)} each
-                    </small>
-                </div>
-
-                <div class="quantity-controls">
-
-                    <button
-                        onclick="changeQuantity(${item.id}, -1)"
-                    >−</button>
-
-                    <span>${item.quantity}</span>
-
-                    <button
-                        onclick="changeQuantity(${item.id}, 1)"
-                    >+</button>
-
-                </div>
-
-            </div>
-        `).join("");
-    }
-
-    checkoutButton.disabled = cart.length === 0;
+.brand span {
+    color: white;
+    font-size: 14px;
 }
 
-// OPEN SHOPPING CART
-document.getElementById("cart-button")
-    .addEventListener("click", () => {
+.shop-link {
+    color: #d4af37;
+    text-decoration: none;
+    border: 1px solid #d4af37;
+    padding: 10px 18px;
+    border-radius: 6px;
+}
 
-        cartSection.classList.add("open");
+.shop-link:hover {
+    background: #d4af37;
+    color: black;
+}
 
-        cartSection.scrollIntoView({
-            behavior: "smooth"
-        });
-    });
+/* MAIN DASHBOARD */
 
-// CLOSE SHOPPING CART
-document.getElementById("close-cart")
-    .addEventListener("click", () => {
+.dashboard {
+    width: 90%;
+    max-width: 1200px;
+    margin: 35px auto;
+}
 
-        cartSection.classList.remove("open");
-    });
+/* WELCOME */
 
-// WHATSAPP CHECKOUT
-checkoutButton.addEventListener("click", () => {
+.welcome {
+    margin-bottom: 30px;
+}
 
-    if (cart.length === 0) {
-        alert("Your shopping cart is empty.");
-        return;
+.eyebrow {
+    color: #d4af37;
+    font-size: 12px;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+}
+
+.welcome h1 {
+    font-size: 34px;
+    color: #d4af37;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    color: #aaa;
+    line-height: 1.6;
+}
+
+/* STATISTICS */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 35px;
+}
+
+.stat-card {
+    background: #151515;
+    border: 1px solid #806522;
+    border-radius: 12px;
+    padding: 25px 18px;
+    transition: 0.3s;
+}
+
+.stat-card:hover {
+    border-color: #d4af37;
+    transform: translateY(-3px);
+}
+
+.stat-card p {
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.stat-card h2 {
+    color: #d4af37;
+    font-size: 27px;
+    margin-bottom: 10px;
+    overflow-wrap: anywhere;
+}
+
+.stat-card span {
+    color: #888;
+    font-size: 12px;
+}
+
+/* DASHBOARD SECTIONS */
+
+.dashboard-section {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.section-heading {
+    margin-bottom: 22px;
+}
+
+.section-heading h2 {
+    color: #d4af37;
+    font-size: 21px;
+    margin-bottom: 8px;
+}
+
+.section-heading span {
+    color: #999;
+    font-size: 13px;
+}
+
+/* ORDERS TABLE */
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 450px;
+}
+
+th {
+    color: #d4af37;
+    text-align: left;
+    font-size: 13px;
+}
+
+th, td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #333;
+}
+
+td {
+    color: #ddd;
+    font-size: 14px;
+}
+
+.empty-message {
+    text-align: center;
+    color: #888;
+    padding: 30px;
+}
+
+/* QUICK ACTIONS */
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.actions-grid button {
+    background: #d4af37;
+    color: #080808;
+    border: none;
+    border-radius: 7px;
+    padding: 15px 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.actions-grid button:hover {
+    background: #f0cc61;
+    transform: translateY(-2px);
+}
+
+/* FOOTER */
+
+footer {
+    text-align: center;
+    color: #d4af37;
+    padding: 30px 10px;
+    font-size: 13px;
+}
+
+footer p {
+    color: #888;
+    margin-top: 8px;
+}
+
+/* MOBILE RESPONSIVENESS */
+
+@media (max-width: 800px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    let message =
-        "Hello LBM Online Shop! I would like to place an order:\n\n";
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
 
-    cart.forEach(item => {
-
-        message +=
-            item.name +
-            " x " +
-            item.quantity +
-            " = " +
-            formatPrice(item.price * item.quantity) +
-            "\n";
-    });
-
-    const total = cart.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
-
-    message += "\nTOTAL: " + formatPrice(total);
-
-    message +=
-        "\n\nPlease confirm availability and delivery arrangements.";
-
-    const whatsappLink =
-    "https://api.whatsapp.com/send?phone=" +
-    WHATSAPP_NUMBER +
-    "&text=" +
-    encodeURIComponent(message);
-
-window.location.assign(whatsappLink);
-});
-// AUTOMATIC FOOTER YEAR
-document.getElementById("year").textContent =
-    new Date().getFullYear();
-
-// START THE ONLINE SHOP
-displayProducts();
-
-updateCart();
-
-// ======================================
-// LBM WHATSAPP CHECKOUT
-// ======================================
-
-
-checkoutButton.addEventListener("click", function () {
-
-    if (cart.length === 0) {
-        alert("Your shopping cart is empty.");
-        return;
+@media (max-width: 480px) {
+    .dashboard {
+        width: 92%;
+        margin: 25px auto;
     }
 
-    const checkoutNumber = "260969034955";
-
-    let totalPrice = 0;
-
-    let message = "HELLO LBM ONLINE SHOP!\n";
-    message += "I would like to place an order.\n\n";
-    message += "MY ORDER:\n";
-
-    cart.forEach(item => {
-        const subtotal = item.price * item.quantity;
-        totalPrice += subtotal;
-
-        message += item.name + "\n";
-        message += "Quantity: " + item.quantity + "\n";
-        message += "Price: " + formatPrice(item.price) + "\n";
-        message += "Subtotal: " + formatPrice(subtotal) + "\n\n";
-    });
-
-    message += "TOTAL: " + formatPrice(totalPrice);
-    message += "\n\nPlease confirm my order. Thank you!";
-
-    const whatsappURL =
-        "https://api.whatsapp.com/send?phone=" +
-        checkoutNumber +
-        "&text=" +
-        encodeURIComponent(message);
-
-    const newTab = window.open(whatsappURL, "_blank");
-
-    if (!newTab) {
-        alert("Please allow pop-ups for this website.");
+    .admin-header {
+        padding: 18px 4%;
     }
 
-});
+    .brand {
+        font-size: 20px;
+    }
+
+    .welcome h1 {
+        font-size: 28px;
+    }
+
+    .stat-card {
+        padding: 18px 12px;
+    }
+
+    .stat-card h2 {
+        font-size: 22px;
+    }
+
+    .dashboard-section {
+        padding: 17px;
+    }
+}
