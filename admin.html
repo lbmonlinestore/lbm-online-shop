@@ -1401,10 +1401,10 @@ async function refreshAll() {
 
     if(!currentUser) return;
 
-    await Promise.all([
-        loadProducts(),
-        loadOrders()
-    ]);
+    // Load products first so older orders without saved image URLs
+    // can still display their current product images.
+    await loadProducts();
+    await loadOrders();
 
 }
 
