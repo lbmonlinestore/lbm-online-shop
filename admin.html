@@ -54,6 +54,13 @@ button.success{background:#16834b}
 .order{border-bottom:1px solid #e6ebf1;padding:14px 0}
 .order p{font-size:13px;margin:5px 0;color:#526174;overflow-wrap:anywhere}
 .order select{max-width:200px}
+.order-items{display:grid;gap:9px;margin:12px 0}
+.order-item{display:flex;align-items:center;gap:12px;padding:9px;background:#f7f9fc;border:1px solid #e6ebf1;border-radius:9px}
+.order-item img{width:68px;height:68px;object-fit:cover;border-radius:7px;background:#e8edf4;flex:0 0 68px}
+.order-item-info{min-width:0}
+.order-item-info strong{display:block;font-size:13px;overflow-wrap:anywhere}
+.order-item-info span{display:block;font-size:12px;color:#526174;margin-top:4px;overflow-wrap:anywhere}
+.order-items-heading{font-size:13px;margin:12px 0 7px;color:#202b3c}
 .empty{padding:20px;text-align:center;color:#68778b}
 @media(max-width:750px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
 @media(max-width:420px){.stat strong{font-size:19px}.panel{padding:15px}header h2{font-size:16px}}
@@ -1105,6 +1112,122 @@ function getOrderDate(order) {
 
 }
 
+function getOrderItems(order) {
+
+    let items = getOrderValue(
+        order,
+        ["items", "order_items", "products"],
+        []
+    );
+
+    if(typeof items === "string") {
+
+        try {
+            items = JSON.parse(items);
+        } catch(error) {
+            console.warn("Could not parse saved order items:", error);
+            return [];
+        }
+
+    }
+
+    if(!Array.isArray(items) && items && Array.isArray(items.items)) {
+        items = items.items;
+    }
+
+    return Array.isArray(items) ? items : [];
+
+}
+
+function getOrderItemImage(item) {
+
+    const savedImage =
+        item.image_url ||
+        item.product_image ||
+        item.image ||
+        item.imageUrl;
+
+    if(typeof savedImage === "string" && /^https?:\\/\\//i.test(savedImage)) {
+        return savedImage;
+    }
+
+    const product = productsCache.find(product =>
+        String(product.id) === String(item.product_id ?? item.id)
+    );
+
+    return product ? (getProductImageUrls(product)[0] || "") : "";
+
+}
+
+function renderOrderItems(order, container) {
+
+    const items = getOrderItems(order);
+
+    const heading = document.createElement("strong");
+    heading.className = "order-items-heading";
+    heading.textContent = "Products ordered";
+    container.appendChild(heading);
+
+    if(items.length === 0) {
+
+        const empty = document.createElement("p");
+        empty.textContent = "No product details were saved with this order.";
+        container.appendChild(empty);
+        return;
+
+    }
+
+    const list = document.createElement("div");
+    list.className = "order-items";
+
+    items.forEach(item => {
+
+        const row = document.createElement("div");
+        row.className = "order-item";
+
+        const imageUrl = getOrderItemImage(item);
+
+        if(imageUrl) {
+
+            const image = document.createElement("img");
+            image.src = imageUrl;
+            image.alt = item.name || "Ordered product";
+            image.loading = "lazy";
+            image.onerror = function() {
+                this.style.display = "none";
+            };
+            row.appendChild(image);
+
+        }
+
+        const info = document.createElement("div");
+        info.className = "order-item-info";
+
+        const name = document.createElement("strong");
+        name.textContent = item.name || item.product_name || "Unnamed product";
+
+        const quantity = Number(item.quantity || 0);
+        const price = Number(item.price || 0);
+        const subtotal = Number(
+            item.subtotal !== undefined ? item.subtotal : price * quantity
+        );
+
+        const detail = document.createElement("span");
+        detail.textContent =
+            "Qty: " + quantity +
+            " | Unit: " + money(price) +
+            " | Subtotal: " + money(subtotal);
+
+        info.append(name, detail);
+        row.appendChild(info);
+        list.appendChild(row);
+
+    });
+
+    container.appendChild(list);
+
+}
+
 /* =========================================
    LOAD ORDERS
 ========================================= */
@@ -1183,6 +1306,8 @@ async function loadOrders() {
         status.textContent = "Status: " + getOrderStatus(order);
 
         box.append(title, total, date, status);
+
+        renderOrderItems(order, box);
 
         const statusKey = ["status", "order_status"].find(key =>
             Object.prototype.hasOwnProperty.call(order, key)
