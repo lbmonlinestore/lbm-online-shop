@@ -2,8 +2,9 @@
 /* =====================================================
    LBM ONLINE SHOP
    COMPLETE STOREFRONT SYSTEM
-   SUPABASE + PRODUCT GALLERY + CART
-   WHATSAPP CHECKOUT + ORDER CANCELLATION
+   SUPABASE + PRODUCT-SPECIFIC LONG-PRESS SELECTION
+   DISTINCT CART VARIANTS + WHATSAPP CHECKOUT
+   ORDER CANCELLATION
    ===================================================== */
 
 
@@ -100,6 +101,15 @@ let productImageIndices = {};
 
 let previewProductId = null;
 let previewImageIndex = 0;
+
+// Each product has its OWN selected image collection.
+// Selecting pictures in one product cannot affect another.
+const selectedPreviewImages = new Map();
+
+// Long-press handling for thumbnail selection.
+let thumbnailPressTimer = null;
+let suppressThumbnailClickUntil = 0;
+let activeThumbnailButton = null;
 
 
 /* =====================================================
@@ -199,6 +209,46 @@ function getStock(product) {
 }
 
 
+// A separate cart key for every product-picture combination.
+function makeCartKey(productId, imageURL) {
+
+    return String(productId) + "::" +
+        encodeURIComponent(String(imageURL));
+
+}
+
+
+// Calculate the total quantity of all picture variants
+// belonging to the same Supabase product.
+function getProductCartQuantity(productId) {
+
+    return cart.reduce((total, item) => {
+
+        return String(item.id) === String(productId)
+            ? total + Number(item.quantity || 0)
+            : total;
+
+    }, 0);
+
+}
+
+
+// Obtain the selected image set for a particular product.
+function getSelectedImages(productId) {
+
+    const id = String(productId);
+
+    if (!selectedPreviewImages.has(id)) {
+
+        selectedPreviewImages.set(id, new Set());
+
+    }
+
+    return selectedPreviewImages.get(id);
+
+}
+
+
 /* =====================================================
    8. DEFAULT IMAGE SELECTION
    ===================================================== */
@@ -292,10 +342,7 @@ function getProductImages(product) {
 
         } catch (error) {
 
-            console.warn(
-                "Product image data could not be parsed:",
-                error
-            );
+            console.warn("Product image data could not be parsed:", error);
 
         }
 
@@ -322,9 +369,7 @@ function getProductImages(product) {
 
     if (images.length === 0) {
 
-        images.push(
-            getFallbackProductImage(product)
-        );
+        images.push(getFallbackProductImage(product));
 
     }
 
@@ -428,10 +473,7 @@ async function loadProducts() {
 
         updateCart();
 
-        console.log(
-            "LBM products loaded:",
-            products.length
-        );
+        console.log("LBM products loaded:", products.length);
 
     } catch (error) {
 
@@ -550,8 +592,6 @@ function displayProducts() {
 
     }).join("");
 
-    // Prevent broken image icons.
-
     productList.querySelectorAll(".product-image").forEach(image => {
 
         image.addEventListener("error", function() {
@@ -614,15 +654,13 @@ function changeProductImage(productId, direction) {
 
         image.src = images[index];
 
-        image.alt =
-            product.name + " - picture " + (index + 1);
+        image.alt = product.name + " - picture " + (index + 1);
 
     }
 
     if (counter) {
 
-        counter.textContent =
-            (index + 1) + " / " + images.length;
+        counter.textContent = (index + 1) + " / " + images.length;
 
     }
 
@@ -630,40 +668,32 @@ function changeProductImage(productId, direction) {
 
 
 /* =====================================================
-   14. ADD TO CART
+   14. ADD A SPECIFIC PICTURE TO CART
    ===================================================== */
 
-function addToCart(productId) {
-
-    const product = products.find(
-        item => String(item.id) === String(productId)
-    );
-
-    if (!product) return;
+function addImageVariantToCart(product, imageURL, imageIndex) {
 
     const stock = getStock(product);
 
-    if (stock < 1) {
+    if (stock < 1) return false;
 
-        alert("This product is out of stock.");
+    const productId = String(product.id);
 
-        return;
+    const cartKey = makeCartKey(productId, imageURL);
+
+    const existingItem = cart.find(
+        item => item.cartKey === cartKey
+    );
+
+    const totalQuantity = getProductCartQuantity(productId);
+
+    if (totalQuantity >= stock) {
+
+        return false;
 
     }
 
-    const existingItem = cart.find(
-        item => String(item.id) === String(productId)
-    );
-
     if (existingItem) {
-
-        if (Number(existingItem.quantity) >= stock) {
-
-            alert("Sorry, there is no more stock available.");
-
-            return;
-
-        }
 
         existingItem.quantity =
             Number(existingItem.quantity) + 1;
@@ -674,9 +704,43 @@ function addToCart(productId) {
 
             ...product,
 
+            id: product.id,
+
+            cartKey: cartKey,
+
+            selectedImageUrl: imageURL,
+
+            selectedImageIndex: imageIndex,
+
+            style: "Picture " + (imageIndex + 1),
+
             quantity: 1
 
         });
+
+    }
+
+    return true;
+
+}
+
+
+// Normal product-card Add to Cart uses the first picture.
+function addToCart(productId) {
+
+    const product = products.find(
+        item => String(item.id) === String(productId)
+    );
+
+    if (!product) return;
+
+    const images = getProductImages(product);
+
+    if (!addImageVariantToCart(product, images[0], 0)) {
+
+        alert("Sorry, the available stock for this product has been reached.");
+
+        return;
 
     }
 
@@ -694,40 +758,44 @@ function addToCart(productId) {
 
 
 /* =====================================================
-   15. CHANGE CART QUANTITY
+   15. CHANGE A SPECIFIC CART LINE QUANTITY
    ===================================================== */
 
-function changeQuantity(productId, change) {
+function changeCartLineQuantity(cartKey, change) {
 
     const item = cart.find(
-        product => String(product.id) === String(productId)
+        product => product.cartKey === cartKey
     );
 
     if (!item) return;
 
     const product = products.find(
-        product => String(product.id) === String(productId)
+        product => String(product.id) === String(item.id)
     );
 
     if (!product) return;
 
-    const maximumStock = getStock(product);
-
     const newQuantity =
         Number(item.quantity) + Number(change);
 
-    if (newQuantity > maximumStock) {
+    if (newQuantity > Number(item.quantity)) {
 
-        alert("You have reached the available stock.");
+        const totalQuantity = getProductCartQuantity(item.id);
 
-        return;
+        if (totalQuantity + 1 > getStock(product)) {
+
+            alert("You have reached the available stock for this product.");
+
+            return;
+
+        }
 
     }
 
     if (newQuantity <= 0) {
 
         cart = cart.filter(
-            product => String(product.id) !== String(productId)
+            product => product.cartKey !== cartKey
         );
 
     } else {
@@ -751,42 +819,103 @@ function updateCart() {
 
     if (!cartItems || !cartTotal) return;
 
-    // Remove products no longer available.
+    // Do not discard saved cart items before products load.
+    if (products.length > 0) {
 
-    cart = cart.filter(item => {
+        cart = cart.filter(item => {
 
-        const currentProduct = products.find(
-            product => String(product.id) === String(item.id)
-        );
+            const currentProduct = products.find(
+                product => String(product.id) === String(item.id)
+            );
 
-        return currentProduct && getStock(currentProduct) > 0;
+            return currentProduct && getStock(currentProduct) > 0;
 
-    });
+        });
 
-    // Refresh current product information.
+        // Refresh product details while preserving each exact picture.
+        cart = cart.map(item => {
 
-    cart = cart.map(item => {
+            const currentProduct = products.find(
+                product => String(product.id) === String(item.id)
+            );
 
-        const currentProduct = products.find(
-            product => String(product.id) === String(item.id)
-        );
+            if (!currentProduct) return item;
 
-        if (!currentProduct) return item;
+            const images = getProductImages(currentProduct);
 
-        const quantity = Math.min(
-            Math.max(1, Number(item.quantity) || 1),
-            getStock(currentProduct)
-        );
+            let imageURL =
+                item.selectedImageUrl ||
+                item.image_url ||
+                item.image ||
+                images[0];
 
-        return {
+            if (!isValidImageURL(imageURL)) {
+                imageURL = images[0];
+            }
 
-            ...currentProduct,
+            let imageIndex = Number(item.selectedImageIndex);
 
-            quantity
+            if (!Number.isInteger(imageIndex) || imageIndex < 0) {
 
-        };
+                imageIndex = images.indexOf(imageURL);
 
-    });
+            }
+
+            if (imageIndex < 0) {
+
+                imageIndex = images.indexOf(imageURL);
+
+            }
+
+            if (imageIndex < 0) imageIndex = 0;
+
+            const cartKey = makeCartKey(
+                currentProduct.id,
+                imageURL
+            );
+
+            return {
+
+                ...currentProduct,
+
+                quantity: Math.max(
+                    1,
+                    Math.floor(Number(item.quantity) || 1)
+                ),
+
+                cartKey: cartKey,
+
+                selectedImageUrl: imageURL,
+
+                selectedImageIndex: imageIndex,
+
+                style: "Picture " + (imageIndex + 1)
+
+            };
+
+        });
+
+        // Merge duplicate product-picture lines safely.
+        const merged = new Map();
+
+        cart.forEach(item => {
+
+            if (merged.has(item.cartKey)) {
+
+                merged.get(item.cartKey).quantity +=
+                    Number(item.quantity);
+
+            } else {
+
+                merged.set(item.cartKey, item);
+
+            }
+
+        });
+
+        cart = [...merged.values()];
+
+    }
 
     const totalQuantity = cart.reduce(
         (sum, item) => sum + Number(item.quantity),
@@ -814,13 +943,20 @@ function updateCart() {
 
         cartItems.innerHTML = cart.map(item => {
 
+            const product = products.find(
+                p => String(p.id) === String(item.id)
+            );
+
+            const overStock = product &&
+                getProductCartQuantity(item.id) > getStock(product);
+
             return `
 
                 <div class="cart-item">
 
                     <img
-                        src="${escapeHTML(getProductImage(item))}"
-                        alt="${escapeHTML(item.name)}"
+                        src="${escapeHTML(item.selectedImageUrl || getProductImage(item))}"
+                        alt="${escapeHTML(item.name)} - ${escapeHTML(item.style || "Selected picture")}"
                         class="cart-product-image"
                     >
 
@@ -828,14 +964,26 @@ function updateCart() {
 
                         <h4>${escapeHTML(item.name)}</h4>
 
+                        <p class="lbm-cart-style">
+                            ${escapeHTML(item.style || "Selected picture")}
+                        </p>
+
                         <p>${formatPrice(item.price)}</p>
+
+                        ${
+                            overStock
+                            ? `<p class="lbm-stock-warning">
+                                Stock has changed. Please reduce your quantity.
+                               </p>`
+                            : ""
+                        }
 
                         <div class="quantity-controls">
 
                             <button
                                 type="button"
                                 data-action="decrease"
-                                data-id="${escapeHTML(item.id)}"
+                                data-key="${escapeHTML(item.cartKey)}"
                                 aria-label="Decrease quantity"
                             >−</button>
 
@@ -844,7 +992,7 @@ function updateCart() {
                             <button
                                 type="button"
                                 data-action="increase"
-                                data-id="${escapeHTML(item.id)}"
+                                data-key="${escapeHTML(item.cartKey)}"
                                 aria-label="Increase quantity"
                             >+</button>
 
@@ -866,8 +1014,6 @@ function updateCart() {
 
     }
 
-    // Handle broken cart images.
-
     cartItems.querySelectorAll("img").forEach(image => {
 
         image.addEventListener("error", function() {
@@ -881,9 +1027,17 @@ function updateCart() {
 
     cartTotal.textContent = formatPrice(totalPrice);
 
+    // Checkout is also blocked if any product exceeds current stock.
+    const stockExceeded = products.some(product => {
+
+        return getProductCartQuantity(product.id) > getStock(product);
+
+    });
+
     if (checkoutButton) {
 
-        checkoutButton.disabled = cart.length === 0;
+        checkoutButton.disabled =
+            cart.length === 0 || stockExceeded;
 
     }
 
@@ -894,17 +1048,31 @@ function updateCart() {
 
 /* =====================================================
    17. IMAGE PREVIEW MODAL
+   PRODUCT-SPECIFIC LONG-PRESS SELECTION
    ===================================================== */
 
 function createImagePreview() {
 
     let modal = document.getElementById("lbm-image-preview");
 
+    if (
+        modal &&
+        modal.dataset.version !== "long-press-selection-v2"
+    ) {
+
+        modal.remove();
+
+        modal = null;
+
+    }
+
     if (modal) return modal;
 
     modal = document.createElement("div");
 
     modal.id = "lbm-image-preview";
+
+    modal.dataset.version = "long-press-selection-v2";
 
     modal.innerHTML = `
 
@@ -915,6 +1083,10 @@ function createImagePreview() {
                 id="lbm-preview-close"
                 aria-label="Close gallery"
             >×</button>
+
+            <h3 id="lbm-preview-title"></h3>
+
+            <p id="lbm-preview-price"></p>
 
             <div class="lbm-preview-image-area">
 
@@ -940,9 +1112,37 @@ function createImagePreview() {
 
             <div id="lbm-preview-thumbnails"></div>
 
-            <h3 id="lbm-preview-title"></h3>
+            <div class="lbm-preview-product-selection">
 
-            <p id="lbm-preview-price"></p>
+                <h3>Select Your Pictures</h3>
+
+                <p>
+                    Tap a thumbnail briefly to preview it.
+                    Press and hold a thumbnail to select or
+                    unselect that picture.
+                </p>
+
+                <p class="lbm-preview-selection-hint">
+                    You can select several pictures, but only
+                    from this product.
+                </p>
+
+                <p
+                    id="lbm-preview-selected-count"
+                    class="lbm-preview-selected-count"
+                >
+                    0 pictures selected
+                </p>
+
+                <button
+                    type="button"
+                    id="lbm-preview-add-selected"
+                    disabled
+                >
+                    ADD SELECTED PICTURES TO CART
+                </button>
+
+            </div>
 
         </div>
 
@@ -965,33 +1165,162 @@ function createImagePreview() {
 
     document.getElementById("lbm-preview-prev")
         .addEventListener("click", () => {
+
             changePreviewImage(-1);
+
         });
 
     document.getElementById("lbm-preview-next")
         .addEventListener("click", () => {
+
             changePreviewImage(1);
-        });
-
-    document.getElementById("lbm-preview-thumbnails")
-        .addEventListener("click", event => {
-
-            const thumbnail = event.target.closest(
-                "[data-preview-index]"
-            );
-
-            if (!thumbnail) return;
-
-            previewImageIndex = Number(
-                thumbnail.dataset.previewIndex
-            );
-
-            productImageIndices[previewProductId] =
-                previewImageIndex;
-
-            renderPreviewGallery();
 
         });
+
+
+    /* ---------------------------------------------
+       THUMBNAIL SHORT TAP AND LONG-PRESS HANDLING
+       --------------------------------------------- */
+
+    const thumbnailContainer = document.getElementById(
+        "lbm-preview-thumbnails"
+    );
+
+
+    function clearThumbnailPress() {
+
+        if (thumbnailPressTimer !== null) {
+
+            clearTimeout(thumbnailPressTimer);
+
+            thumbnailPressTimer = null;
+
+        }
+
+        activeThumbnailButton = null;
+
+    }
+
+
+    thumbnailContainer.addEventListener("pointerdown", event => {
+
+        const thumbnail = event.target.closest(
+            "[data-preview-index]"
+        );
+
+        if (!thumbnail) return;
+
+        // Ignore right-click and non-primary mouse buttons.
+        if (event.pointerType === "mouse" && event.button !== 0) {
+            return;
+        }
+
+        clearThumbnailPress();
+
+        activeThumbnailButton = thumbnail;
+
+        const pressedButton = thumbnail;
+
+        const pressedProductId = previewProductId;
+
+        const imageIndex = Number(
+            thumbnail.dataset.previewIndex
+        );
+
+        // 500 milliseconds is the long-press threshold.
+        thumbnailPressTimer = setTimeout(() => {
+
+            thumbnailPressTimer = null;
+
+            // Ensure the same product and thumbnail are still active.
+            if (
+                previewProductId !== pressedProductId ||
+                !pressedButton.isConnected
+            ) {
+
+                return;
+
+            }
+
+            suppressThumbnailClickUntil =
+                Date.now() + 800;
+
+            // Select or unselect this thumbnail only.
+            togglePictureSelection(imageIndex);
+
+        }, 500);
+
+    });
+
+
+    thumbnailContainer.addEventListener("pointerup", () => {
+
+        // If the long press has not fired, this is a normal tap.
+        clearThumbnailPress();
+
+    });
+
+
+    thumbnailContainer.addEventListener("pointercancel", () => {
+
+        clearThumbnailPress();
+
+    });
+
+
+    thumbnailContainer.addEventListener("pointerleave", () => {
+
+        clearThumbnailPress();
+
+    });
+
+
+    thumbnailContainer.addEventListener("contextmenu", event => {
+
+        if (event.target.closest("[data-preview-index]")) {
+
+            event.preventDefault();
+
+        }
+
+    });
+
+
+    thumbnailContainer.addEventListener("click", event => {
+
+        const thumbnail = event.target.closest(
+            "[data-preview-index]"
+        );
+
+        if (!thumbnail) return;
+
+        // A long-press already selected the picture.
+        // Do not also treat the resulting click as a preview tap.
+        if (Date.now() < suppressThumbnailClickUntil) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            return;
+
+        }
+
+        // Normal short tap changes the large preview only.
+        previewImageIndex = Number(
+            thumbnail.dataset.previewIndex
+        );
+
+        productImageIndices[previewProductId] =
+            previewImageIndex;
+
+        renderPreviewGallery();
+
+    });
+
+
+    document.getElementById("lbm-preview-add-selected")
+        .addEventListener("click", addSelectedPicturesToCart);
 
     return modal;
 
@@ -1010,7 +1339,7 @@ function previewProductImage(productId) {
 
     if (!product) return;
 
-    previewProductId = String(productId);
+    previewProductId = String(product.id);
 
     previewImageIndex =
         productImageIndices[previewProductId] || 0;
@@ -1034,7 +1363,140 @@ function previewProductImage(productId) {
 
 
 /* =====================================================
-   19. RENDER PREVIEW GALLERY
+   19. TOGGLE A PARTICULAR THUMBNAIL SELECTION
+   ===================================================== */
+
+function togglePictureSelection(imageIndex) {
+
+    if (!previewProductId) return;
+
+    const product = products.find(
+        item => String(item.id) === previewProductId
+    );
+
+    if (!product) return;
+
+    if (getStock(product) < 1) {
+
+        alert("This product is out of stock.");
+
+        return;
+
+    }
+
+    const images = getProductImages(product);
+
+    if (
+        !Number.isInteger(imageIndex) ||
+        imageIndex < 0 ||
+        imageIndex >= images.length
+    ) {
+
+        return;
+
+    }
+
+    const imageURL = images[imageIndex];
+
+    // This selection set belongs ONLY to the open product.
+    const selected = getSelectedImages(previewProductId);
+
+    if (selected.has(imageURL)) {
+
+        selected.delete(imageURL);
+
+    } else {
+
+        selected.add(imageURL);
+
+    }
+
+    renderPreviewGallery();
+
+}
+
+
+/* =====================================================
+   20. ADD ALL SELECTED PICTURES TO CART
+   ===================================================== */
+
+function addSelectedPicturesToCart() {
+
+    if (!previewProductId) return;
+
+    const product = products.find(
+        item => String(item.id) === previewProductId
+    );
+
+    if (!product) return;
+
+    const images = getProductImages(product);
+
+    const selected = getSelectedImages(previewProductId);
+
+    const selectedURLs = [...selected];
+
+    if (selectedURLs.length === 0) {
+
+        alert("Please long-press at least one picture to select it.");
+
+        return;
+
+    }
+
+    const stock = getStock(product);
+
+    const currentQuantity =
+        getProductCartQuantity(product.id);
+
+    // Each selected picture adds one unit.
+    // Validate combined stock before adding anything.
+    if (currentQuantity + selectedURLs.length > stock) {
+
+        alert(
+            "You selected " + selectedURLs.length +
+            " pictures, but only " +
+            Math.max(0, stock - currentQuantity) +
+            " additional units are available."
+        );
+
+        return;
+
+    }
+
+    selectedURLs.forEach(imageURL => {
+
+        const imageIndex = images.indexOf(imageURL);
+
+        addImageVariantToCart(
+            product,
+            imageURL,
+            imageIndex >= 0 ? imageIndex : 0
+        );
+
+    });
+
+    // Clear only this product's selection.
+    // Other products' selections remain untouched.
+    selected.clear();
+
+    saveCart();
+
+    updateCart();
+
+    closeImagePreview();
+
+    if (cartSection) {
+
+        cartSection.classList.add("open");
+
+    }
+
+}
+
+
+/* =====================================================
+   21. RENDER PRODUCT GALLERY + SELECTION STATUS
    ===================================================== */
 
 function renderPreviewGallery() {
@@ -1064,6 +1526,24 @@ function renderPreviewGallery() {
     const nextButton =
         document.getElementById("lbm-preview-next");
 
+    const addButton =
+        document.getElementById("lbm-preview-add-selected");
+
+    const selectedCount =
+        document.getElementById("lbm-preview-selected-count");
+
+    if (
+        !image ||
+        !counter ||
+        !thumbnails ||
+        !addButton ||
+        !selectedCount
+    ) return;
+
+    const selected = getSelectedImages(previewProductId);
+
+    const currentURL = images[previewImageIndex];
+
     image.onerror = function() {
 
         this.onerror = null;
@@ -1071,7 +1551,7 @@ function renderPreviewGallery() {
 
     };
 
-    image.src = images[previewImageIndex];
+    image.src = currentURL;
 
     image.alt =
         product.name + " - picture " + (previewImageIndex + 1);
@@ -1089,22 +1569,37 @@ function renderPreviewGallery() {
         hasMultiple ? "block" : "none";
 
     thumbnails.innerHTML = hasMultiple
-        ? images.map((url, index) => `
+        ? images.map((url, index) => {
 
-            <button
-                type="button"
-                class="lbm-preview-thumbnail ${
-                    index === previewImageIndex ? "active" : ""
-                }"
-                data-preview-index="${index}"
-                aria-label="View picture ${index + 1}"
-            >
+            const chosen = selected.has(url);
 
-                <img src="${escapeHTML(url)}" alt="">
+            return `
 
-            </button>
+                <button
+                    type="button"
+                    class="lbm-preview-thumbnail
+                        ${index === previewImageIndex ? "active" : ""}
+                        ${chosen ? "selected" : ""}"
+                    data-preview-index="${index}"
+                    aria-label="Picture ${index + 1}. ${
+                        chosen ? "Selected" : "Not selected"
+                    }. Tap to preview or long-press to select."
+                    aria-pressed="${chosen}"
+                >
 
-        `).join("")
+                    <img
+                        src="${escapeHTML(url)}"
+                        alt=""
+                        draggable="false"
+                    >
+
+                    ${chosen ? `<span class="lbm-thumbnail-tick">✓</span>` : ""}
+
+                </button>
+
+            `;
+
+        }).join("")
         : "";
 
     thumbnails.querySelectorAll("img").forEach(thumb => {
@@ -1118,11 +1613,28 @@ function renderPreviewGallery() {
 
     });
 
+    const available = getStock(product) > 0;
+
+    selectedCount.textContent =
+        selected.size + (
+            selected.size === 1
+                ? " picture selected"
+                : " pictures selected"
+        );
+
+    addButton.disabled =
+        !available || selected.size === 0;
+
+    addButton.textContent =
+        selected.size > 0
+            ? "ADD " + selected.size + " SELECTED PICTURE(S) TO CART"
+            : "LONG-PRESS THUMBNAILS TO SELECT";
+
 }
 
 
 /* =====================================================
-   20. CHANGE PREVIEW IMAGE
+   22. CHANGE PREVIEW IMAGE
    ===================================================== */
 
 function changePreviewImage(direction) {
@@ -1150,10 +1662,20 @@ function changePreviewImage(direction) {
 
 
 /* =====================================================
-   21. CLOSE IMAGE PREVIEW
+   23. CLOSE IMAGE PREVIEW
    ===================================================== */
 
 function closeImagePreview() {
+
+    if (thumbnailPressTimer !== null) {
+
+        clearTimeout(thumbnailPressTimer);
+
+        thumbnailPressTimer = null;
+
+    }
+
+    activeThumbnailButton = null;
 
     const modal = document.getElementById("lbm-image-preview");
 
@@ -1171,7 +1693,7 @@ function closeImagePreview() {
 
 
 /* =====================================================
-   22. PREVIEW KEYBOARD CONTROLS
+   24. PREVIEW KEYBOARD CONTROLS
    ===================================================== */
 
 document.addEventListener("keydown", event => {
@@ -1202,10 +1724,14 @@ document.addEventListener("keydown", event => {
 
 
 /* =====================================================
-   23. IMAGE GALLERY STYLES
+   25. IMAGE GALLERY + SELECTION STYLES
    ===================================================== */
 
+document.getElementById("lbm-gallery-styles")?.remove();
+
 const previewStyles = document.createElement("style");
+
+previewStyles.id = "lbm-gallery-styles";
 
 previewStyles.textContent = `
 
@@ -1348,28 +1874,131 @@ previewStyles.textContent = `
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 7px;
+    gap: 9px;
     margin: 12px 0;
 }
 
 .lbm-preview-thumbnail {
-    width: 55px;
-    height: 55px;
+    width: 58px;
+    height: 58px;
     padding: 2px;
     border: 2px solid #ddd;
     border-radius: 5px;
     background: white;
     cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+
+    /* Allow vertical scrolling while supporting long-press. */
+    touch-action: pan-y;
+
+    /* Prevent the browser's image dragging and text selection. */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .lbm-preview-thumbnail.active {
     border-color: #c9a44c;
 }
 
+.lbm-preview-thumbnail.selected {
+    border: 3px solid #159447;
+    background: #e9f8ef;
+}
+
 .lbm-preview-thumbnail img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    pointer-events: none;
+    -webkit-user-drag: none;
+}
+
+.lbm-thumbnail-tick {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    background: #159447;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+.lbm-preview-product-selection {
+    margin-top: 18px;
+    padding: 15px;
+    border: 1px solid #d1b15a;
+    border-radius: 8px;
+    background: #171717;
+    color: white;
+}
+
+.lbm-preview-product-selection h3 {
+    color: #d1b15a;
+    margin: 5px 0 8px;
+}
+
+.lbm-preview-product-selection p {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #eee;
+}
+
+.lbm-preview-selection-hint {
+    color: #d1b15a !important;
+    font-weight: 600;
+}
+
+.lbm-preview-selected-count {
+    color: #d1b15a !important;
+    font-weight: bold;
+    font-size: 15px !important;
+}
+
+#lbm-preview-add-selected {
+    display: block;
+    width: 100%;
+    padding: 14px 10px;
+    margin-top: 12px;
+    border: none;
+    border-radius: 5px;
+    background: #c9a44c;
+    color: #111;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+#lbm-preview-add-selected:hover {
+    filter: brightness(1.08);
+}
+
+#lbm-preview-add-selected:disabled {
+    background: #777;
+    color: white;
+    cursor: not-allowed;
+    opacity: .7;
+}
+
+.lbm-cart-style {
+    color: #a17b26;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 4px 0;
+}
+
+.lbm-stock-warning {
+    color: #c0392b;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 @media(max-width:450px) {
@@ -1387,6 +2016,11 @@ previewStyles.textContent = `
         height: 34px;
     }
 
+    .lbm-preview-thumbnail {
+        width: 55px;
+        height: 55px;
+    }
+
 }
 
 `;
@@ -1395,7 +2029,7 @@ document.head.appendChild(previewStyles);
 
 
 /* =====================================================
-   24. WHATSAPP CHECKOUT + SUPABASE ORDER SAVING
+   26. WHATSAPP CHECKOUT + SUPABASE ORDER SAVING
    ===================================================== */
 
 async function checkoutWhatsApp() {
@@ -1436,6 +2070,26 @@ async function checkoutWhatsApp() {
 
     let total = 0;
 
+    // Validate aggregate stock across every picture variant.
+    for (const product of products) {
+
+        const quantity = getProductCartQuantity(product.id);
+
+        if (quantity > getStock(product)) {
+
+            alert(
+                product.name +
+                " has only " + getStock(product) +
+                " units available, but your cart contains " +
+                quantity + ". Please adjust your cart."
+            );
+
+            return;
+
+        }
+
+    }
+
     for (const item of cart) {
 
         const product = products.find(
@@ -1444,9 +2098,7 @@ async function checkoutWhatsApp() {
 
         if (!product) {
 
-            alert(
-                "A product is no longer available. Please refresh."
-            );
+            alert("A product is no longer available. Please refresh.");
 
             return;
 
@@ -1473,14 +2125,20 @@ async function checkoutWhatsApp() {
 
         if (quantity > stock) {
 
-            alert(
-                product.name + " has only " +
-                stock + " available."
-            );
+            alert(product.name + " has insufficient stock.");
 
             return;
 
         }
+
+        const imageURL =
+            item.selectedImageUrl || getProductImage(product);
+
+        const imageIndex =
+            Number(item.selectedImageIndex) + 1;
+
+        const style =
+            item.style || ("Picture " + imageIndex);
 
         const subtotal = price * quantity;
 
@@ -1496,14 +2154,17 @@ async function checkoutWhatsApp() {
 
             quantity: quantity,
 
-            subtotal: subtotal
+            subtotal: subtotal,
+
+            image_url: imageURL,
+
+            image_index: imageIndex,
+
+            style: style
 
         });
 
     }
-
-    // Open a window before awaiting Supabase.
-    // This helps prevent browser popup blocking.
 
     const whatsappWindow = window.open(
         "about:blank",
@@ -1524,8 +2185,7 @@ async function checkoutWhatsApp() {
 
     try {
 
-        // Save the order using the existing Supabase RPC.
-
+        // Keep the existing RPC name and parameter names.
         const { data, error } = await supabaseClient.rpc(
             "place_lbm_order",
             {
@@ -1546,8 +2206,6 @@ async function checkoutWhatsApp() {
         );
 
         if (error) throw error;
-
-        // Accept a scalar ID or common object/array responses.
 
         let orderId = data;
 
@@ -1578,8 +2236,6 @@ async function checkoutWhatsApp() {
 
         }
 
-        // Build WhatsApp message.
-
         let message = "NEW LBM ONLINE SHOP ORDER\n\n";
 
         message += "ORDER REFERENCE: LBM-" + orderId + "\n";
@@ -1596,9 +2252,11 @@ async function checkoutWhatsApp() {
 
             message +=
                 item.name + "\n" +
+                "Selected style: " + item.style + "\n" +
                 "Quantity: " + item.quantity + "\n" +
                 "Price: " + formatPrice(item.price) + "\n" +
-                "Subtotal: " + formatPrice(item.subtotal) + "\n\n";
+                "Subtotal: " + formatPrice(item.subtotal) + "\n" +
+                "Picture: " + item.image_url + "\n\n";
 
         });
 
@@ -1615,8 +2273,7 @@ async function checkoutWhatsApp() {
             "?text=" +
             encodeURIComponent(message);
 
-        // Clear cart only after successful database submission.
-
+        // Clear the cart only after Supabase confirms the order.
         cart = [];
 
         saveCart();
@@ -1679,7 +2336,7 @@ async function checkoutWhatsApp() {
 
 
 /* =====================================================
-   25. CUSTOMER ORDER CANCELLATION
+   27. CUSTOMER ORDER CANCELLATION
    ===================================================== */
 
 function installOrderCancellation() {
@@ -1854,8 +2511,6 @@ function installOrderCancellation() {
 
             if (error) throw error;
 
-            // Support either an object or an array response.
-
             let result = Array.isArray(data) ? data[0] : data;
 
             if (
@@ -1869,7 +2524,7 @@ function installOrderCancellation() {
 
                 } catch (parseError) {
 
-                    // Leave the original result unchanged.
+                    // Keep the original result.
 
                 }
 
@@ -1921,10 +2576,14 @@ function installOrderCancellation() {
 
 
 /* =====================================================
-   26. CANCELLATION STYLES
+   28. CANCELLATION STYLES
    ===================================================== */
 
+document.getElementById("lbm-cancellation-styles")?.remove();
+
 const orderToolsStyles = document.createElement("style");
+
+orderToolsStyles.id = "lbm-cancellation-styles";
 
 orderToolsStyles.textContent = `
 
@@ -1983,14 +2642,14 @@ document.head.appendChild(orderToolsStyles);
 
 
 /* =====================================================
-   27. INSTALL ORDER CANCELLATION
+   29. INSTALL ORDER CANCELLATION
    ===================================================== */
 
 installOrderCancellation();
 
 
 /* =====================================================
-   28. ALL STOREFRONT BUTTON EVENTS
+   30. ALL STOREFRONT BUTTON EVENTS
    ===================================================== */
 
 document.addEventListener("click", function(event) {
@@ -2003,6 +2662,8 @@ document.addEventListener("click", function(event) {
 
     const id = button.dataset.id;
 
+    const key = button.dataset.key;
+
     if (action === "add") {
 
         addToCart(id);
@@ -2011,13 +2672,13 @@ document.addEventListener("click", function(event) {
 
     else if (action === "increase") {
 
-        changeQuantity(id, 1);
+        changeCartLineQuantity(key, 1);
 
     }
 
     else if (action === "decrease") {
 
-        changeQuantity(id, -1);
+        changeCartLineQuantity(key, -1);
 
     }
 
@@ -2043,7 +2704,7 @@ document.addEventListener("click", function(event) {
 
 
 /* =====================================================
-   29. OPEN AND CLOSE SHOPPING CART
+   31. OPEN AND CLOSE SHOPPING CART
    ===================================================== */
 
 if (cartButton && cartSection) {
@@ -2069,7 +2730,7 @@ if (closeCartButton && cartSection) {
 
 
 /* =====================================================
-   30. CHECKOUT BUTTON
+   32. CHECKOUT BUTTON
    ===================================================== */
 
 if (checkoutButton) {
@@ -2083,7 +2744,7 @@ if (checkoutButton) {
 
 
 /* =====================================================
-   31. FOOTER YEAR
+   33. FOOTER YEAR
    ===================================================== */
 
 const yearElement = document.getElementById("year");
@@ -2096,7 +2757,7 @@ if (yearElement) {
 
 
 /* =====================================================
-   32. START LBM ONLINE SHOP
+   34. START LBM ONLINE SHOP
    ===================================================== */
 
 async function startShop() {
