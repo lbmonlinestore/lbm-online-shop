@@ -914,3 +914,22 @@ body {
         grid-column: 2;
     }
 }
+/* DISCREET ADMIN LOGIN */
+
+.admin-access {
+    margin-top: 12px;
+    text-align: center;
+}
+
+.admin-access a {
+    color: #777;
+    font-size: 10px;
+    text-decoration: none;
+    opacity: 0.65;
+    transition: 0.3s;
+}
+
+.admin-access a:hover {
+    color: #d4af37;
+    opacity: 1;
+}
