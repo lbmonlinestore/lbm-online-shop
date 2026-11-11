@@ -1492,6 +1492,8 @@ async function checkoutWhatsApp() {
 
             name: product.name,
 
+            image_url: getProductImage(product),
+
             price: price,
 
             quantity: quantity,
@@ -1598,7 +1600,9 @@ async function checkoutWhatsApp() {
                 item.name + "\n" +
                 "Quantity: " + item.quantity + "\n" +
                 "Price: " + formatPrice(item.price) + "\n" +
-                "Subtotal: " + formatPrice(item.subtotal) + "\n\n";
+                "Subtotal: " + formatPrice(item.subtotal) + "\n" +
+                (item.image_url ? "Product image: " + item.image_url + "\n" : "") +
+                "\n";
 
         });
 
