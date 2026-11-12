@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -61,6 +60,53 @@ button.success{background:#16834b}
 .order-product-info a{font-size:12px;display:inline-block;margin-top:5px;color:#173d70;cursor:pointer}
 .empty{padding:20px;text-align:center;color:#68778b}
 
+/* CUSTOMER REVIEWS */
+.review-card,.announcement-card{
+    border:1px solid #e2e8f0;
+    border-radius:9px;
+    padding:15px;
+    margin-top:12px;
+    background:#fff;
+}
+.review-card p,.announcement-card p{
+    margin-top:8px;
+    font-size:14px;
+    line-height:1.6;
+    overflow-wrap:anywhere;
+}
+.review-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+}
+.review-stars{color:#e5a000;font-size:19px;letter-spacing:2px}
+.status-label{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:bold;
+}
+.status-pending{background:#fff4d6;color:#8a5b00}
+.status-approved{background:#e3f7eb;color:#176b38}
+.status-rejected{background:#ffe7e7;color:#a52626}
+.announcement-card.unpublished{border-left:4px solid #c58a16}
+.announcement-card.published{border-left:4px solid #16834b}
+.review-actions,.announcement-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+    margin-top:12px;
+}
+.review-actions button,.announcement-actions button{
+    padding:8px 11px;
+    font-size:12px;
+}
+.filter-tabs{margin-top:15px}
+.filter-tabs button{font-size:12px;padding:9px 12px}
+
 /* =========================================
    SECTION 17 — RESPONSIVE ORDER IMAGE VIEWER
 ========================================= */
@@ -75,11 +121,7 @@ button.success{background:#16834b}
     padding:16px;
     background:rgba(0,0,0,.88);
 }
-
-.image-viewer.active{
-    display:flex;
-}
-
+.image-viewer.active{display:flex}
 .image-viewer-content{
     position:relative;
     width:100%;
@@ -88,7 +130,6 @@ button.success{background:#16834b}
     align-items:center;
     justify-content:center;
 }
-
 .image-viewer img{
     display:block;
     max-width:100%;
@@ -99,7 +140,6 @@ button.success{background:#16834b}
     border-radius:8px;
     background:#fff;
 }
-
 .image-viewer-close{
     position:absolute;
     top:5px;
@@ -116,11 +156,7 @@ button.success{background:#16834b}
     text-align:center;
     box-shadow:0 2px 10px #0005;
 }
-
-.image-viewer-close:hover{
-    background:#e8edf5;
-}
-
+.image-viewer-close:hover{background:#e8edf5}
 .image-viewer-caption{
     position:absolute;
     bottom:5px;
@@ -132,10 +168,7 @@ button.success{background:#16834b}
     padding:8px;
     overflow-wrap:anywhere;
 }
-
-body.image-viewer-open{
-    overflow:hidden;
-}
+body.image-viewer-open{overflow:hidden}
 
 @media(max-width:750px){
     .stats{grid-template-columns:1fr 1fr}
@@ -143,7 +176,6 @@ body.image-viewer-open{
     .image-viewer{padding:12px}
     .image-viewer img{max-width:100%;max-height:calc(100dvh - 75px)}
 }
-
 @media(max-width:420px){
     .stat strong{font-size:19px}
     .panel{padding:15px}
@@ -195,6 +227,8 @@ body.image-viewer-open{
     <button class="active" data-tab="overview">Overview</button>
     <button data-tab="products">Manage Products</button>
     <button data-tab="orders">Manage Orders</button>
+    <button data-tab="reviews">Customer Reviews</button>
+    <button data-tab="announcements">Announcements</button>
     <button data-tab="background">Manage Background</button>
     <button data-tab="social">Manage Social Media</button>
 </div>
@@ -202,7 +236,6 @@ body.image-viewer-open{
 <!-- OVERVIEW -->
 
 <section id="overviewTab" class="tab-content">
-
     <div class="panel">
         <h2>Shop Analytics</h2>
 
@@ -233,20 +266,17 @@ body.image-viewer-open{
         <h3>Recent Orders</h3>
         <div id="recentOrders" class="empty">Loading orders...</div>
     </div>
-
 </section>
 
 <!-- PRODUCTS -->
 
 <section id="productsTab" class="tab-content hidden">
-
 <div class="grid">
 
     <div class="panel">
         <h2 id="formHeading">Add New Product</h2>
 
         <form id="productForm">
-
             <input type="hidden" id="productId">
 
             <label>Product Name</label>
@@ -303,7 +333,6 @@ body.image-viewer-open{
             </p>
 
             <div id="imagePreviewContainer" class="image-grid"></div>
-
             <p id="existingImageNote" class="small"></p>
 
             <button type="submit" id="saveButton" style="width:100%">Save Product</button>
@@ -311,7 +340,6 @@ body.image-viewer-open{
             <button type="button" id="cancelEdit" class="secondary hidden" style="width:100%;margin-top:8px">
                 Cancel Editing
             </button>
-
         </form>
 
         <div id="productMessage" class="message hidden"></div>
@@ -319,7 +347,6 @@ body.image-viewer-open{
 
     <div class="panel">
         <h2>Product Instructions</h2>
-
         <p style="line-height:1.8;font-size:14px">
             1. Enter your product details.<br><br>
             2. Choose the correct size format.<br><br>
@@ -329,13 +356,11 @@ body.image-viewer-open{
             6. The photographs will upload to Supabase Storage.<br><br>
             7. Your product will be saved to the shop database.
         </p>
-
         <br>
         <p class="small">
             When editing a product, existing photographs are retained unless you remove them.
         </p>
     </div>
-
 </div>
 
 <div class="panel">
@@ -343,7 +368,6 @@ body.image-viewer-open{
     <button id="refreshProducts" class="secondary">Refresh Products</button>
     <div id="productList" class="empty">Loading products...</div>
 </div>
-
 </section>
 
 <!-- ORDERS -->
@@ -353,6 +377,111 @@ body.image-viewer-open{
         <h2>Customer Orders</h2>
         <button id="refreshOrders" class="secondary">Refresh Orders</button>
         <div id="ordersList" class="empty">Loading orders...</div>
+    </div>
+</section>
+
+<!-- CUSTOMER REVIEWS -->
+
+<section id="reviewsTab" class="tab-content hidden">
+    <div class="panel">
+        <h2>Customer Reviews Management</h2>
+        <p class="small">
+            Review customer submissions before they appear publicly on the shop.
+            Only approved reviews are visible to customers.
+        </p>
+
+        <div class="tabs filter-tabs">
+            <button type="button" class="active" data-review-filter="Pending">Pending</button>
+            <button type="button" data-review-filter="Approved">Approved</button>
+            <button type="button" data-review-filter="Rejected">Rejected</button>
+            <button type="button" data-review-filter="All">All Reviews</button>
+        </div>
+
+        <div id="reviewsMessage" class="message hidden"></div>
+
+        <button type="button" id="refreshReviews" class="secondary">
+            Refresh Reviews
+        </button>
+
+        <div id="reviewsList" class="empty">Customer reviews will appear here.</div>
+    </div>
+</section>
+
+<!-- ANNOUNCEMENTS -->
+
+<section id="announcementsTab" class="tab-content hidden">
+    <div class="grid">
+        <div class="panel">
+            <h2 id="announcementFormHeading">Create Announcement</h2>
+
+            <form id="announcementForm">
+                <input type="hidden" id="announcementId">
+
+                <label>Announcement Title</label>
+                <input
+                    type="text"
+                    id="announcementTitle"
+                    placeholder="e.g. New Stock Arrivals!"
+                    minlength="2"
+                    maxlength="120"
+                    required
+                >
+
+                <label>Announcement Message</label>
+                <textarea
+                    id="announcementMessage"
+                    placeholder="Write your announcement here..."
+                    minlength="2"
+                    maxlength="2000"
+                    required
+                ></textarea>
+
+                <label style="display:flex;align-items:center;gap:9px;margin:8px 0 15px">
+                    <input
+                        type="checkbox"
+                        id="announcementPublish"
+                        style="width:auto;margin:0"
+                    >
+                    Publish immediately
+                </label>
+
+                <button type="submit" id="saveAnnouncement" style="width:100%">
+                    Save Announcement
+                </button>
+
+                <button
+                    type="button"
+                    id="cancelAnnouncementEdit"
+                    class="secondary hidden"
+                    style="width:100%;margin-top:8px"
+                >
+                    Cancel Editing
+                </button>
+            </form>
+
+            <div id="announcementMessageBox" class="message hidden"></div>
+        </div>
+
+        <div class="panel">
+            <h2>Announcement Instructions</h2>
+            <p style="line-height:1.8;font-size:14px">
+                1. Enter a title for your announcement.<br><br>
+                2. Write the announcement message.<br><br>
+                3. Select Publish immediately if you want customers to see it straight away.<br><br>
+                4. If unpublished, it will remain visible only in this admin dashboard.<br><br>
+                5. You can edit, publish, unpublish or delete announcements at any time.
+            </p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>All Announcements</h2>
+        <button type="button" id="refreshAnnouncements" class="secondary">
+            Refresh Announcements
+        </button>
+        <div id="announcementsAdminList" class="empty">
+            Announcements will appear here.
+        </div>
     </div>
 </section>
 
@@ -407,9 +536,7 @@ body.image-viewer-open{
 </main>
 </div>
 
-<!-- =========================================
-     SECTION 18 — IMAGE VIEWER HTML
-========================================= -->
+<!-- IMAGE VIEWER -->
 
 <div id="imageViewer" class="image-viewer" role="dialog" aria-modal="true" aria-label="Product image preview">
     <div class="image-viewer-content">
@@ -473,6 +600,19 @@ function escapeHTML(value) {
         '"': "&quot;",
         "'": "&#039;"
     })[character]);
+}
+
+function formatAdminDate(value) {
+    if (!value) return "Date not available";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "Date not available";
+
+    return date.toLocaleString("en-ZM", {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
 }
 
 /* =========================================
@@ -615,7 +755,17 @@ document.querySelectorAll("[data-tab]").forEach(button => {
             section.classList.add("hidden");
         });
 
-        $(button.dataset.tab + "Tab").classList.remove("hidden");
+        const target = $(button.dataset.tab + "Tab");
+
+        if (target) target.classList.remove("hidden");
+
+        if (button.dataset.tab === "reviews") {
+            loadAdminReviews();
+        }
+
+        if (button.dataset.tab === "announcements") {
+            loadAdminAnnouncements();
+        }
     });
 });
 
@@ -1237,12 +1387,6 @@ function renderOrderItems(order) {
             String(product.id) === String(item.product_id)
         );
 
-        /*
-           Prefer the exact picture selected by the customer.
-           Fall back to the product's main picture only when
-           the order does not contain an image URL.
-        */
-
         let imageURL =
             item.image_url ||
             item.image ||
@@ -1748,6 +1892,498 @@ $("saveSocial").addEventListener("click", async function() {
         this.textContent = "Save Social Media Links";
     }
 });
+
+/* =========================================
+   SECTION 18 — CUSTOMER REVIEWS MANAGEMENT
+========================================= */
+
+let currentReviewFilter = "Pending";
+let reviewsCache = [];
+
+async function loadAdminReviews() {
+    if (!currentUser) return;
+
+    const list = $("reviewsList");
+    list.textContent = "Loading customer reviews...";
+
+    const { data, error } = await db
+        .from("customer_reviews")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        list.textContent = "Could not load reviews: " + error.message;
+        showMessage($("reviewsMessage"), error.message, "error");
+        return;
+    }
+
+    reviewsCache = data || [];
+    renderAdminReviews();
+}
+
+function renderAdminReviews() {
+    const list = $("reviewsList");
+
+    const filteredReviews = currentReviewFilter === "All"
+        ? reviewsCache
+        : reviewsCache.filter(review =>
+            review.status === currentReviewFilter
+        );
+
+    if (filteredReviews.length === 0) {
+        list.innerHTML =
+            '<p class="empty">No ' +
+            escapeHTML(currentReviewFilter.toLowerCase()) +
+            ' reviews found.</p>';
+        return;
+    }
+
+    list.innerHTML = "";
+
+    filteredReviews.forEach(review => {
+        const card = document.createElement("div");
+        card.className = "review-card";
+
+        const top = document.createElement("div");
+        top.className = "review-meta";
+
+        const customer = document.createElement("strong");
+        customer.textContent = review.customer_name || "Anonymous customer";
+
+        const status = document.createElement("span");
+        status.className =
+            "status-label status-" +
+            String(review.status || "pending").toLowerCase();
+
+        status.textContent = review.status || "Pending";
+
+        top.append(customer, status);
+
+        const stars = document.createElement("div");
+        stars.className = "review-stars";
+        stars.textContent =
+            "★".repeat(Number(review.rating || 0)) +
+            "☆".repeat(5 - Number(review.rating || 0));
+
+        const reviewText = document.createElement("p");
+        reviewText.textContent = review.review_text || "";
+
+        const date = document.createElement("p");
+        date.className = "small";
+        date.textContent = "Submitted: " + formatAdminDate(review.created_at);
+
+        const actions = document.createElement("div");
+        actions.className = "review-actions";
+
+        if (review.status !== "Approved") {
+            const approveButton = document.createElement("button");
+            approveButton.className = "success";
+            approveButton.textContent = "Approve";
+
+            approveButton.addEventListener("click", () => {
+                updateReviewStatus(review.id, "Approved");
+            });
+
+            actions.appendChild(approveButton);
+        }
+
+        if (review.status !== "Rejected") {
+            const rejectButton = document.createElement("button");
+            rejectButton.className = "secondary";
+            rejectButton.textContent = "Reject";
+
+            rejectButton.addEventListener("click", () => {
+                updateReviewStatus(review.id, "Rejected");
+            });
+
+            actions.appendChild(rejectButton);
+        }
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "danger";
+        deleteButton.textContent = "Delete";
+
+        deleteButton.addEventListener("click", () => {
+            deleteCustomerReview(review.id);
+        });
+
+        actions.appendChild(deleteButton);
+
+        card.append(top, stars, reviewText, date, actions);
+        list.appendChild(card);
+    });
+}
+
+async function updateReviewStatus(id, newStatus) {
+    if (!["Approved", "Rejected"].includes(newStatus)) return;
+
+    if (!currentUser) {
+        showMessage($("reviewsMessage"), "Please log in again.", "error");
+        return;
+    }
+
+    const review = reviewsCache.find(item =>
+        String(item.id) === String(id)
+    );
+
+    if (!review) return;
+
+    const confirmation = newStatus === "Approved"
+        ? "Approve this review? It will become visible to customers."
+        : "Reject this review? It will no longer be publicly visible.";
+
+    if (!confirm(confirmation)) return;
+
+    const { error } = await db
+        .from("customer_reviews")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+    if (error) {
+        showMessage($("reviewsMessage"), error.message, "error");
+        return;
+    }
+
+    showMessage(
+        $("reviewsMessage"),
+        "Review " + newStatus.toLowerCase() + " successfully.",
+        "success"
+    );
+
+    await loadAdminReviews();
+}
+
+async function deleteCustomerReview(id) {
+    if (!currentUser) return;
+
+    if (!confirm("Permanently delete this customer review?")) return;
+
+    const { error } = await db
+        .from("customer_reviews")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        showMessage($("reviewsMessage"), error.message, "error");
+        return;
+    }
+
+    showMessage($("reviewsMessage"), "Review deleted successfully.", "success");
+
+    await loadAdminReviews();
+}
+
+document.querySelectorAll("[data-review-filter]").forEach(button => {
+    button.addEventListener("click", () => {
+        document.querySelectorAll("[data-review-filter]").forEach(item => {
+            item.classList.remove("active");
+        });
+
+        button.classList.add("active");
+        currentReviewFilter = button.dataset.reviewFilter;
+
+        renderAdminReviews();
+    });
+});
+
+$("refreshReviews").addEventListener("click", loadAdminReviews);
+
+/* =========================================
+   SECTION 19 — ANNOUNCEMENTS MANAGEMENT
+========================================= */
+
+let announcementsCache = [];
+
+function resetAnnouncementForm() {
+    $("announcementForm").reset();
+
+    $("announcementId").value = "";
+    $("announcementFormHeading").textContent = "Create Announcement";
+    $("saveAnnouncement").textContent = "Save Announcement";
+    $("cancelAnnouncementEdit").classList.add("hidden");
+
+    hideMessage($("announcementMessageBox"));
+}
+
+async function loadAdminAnnouncements() {
+    if (!currentUser) return;
+
+    const list = $("announcementsAdminList");
+    list.textContent = "Loading announcements...";
+
+    const { data, error } = await db
+        .from("announcements")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        list.textContent = "Could not load announcements: " + error.message;
+        showMessage($("announcementMessageBox"), error.message, "error");
+        return;
+    }
+
+    announcementsCache = data || [];
+    renderAdminAnnouncements();
+}
+
+function renderAdminAnnouncements() {
+    const list = $("announcementsAdminList");
+
+    if (announcementsCache.length === 0) {
+        list.innerHTML =
+            '<p class="empty">You have not created any announcements yet.</p>';
+        return;
+    }
+
+    list.innerHTML = "";
+
+    announcementsCache.forEach(announcement => {
+        const card = document.createElement("div");
+
+        card.className = "announcement-card " +
+            (announcement.is_published ? "published" : "unpublished");
+
+        const top = document.createElement("div");
+        top.className = "review-meta";
+
+        const title = document.createElement("strong");
+        title.textContent = announcement.title || "Untitled announcement";
+
+        const status = document.createElement("span");
+        status.className = "status-label " +
+            (announcement.is_published ? "status-approved" : "status-pending");
+
+        status.textContent = announcement.is_published ? "Published" : "Unpublished";
+
+        top.append(title, status);
+
+        const message = document.createElement("p");
+        message.textContent = announcement.message || "";
+
+        const date = document.createElement("p");
+        date.className = "small";
+        date.textContent =
+            "Created: " + formatAdminDate(announcement.created_at) +
+            " | Updated: " + formatAdminDate(announcement.updated_at);
+
+        const actions = document.createElement("div");
+        actions.className = "announcement-actions";
+
+        const editButton = document.createElement("button");
+        editButton.textContent = "Edit";
+        editButton.addEventListener("click", () => {
+            editAnnouncement(announcement.id);
+        });
+
+        const publicationButton = document.createElement("button");
+        publicationButton.className = announcement.is_published
+            ? "secondary"
+            : "success";
+
+        publicationButton.textContent = announcement.is_published
+            ? "Unpublish"
+            : "Publish";
+
+        publicationButton.addEventListener("click", () => {
+            toggleAnnouncementPublication(
+                announcement.id,
+                !announcement.is_published
+            );
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "danger";
+        deleteButton.textContent = "Delete";
+
+        deleteButton.addEventListener("click", () => {
+            deleteAnnouncement(announcement.id);
+        });
+
+        actions.append(editButton, publicationButton, deleteButton);
+
+        card.append(top, message, date, actions);
+        list.appendChild(card);
+    });
+}
+
+$("announcementForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    if (!currentUser) {
+        showMessage(
+            $("announcementMessageBox"),
+            "Please log in again.",
+            "error"
+        );
+        return;
+    }
+
+    const button = $("saveAnnouncement");
+    const id = $("announcementId").value;
+
+    const title = $("announcementTitle").value.trim();
+    const message = $("announcementMessage").value.trim();
+    const isPublished = $("announcementPublish").checked;
+
+    if (title.length < 2 || title.length > 120) {
+        showMessage(
+            $("announcementMessageBox"),
+            "The title must contain between 2 and 120 characters.",
+            "error"
+        );
+        return;
+    }
+
+    if (message.length < 2 || message.length > 2000) {
+        showMessage(
+            $("announcementMessageBox"),
+            "The message must contain between 2 and 2,000 characters.",
+            "error"
+        );
+        return;
+    }
+
+    button.disabled = true;
+    button.textContent = id ? "Updating..." : "Saving...";
+
+    try {
+        const announcementData = {
+            title,
+            message,
+            is_published: isPublished,
+            updated_at: new Date().toISOString()
+        };
+
+        let result;
+
+        if (id) {
+            result = await db
+                .from("announcements")
+                .update(announcementData)
+                .eq("id", id);
+        } else {
+            result = await db
+                .from("announcements")
+                .insert([announcementData]);
+        }
+
+        if (result.error) throw result.error;
+
+        resetAnnouncementForm();
+
+        showMessage(
+            $("announcementMessageBox"),
+            id
+                ? "Announcement updated successfully."
+                : "Announcement created successfully.",
+            "success"
+        );
+
+        await loadAdminAnnouncements();
+
+    } catch (error) {
+        showMessage(
+            $("announcementMessageBox"),
+            error.message || "Could not save announcement.",
+            "error"
+        );
+
+    } finally {
+        button.disabled = false;
+        button.textContent = $("announcementId").value
+            ? "Update Announcement"
+            : "Save Announcement";
+    }
+});
+
+function editAnnouncement(id) {
+    const announcement = announcementsCache.find(item =>
+        String(item.id) === String(id)
+    );
+
+    if (!announcement) return;
+
+    $("announcementId").value = announcement.id;
+    $("announcementTitle").value = announcement.title || "";
+    $("announcementMessage").value = announcement.message || "";
+    $("announcementPublish").checked = Boolean(announcement.is_published);
+
+    $("announcementFormHeading").textContent = "Edit Announcement";
+    $("saveAnnouncement").textContent = "Update Announcement";
+    $("cancelAnnouncementEdit").classList.remove("hidden");
+
+    $("announcementForm").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
+}
+
+$("cancelAnnouncementEdit").addEventListener("click", resetAnnouncementForm);
+
+async function toggleAnnouncementPublication(id, publish) {
+    if (!currentUser) return;
+
+    const action = publish ? "publish" : "unpublish";
+
+    if (!confirm("Are you sure you want to " + action + " this announcement?")) {
+        return;
+    }
+
+    const { error } = await db
+        .from("announcements")
+        .update({
+            is_published: publish,
+            updated_at: new Date().toISOString()
+        })
+        .eq("id", id);
+
+    if (error) {
+        showMessage($("announcementMessageBox"), error.message, "error");
+        return;
+    }
+
+    showMessage(
+        $("announcementMessageBox"),
+        "Announcement " + (publish ? "published" : "unpublished") + " successfully.",
+        "success"
+    );
+
+    await loadAdminAnnouncements();
+}
+
+async function deleteAnnouncement(id) {
+    if (!currentUser) return;
+
+    if (!confirm("Permanently delete this announcement?")) return;
+
+    const { error } = await db
+        .from("announcements")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        showMessage($("announcementMessageBox"), error.message, "error");
+        return;
+    }
+
+    if (String($("announcementId").value) === String(id)) {
+        resetAnnouncementForm();
+    }
+
+    showMessage(
+        $("announcementMessageBox"),
+        "Announcement deleted successfully.",
+        "success"
+    );
+
+    await loadAdminAnnouncements();
+}
+
+$("refreshAnnouncements").addEventListener("click", loadAdminAnnouncements);
+
+/* =========================================
+   SECTION 20 — END OF ADMIN DASHBOARD
+========================================= */
 
 </script>
 
