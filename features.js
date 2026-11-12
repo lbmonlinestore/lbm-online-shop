@@ -105,6 +105,7 @@
             }
 
             .lbm-feature-button {
+                display: inline-block;
                 background: #d4af37;
                 color: #080808;
                 border: none;
@@ -112,6 +113,14 @@
                 border-radius: 7px;
                 font-weight: bold;
                 cursor: pointer;
+                text-decoration: none;
+                text-align: center;
+                transition: background .2s, transform .2s;
+            }
+
+            .lbm-feature-button:hover {
+                background: #edca65;
+                transform: translateY(-2px);
             }
 
             .lbm-feature-button:disabled {
@@ -135,11 +144,24 @@
                 font-size: 12px;
             }
 
+            /* GREETING: NORMAL PAGE FLOW */
+
             #lbm-welcome-greeting {
+                position: static !important;
+                top: auto !important;
+                bottom: auto !important;
+                left: auto !important;
+                right: auto !important;
+                transform: none !important;
+                z-index: auto !important;
+                width: 100%;
+                display: block;
+                box-sizing: border-box;
                 text-align: center;
-                margin: 12px auto;
-                padding: 12px 16px;
+                margin: 0 auto;
+                padding: 14px 16px;
                 color: #fff;
+                background: #080808;
                 font-size: 17px;
                 font-weight: 600;
                 line-height: 1.6;
@@ -153,6 +175,11 @@
                 .lbm-feature-section {
                     padding: 18px;
                 }
+
+                #lbm-welcome-greeting {
+                    font-size: 15px;
+                    padding: 12px;
+                }
             }
         `;
 
@@ -164,21 +191,26 @@
        ===================================================== */
 
     function installGreeting() {
-        let greeting = document.getElementById("lbm-welcome-greeting");
+        let greeting = document.getElementById(
+            "lbm-welcome-greeting"
+        );
 
         if (!greeting) {
             greeting = document.createElement("div");
             greeting.id = "lbm-welcome-greeting";
+        }
 
-            const hero = document.querySelector(
-                ".hero, #home, header"
-            );
+        /*
+         * Place greeting at the beginning of main content.
+         * It will scroll naturally with the page.
+         */
 
-            if (hero) {
-                hero.appendChild(greeting);
-            } else {
-                document.body.prepend(greeting);
-            }
+        const main = document.querySelector("main");
+
+        if (main && greeting.parentElement !== main) {
+            main.insertBefore(greeting, main.firstChild);
+        } else if (!main && !greeting.parentElement) {
+            document.body.prepend(greeting);
         }
 
         function updateGreeting() {
@@ -207,7 +239,11 @@
         }
 
         updateGreeting();
-        setInterval(updateGreeting, 60000);
+
+        if (!greeting.dataset.timerInstalled) {
+            greeting.dataset.timerInstalled = "true";
+            setInterval(updateGreeting, 60000);
+        }
     }
 
     /* =====================================================
@@ -226,16 +262,29 @@
 
         wrapper.innerHTML = `
             <section class="lbm-feature-section" id="lbm-announcements">
+
                 <h2>📢 Store Announcements</h2>
-                <p>Stay updated with the latest news, new arrivals and special offers from LBM Online Store.</p>
+
+                <p>
+                    Stay updated with the latest news, new arrivals
+                    and special offers from LBM Online Store.
+                </p>
+
                 <div id="lbm-announcements-list">
                     <p>Loading announcements...</p>
                 </div>
+
             </section>
 
+
             <section class="lbm-feature-section" id="lbm-reviews">
+
                 <h2>⭐ Customer Reviews</h2>
-                <p>Your feedback helps us improve our products and services.</p>
+
+                <p>
+                    Your feedback helps us improve our products
+                    and services.
+                </p>
 
                 <div id="lbm-reviews-list">
                     <p>Loading customer reviews...</p>
@@ -244,6 +293,7 @@
                 <h3>Leave a Review</h3>
 
                 <form id="lbm-review-form" class="lbm-feature-form">
+
                     <input
                         type="text"
                         id="lbm-review-name"
@@ -274,33 +324,44 @@
                         Submit Review
                     </button>
 
-                    <div id="lbm-review-message" class="lbm-feature-message"></div>
+                    <div
+                        id="lbm-review-message"
+                        class="lbm-feature-message"
+                    ></div>
+
                 </form>
+
             </section>
 
+
             <section class="lbm-feature-section" id="lbm-return-policy">
+
                 <h2>↩️ Returns & Exchanges</h2>
+
                 <p>
                     At LBM Online Store, customer satisfaction matters to us.
-                    Customers may request a return or exchange within
-                    <strong>3 days after delivery</strong>.
+                    Customers may submit a return or exchange request
+                    within <strong>3 days after delivery</strong>.
                 </p>
+
                 <p>
-                    Please contact our customer support team within this
-                    period to discuss your return or exchange request.
+                    To submit a request, verify your order using your
+                    order number and the phone number used during checkout.
                 </p>
+
                 <p>
-                    We will assist you with the next steps.
+                    You can also track the progress of your request
+                    and view responses from our customer support team
+                    directly on our website.
                 </p>
+
                 <a
-                    href="https://wa.me/260969034955?text=Hello%20LBM%20Online%20Store%2C%20I%20would%20like%20to%20make%20a%20return%20or%20exchange%20request."
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="returns.html"
                     class="lbm-feature-button"
-                    style="display:inline-block;text-decoration:none;"
                 >
-                    Contact Us on WhatsApp
+                    Submit / Track Return or Exchange
                 </a>
+
             </section>
         `;
 
@@ -342,7 +403,9 @@
             container.innerHTML = data.map(item => `
                 <article class="lbm-announcement-card">
                     <h3>${escapeHTML(item.title)}</h3>
+
                     <p>${escapeHTML(item.message).replace(/\n/g, "<br>")}</p>
+
                     <div class="lbm-feature-date">
                         ${escapeHTML(
                             new Date(item.created_at).toLocaleDateString(
@@ -356,6 +419,7 @@
 
         } catch (error) {
             console.error("LBM announcements:", error);
+
             container.innerHTML =
                 "<p>Announcements are temporarily unavailable.</p>";
         }
@@ -389,11 +453,15 @@
 
             container.innerHTML = data.map(review => `
                 <article class="lbm-review-card">
+
                     <div class="lbm-review-stars">
                         ${"★".repeat(review.rating)}${"☆".repeat(5 - review.rating)}
                     </div>
+
                     <p>${escapeHTML(review.review_text).replace(/\n/g, "<br>")}</p>
+
                     <strong>${escapeHTML(review.customer_name)}</strong>
+
                     <div class="lbm-feature-date">
                         ${escapeHTML(
                             new Date(review.created_at).toLocaleDateString(
@@ -402,11 +470,13 @@
                             )
                         )}
                     </div>
+
                 </article>
             `).join("");
 
         } catch (error) {
             console.error("LBM reviews:", error);
+
             container.innerHTML =
                 "<p>Customer reviews are temporarily unavailable.</p>";
         }
@@ -442,7 +512,9 @@
                 "lbm-review-message"
             );
 
-            const button = form.querySelector("button[type='submit']");
+            const button = form.querySelector(
+                "button[type='submit']"
+            );
 
             if (name.length < 2 || name.length > 80) {
                 message.textContent = "Please enter a valid name.";
@@ -450,12 +522,14 @@
             }
 
             if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-                message.textContent = "Please select a rating from 1 to 5.";
+                message.textContent =
+                    "Please select a rating from 1 to 5.";
                 return;
             }
 
             if (reviewText.length < 2 || reviewText.length > 1000) {
-                message.textContent = "Your review must contain 2 to 1,000 characters.";
+                message.textContent =
+                    "Your review must contain 2 to 1,000 characters.";
                 return;
             }
 
@@ -475,6 +549,7 @@
                 if (error) throw error;
 
                 message.style.color = "#4ade80";
+
                 message.textContent =
                     "Thank you! Your review has been submitted and is awaiting approval.";
 
@@ -482,9 +557,12 @@
 
             } catch (error) {
                 console.error("LBM review submission:", error);
+
                 message.style.color = "#ff7777";
+
                 message.textContent =
                     "We could not submit your review. Please try again.";
+
             } finally {
                 button.disabled = false;
                 button.textContent = "Submit Review";
