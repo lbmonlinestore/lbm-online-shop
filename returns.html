@@ -1,1 +1,796 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080808">
+<title>Returns & Exchanges | LBM Online Shop</title>
+<meta name="description" content="Submit and track your LBM Online Shop return or exchange request.">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f6f8;
+    color:#222;
+}
+header{
+    background:#080808;
+    color:white;
+    padding:19px 5%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+.brand{
+    color:white;
+    text-decoration:none;
+    font-weight:800;
+    font-size:19px;
+}
+.brand span{color:#d4af37}
+header a.back{
+    color:white;
+    text-decoration:none;
+    font-size:14px;
+}
+.hero{
+    background:#111;
+    color:white;
+    text-align:center;
+    padding:45px 18px;
+}
+.hero h1{margin:0 0 12px;font-size:30px}
+.hero p{color:#ccc;margin:0;line-height:1.6}
+.container{
+    max-width:760px;
+    margin:30px auto;
+    padding:0 15px;
+}
+.card{
+    background:white;
+    padding:25px;
+    margin-bottom:22px;
+    border-radius:14px;
+    box-shadow:0 4px 18px rgba(0,0,0,.06);
+}
+.card h2{margin:0 0 10px;font-size:21px}
+.muted{color:#777;font-size:14px;line-height:1.6}
+label{
+    display:block;
+    margin:17px 0 7px;
+    font-size:14px;
+    font-weight:700;
+}
+input,select,textarea{
+    width:100%;
+    padding:13px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    font-size:15px;
+    background:white;
+    color:#222;
+}
+textarea{min-height:100px;resize:vertical}
+input:focus,select:focus,textarea:focus{
+    outline:none;
+    border-color:#c9a44c;
+    box-shadow:0 0 0 3px rgba(201,164,76,.12);
+}
+button{
+    border:0;
+    border-radius:8px;
+    padding:14px 20px;
+    background:#111;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+    font-size:14px;
+}
+button:disabled{opacity:.55;cursor:not-allowed}
+.primary{background:#b28b32;color:white}
+.full{width:100%;margin-top:18px}
+.message{
+    display:none;
+    padding:13px;
+    border-radius:8px;
+    margin-top:15px;
+    font-size:14px;
+    line-height:1.5;
+    overflow-wrap:anywhere;
+}
+.message.show{display:block}
+.message.error{background:#fff0f0;color:#a32121}
+.message.success{background:#eaf8ee;color:#176b32}
+.message.info{background:#fff8e5;color:#795b12}
+.product-preview{
+    display:flex;
+    gap:13px;
+    align-items:center;
+    padding:13px;
+    border:1px solid #eee;
+    border-radius:10px;
+    margin-top:12px;
+}
+.product-preview img{
+    width:65px;
+    height:65px;
+    object-fit:cover;
+    border-radius:8px;
+    background:#eee;
+}
+.product-preview strong{display:block;margin-bottom:5px}
+.product-preview small{color:#777;line-height:1.5}
+.policy{
+    background:#fff8e5;
+    border-left:4px solid #c9a44c;
+    padding:14px;
+    border-radius:7px;
+    font-size:14px;
+    line-height:1.6;
+    margin-top:18px;
+}
+.result-details{
+    border:1px solid #eee;
+    border-radius:9px;
+    padding:15px;
+    margin-top:15px;
+    line-height:1.7;
+    overflow-wrap:anywhere;
+}
+.status{
+    display:inline-block;
+    background:#f0f0f0;
+    border-radius:20px;
+    padding:6px 12px;
+    font-size:12px;
+    font-weight:700;
+}
+.status.Pending{background:#fff3cd;color:#805c00}
+.status.Approved{background:#e2f3e8;color:#176b32}
+.status.Rejected{background:#fde8e8;color:#a32121}
+.status.Completed{background:#dceeff;color:#15558a}
+.status.Item-Received{background:#e5e1ff;color:#51439a}
+.status.Awaiting-Item{background:#e8eef8;color:#344e75}
+footer{
+    background:#080808;
+    color:#aaa;
+    text-align:center;
+    padding:25px 15px;
+    font-size:13px;
+}
+footer a{color:#d4af37;text-decoration:none}
+[hidden]{display:none!important}
+@media(max-width:480px){
+    .hero h1{font-size:25px}
+    .card{padding:19px}
+    header{padding:16px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <a class="brand" href="index.html">LBM <span>ONLINE SHOP</span></a>
+    <a class="back" href="index.html">← Back to Shop</a>
+</header>
+
+<section class="hero">
+    <h1>Returns & Exchanges</h1>
+    <p>We want you to be happy with your purchase.<br>
+    Submit a request or check its progress here.</p>
+</section>
+
+<main class="container">
+
+    <section class="card">
+        <h2>Submit a Return or Exchange</h2>
+        <p class="muted">
+            Enter your order number and the phone number you used
+            when placing your order. We will verify your purchase.
+        </p>
+
+        <form id="verifyForm">
+            <label for="orderId">Order Number</label>
+            <input id="orderId" type="number" min="1"
+                   step="1" required placeholder="Enter your order number">
+
+            <label for="phone">Checkout Phone Number</label>
+            <input id="phone" type="tel" required
+                   autocomplete="tel" placeholder="e.g. 0969034955">
+
+            <button class="full" id="verifyButton" type="submit">
+                VERIFY MY ORDER
+            </button>
+        </form>
+
+        <div id="verifyMessage" class="message"></div>
+
+        <div id="requestArea" hidden>
+
+            <div class="policy" id="eligibilityMessage"></div>
+
+            <h3 style="margin-top:25px">Products in your order</h3>
+            <div id="orderProducts"></div>
+
+            <form id="requestForm">
+
+                <label for="selectedItem">Select Product</label>
+                <select id="selectedItem" required></select>
+
+                <label for="requestType">What would you like to do?</label>
+                <select id="requestType" required>
+                    <option value="Return">Return a product</option>
+                    <option value="Exchange">Exchange a product</option>
+                </select>
+
+                <label for="quantity">Quantity</label>
+                <input id="quantity" type="number"
+                       min="1" value="1" required>
+
+                <div id="exchangeArea" hidden>
+                    <label for="exchangeDetails">
+                        What would you like instead?
+                    </label>
+                    <textarea id="exchangeDetails"
+                        placeholder="Specify the replacement product, size or colour"></textarea>
+                </div>
+
+                <label for="reason">Reason for your request</label>
+                <textarea id="reason" required maxlength="1000"
+                    placeholder="Please explain why you want to return or exchange this product."></textarea>
+
+                <button type="submit" class="primary full"
+                        id="submitRequest">
+                    SUBMIT REQUEST
+                </button>
+            </form>
+
+            <div id="requestMessage" class="message"></div>
+        </div>
+    </section>
+
+
+    <section class="card">
+        <h2>Track Your Request</h2>
+        <p class="muted">
+            Already submitted a request? Enter your request tracking
+            code and checkout phone number to view its status.
+        </p>
+
+        <form id="trackForm">
+            <label for="trackingCode">Request Tracking Code</label>
+            <input id="trackingCode" type="text" required
+                   placeholder="Paste your tracking code">
+
+            <label for="trackPhone">Checkout Phone Number</label>
+            <input id="trackPhone" type="tel" required
+                   placeholder="Enter your checkout phone number">
+
+            <button type="submit" class="full" id="trackButton">
+                TRACK MY REQUEST
+            </button>
+        </form>
+
+        <div id="trackMessage" class="message"></div>
+        <div id="trackResult"></div>
+    </section>
+
+
+    <section class="card">
+        <h2>Our Returns Policy</h2>
+        <p class="muted">
+            Please read the following before submitting a request.
+        </p>
+
+        <div class="policy">
+            <strong>Three-day request period</strong><br>
+            Return and exchange requests must be submitted within
+            72 hours after your order has been marked as delivered.
+        </div>
+
+        <ul class="muted" style="line-height:1.9;padding-left:20px">
+            <li>Your order must be verified using your order number and checkout phone number.</li>
+            <li>You can only request a quantity that you purchased.</li>
+            <li>Every request is reviewed by LBM Online Shop.</li>
+            <li>Submitting a request does not automatically mean it has been approved.</li>
+            <li>Keep your tracking code so you can follow your request.</li>
+        </ul>
+    </section>
+
+</main>
+
+<footer>
+    <p>© <span id="year"></span> LBM Online Shop. All rights reserved.</p>
+    <a href="index.html">Return to Shop</a>
+</footer>
+
+
+<script>
+/* =========================================
+   SUPABASE CONNECTION
+   ========================================= */
+
+const SUPABASE_URL = "https://toovotqrcsulhgdrcsmn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const $ = id => document.getElementById(id);
+
+let verifiedOrder = null;
+let orderItems = [];
+
+
+/* =========================================
+   GENERAL HELPERS
+   ========================================= */
+
+$("year").textContent = new Date().getFullYear();
+
+function showMessage(id, message, type="info") {
+    const el = $(id);
+    el.textContent = message;
+    el.className = "message show " + type;
+}
+
+function hideMessage(id) {
+    $(id).className = "message";
+    $(id).textContent = "";
+}
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#039;"
+    })[char]);
+}
+
+function getItemName(item) {
+    return item.name || item.product_name || "Purchased product";
+}
+
+function getItemImage(item) {
+    if (item.image_url) return item.image_url;
+    if (item.image) return item.image;
+    if (Array.isArray(item.images) && item.images.length) {
+        return typeof item.images[0] === "string"
+            ? item.images[0]
+            : item.images[0]?.url || "";
+    }
+    return "";
+}
+
+function getItemQuantity(item) {
+    const quantity = Number(item.quantity);
+    return Number.isInteger(quantity) && quantity > 0 ? quantity : 1;
+}
+
+function getItemDescription(item) {
+    const size = item.size || item.selected_size || item.product_size || "";
+    const colour = item.colour || item.color ||
+                   item.selected_colour || item.selected_color || "";
+
+    return [
+        size ? "Size: " + size : "",
+        colour ? "Colour: " + colour : "",
+        "Purchased quantity: " + getItemQuantity(item)
+    ].filter(Boolean).join(" • ");
+}
+
+function formatDate(value) {
+    if (!value) return "Not recorded";
+    return new Date(value).toLocaleString("en-ZM", {
+        dateStyle:"medium",
+        timeStyle:"short"
+    });
+}
+
+function setButtonLoading(buttonId, loading, normalText) {
+    $(buttonId).disabled = loading;
+    $(buttonId).textContent = loading ? "PLEASE WAIT..." : normalText;
+}
+
+
+/* =========================================
+   VERIFY ORDER
+   ========================================= */
+
+$("verifyForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    hideMessage("verifyMessage");
+    hideMessage("requestMessage");
+
+    $("requestArea").hidden = true;
+    verifiedOrder = null;
+    orderItems = [];
+
+    const orderId = Number($("orderId").value);
+    const phone = $("phone").value.trim();
+
+    if (!Number.isSafeInteger(orderId) || orderId < 1) {
+        showMessage("verifyMessage", "Please enter a valid order number.", "error");
+        return;
+    }
+
+    setButtonLoading("verifyButton", true, "VERIFY MY ORDER");
+
+    try {
+        const {data, error} = await db.rpc(
+            "get_return_eligible_order",
+            {
+                p_order_id: orderId,
+                p_phone: phone
+            }
+        );
+
+        if (error) throw error;
+
+        if (!data || !data.length) {
+            throw new Error("We could not verify this order.");
+        }
+
+        verifiedOrder = data[0];
+
+        if (!Array.isArray(verifiedOrder.order_items)) {
+            throw new Error("The products in this order could not be loaded.");
+        }
+
+        orderItems = verifiedOrder.order_items;
+
+        if (!orderItems.length) {
+            throw new Error("This order has no products available for selection.");
+        }
+
+        renderOrderProducts();
+
+        const deadline = verifiedOrder.delivered_at
+            ? new Date(
+                new Date(verifiedOrder.delivered_at).getTime()
+                + 72 * 60 * 60 * 1000
+              )
+            : null;
+
+        if (!verifiedOrder.delivered_at) {
+            $("eligibilityMessage").textContent =
+                "Your order has not yet been marked as delivered. You cannot submit a request yet.";
+            $("requestForm").hidden = true;
+        } else if (!verifiedOrder.return_window_open) {
+            $("eligibilityMessage").textContent =
+                "The 72-hour return and exchange period has expired. You can still view your order, but cannot submit a new request.";
+            $("requestForm").hidden = true;
+        } else {
+            $("eligibilityMessage").textContent =
+                "Your order is eligible for a return or exchange request. The request period ends on " +
+                formatDate(deadline) + ".";
+            $("requestForm").hidden = false;
+        }
+
+        $("requestArea").hidden = false;
+
+        showMessage(
+            "verifyMessage",
+            "Order verified successfully.",
+            "success"
+        );
+
+    } catch (error) {
+        showMessage(
+            "verifyMessage",
+            error.message || "Unable to verify your order.",
+            "error"
+        );
+    } finally {
+        setButtonLoading("verifyButton", false, "VERIFY MY ORDER");
+    }
+});
+
+
+/* =========================================
+   DISPLAY ORDER PRODUCTS
+   ========================================= */
+
+function renderOrderProducts() {
+    const select = $("selectedItem");
+    const container = $("orderProducts");
+
+    select.innerHTML = "";
+    container.innerHTML = "";
+
+    orderItems.forEach((item, index) => {
+        const name = getItemName(item);
+        const image = getItemImage(item);
+
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = name + " — " + getItemDescription(item);
+        select.appendChild(option);
+
+        const preview = document.createElement("div");
+        preview.className = "product-preview";
+
+        const img = document.createElement("img");
+        img.alt = name;
+        img.loading = "lazy";
+
+        if (image) {
+            img.src = image;
+        } else {
+            img.hidden = true;
+        }
+
+        const details = document.createElement("div");
+
+        const title = document.createElement("strong");
+        title.textContent = name;
+
+        const description = document.createElement("small");
+        description.textContent = getItemDescription(item);
+
+        details.appendChild(title);
+        details.appendChild(description);
+
+        preview.appendChild(img);
+        preview.appendChild(details);
+        container.appendChild(preview);
+    });
+
+    updateQuantityLimit();
+}
+
+
+/* =========================================
+   QUANTITY AND EXCHANGE FIELDS
+   ========================================= */
+
+function updateQuantityLimit() {
+    const index = Number($("selectedItem").value);
+    const item = orderItems[index];
+
+    if (!item) return;
+
+    const max = getItemQuantity(item);
+
+    $("quantity").max = max;
+
+    if (Number($("quantity").value) > max) {
+        $("quantity").value = max;
+    }
+
+    if (Number($("quantity").value) < 1) {
+        $("quantity").value = 1;
+    }
+}
+
+$("selectedItem").addEventListener("change", updateQuantityLimit);
+
+$("requestType").addEventListener("change", () => {
+    const isExchange = $("requestType").value === "Exchange";
+
+    $("exchangeArea").hidden = !isExchange;
+    $("exchangeDetails").required = isExchange;
+});
+
+
+/* =========================================
+   SUBMIT RETURN / EXCHANGE REQUEST
+   ========================================= */
+
+$("requestForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    hideMessage("requestMessage");
+
+    if (!verifiedOrder) {
+        showMessage("requestMessage", "Please verify your order first.", "error");
+        return;
+    }
+
+    const itemIndex = Number($("selectedItem").value);
+    const item = orderItems[itemIndex];
+
+    if (!item) {
+        showMessage("requestMessage", "Please select a valid product.", "error");
+        return;
+    }
+
+    const quantity = Number($("quantity").value);
+    const max = getItemQuantity(item);
+
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > max) {
+        showMessage(
+            "requestMessage",
+            "Please enter a valid quantity not exceeding the purchased quantity.",
+            "error"
+        );
+        return;
+    }
+
+    const type = $("requestType").value;
+    const exchangeDetails = $("exchangeDetails").value.trim();
+
+    if (type === "Exchange" && exchangeDetails.length < 2) {
+        showMessage(
+            "requestMessage",
+            "Please specify what you would like in exchange.",
+            "error"
+        );
+        return;
+    }
+
+    setButtonLoading("submitRequest", true, "SUBMIT REQUEST");
+
+    try {
+        const {data, error} = await db.rpc(
+            "create_return_request",
+            {
+                p_order_id: verifiedOrder.verified_order_id,
+                p_phone: $("phone").value.trim(),
+                p_item_index: itemIndex,
+                p_request_type: type,
+                p_quantity: quantity,
+                p_reason: $("reason").value.trim(),
+                p_exchange_details: type === "Exchange"
+                    ? exchangeDetails
+                    : null
+            }
+        );
+
+        if (error) throw error;
+
+        if (!data || !data.length) {
+            throw new Error("The request was not saved. Please try again.");
+        }
+
+        const result = data[0];
+
+        $("requestForm").reset();
+        $("exchangeArea").hidden = true;
+        $("exchangeDetails").required = false;
+
+        showMessage(
+            "requestMessage",
+            "Your request has been submitted successfully. Your tracking code is: " +
+            result.request_code +
+            ". Please save this code. You will need it to track your request.",
+            "success"
+        );
+
+        $("trackingCode").value = result.request_code;
+        $("trackPhone").value = $("phone").value.trim();
+
+    } catch (error) {
+        showMessage(
+            "requestMessage",
+            error.message || "Unable to submit your request.",
+            "error"
+        );
+    } finally {
+        setButtonLoading("submitRequest", false, "SUBMIT REQUEST");
+    }
+});
+
+
+/* =========================================
+   TRACK REQUEST
+   ========================================= */
+
+$("trackForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    hideMessage("trackMessage");
+    $("trackResult").innerHTML = "";
+
+    const code = $("trackingCode").value.trim();
+    const phone = $("trackPhone").value.trim();
+
+    setButtonLoading("trackButton", true, "TRACK MY REQUEST");
+
+    try {
+        const {data, error} = await db.rpc(
+            "track_return_request",
+            {
+                p_request_code: code,
+                p_phone: phone
+            }
+        );
+
+        if (error) throw error;
+
+        if (!data || !data.length) {
+            throw new Error("No matching request was found.");
+        }
+
+        renderTrackingResult(data[0]);
+
+        showMessage(
+            "trackMessage",
+            "Request found successfully.",
+            "success"
+        );
+
+    } catch (error) {
+        showMessage(
+            "trackMessage",
+            error.message || "Unable to track this request.",
+            "error"
+        );
+    } finally {
+        setButtonLoading("trackButton", false, "TRACK MY REQUEST");
+    }
+});
+
+
+/* =========================================
+   TRACKING RESULT DISPLAY
+   ========================================= */
+
+function renderTrackingResult(request) {
+    const item = request.item_snapshot || {};
+
+    const name = getItemName(item);
+    const statusClass = request.status.replace(/\s+/g, "-");
+
+    const result = $("trackResult");
+
+    result.innerHTML = `
+        <div class="result-details">
+
+            <p><strong>Tracking code:</strong><br>
+            ${escapeHTML(request.request_code)}</p>
+
+            <p><strong>Order number:</strong>
+            ${escapeHTML(request.order_id)}</p>
+
+            <p><strong>Product:</strong>
+            ${escapeHTML(name)}</p>
+
+            <p><strong>Request type:</strong>
+            ${escapeHTML(request.request_type)}</p>
+
+            <p><strong>Quantity:</strong>
+            ${escapeHTML(request.quantity)}</p>
+
+            <p><strong>Reason:</strong><br>
+            ${escapeHTML(request.reason)}</p>
+
+            ${request.exchange_details ? `
+                <p><strong>Exchange details:</strong><br>
+                ${escapeHTML(request.exchange_details)}</p>
+            ` : ""}
+
+            <p><strong>Status:</strong><br>
+            <span class="status ${escapeHTML(statusClass)}">
+                ${escapeHTML(request.status)}
+            </span></p>
+
+            <p><strong>Admin response:</strong><br>
+            ${escapeHTML(request.admin_response || "No response yet.")}</p>
+
+            <p><strong>Submitted:</strong><br>
+            ${escapeHTML(formatDate(request.created_at))}</p>
+
+            <p><strong>Last updated:</strong><br>
+            ${escapeHTML(formatDate(request.updated_at))}</p>
+
+        </div>
+    `;
+}
+</script>
+
+</body>
+</html>
