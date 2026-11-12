@@ -1,7 +1,8 @@
+
 /* =====================================================
    LBM ONLINE SHOP
    COMPLETE STOREFRONT SYSTEM
-   SUPABASE + PRODUCT-SPECIFIC LONG-PRESS SELECTION
+   SUPABASE + PC CLICK / MOBILE LONG-PRESS SELECTION
    DISTINCT CART VARIANTS + WHATSAPP CHECKOUT
    ORDER CANCELLATION
    DYNAMIC SOCIAL MEDIA LINKS
@@ -103,13 +104,10 @@ let productImageIndices = {};
 let previewProductId = null;
 let previewImageIndex = 0;
 
-// Product search state.
 let productSearchTerm = "";
 
-// Each product has its OWN selected image collection.
 const selectedPreviewImages = new Map();
 
-// Long-press handling for thumbnail selection.
 let thumbnailPressTimer = null;
 let suppressThumbnailClickUntil = 0;
 let activeThumbnailButton = null;
@@ -646,7 +644,6 @@ async function loadProducts() {
    12. PRODUCT SEARCH
    ===================================================== */
 
-// Normalise text so that searching is not case-sensitive.
 function normaliseSearchText(value) {
 
     return String(value ?? "")
@@ -656,8 +653,6 @@ function normaliseSearchText(value) {
 }
 
 
-// Search across the available product information.
-// Optional fields are ignored when they do not exist.
 function searchProducts(searchTerm) {
 
     const query = normaliseSearchText(searchTerm);
@@ -689,7 +684,6 @@ function searchProducts(searchTerm) {
 }
 
 
-// Update the search result message.
 function updateSearchResults(resultCount, searchTerm) {
 
     const results = document.getElementById(
@@ -725,7 +719,6 @@ function updateSearchResults(resultCount, searchTerm) {
 }
 
 
-// Apply the search without changing the original products array.
 function filterProducts() {
 
     const filteredProducts = searchProducts(productSearchTerm);
@@ -740,7 +733,6 @@ function filterProducts() {
 }
 
 
-// Install the search input and clear button.
 function installProductSearch() {
 
     const searchInput = document.getElementById(
@@ -759,7 +751,6 @@ function installProductSearch() {
 
     }
 
-    // Prevent duplicate event listeners.
     if (searchInput.dataset.searchInstalled === "true") return;
 
     searchInput.dataset.searchInstalled = "true";
@@ -797,8 +788,6 @@ function installProductSearch() {
    13. DISPLAY PRODUCTS
    ===================================================== */
 
-// The optional array allows search results to be displayed
-// without modifying the original Supabase products array.
 function displayProducts(productArray = products) {
 
     if (!productList) return;
@@ -1390,7 +1379,7 @@ function updateCart() {
 
 /* =====================================================
    18. IMAGE PREVIEW MODAL
-   PRODUCT-SPECIFIC LONG-PRESS SELECTION
+   PC CLICK + MOBILE LONG-PRESS SELECTION
    ===================================================== */
 
 function createImagePreview() {
@@ -1399,7 +1388,7 @@ function createImagePreview() {
 
     if (
         modal &&
-        modal.dataset.version !== "long-press-selection-v2"
+        modal.dataset.version !== "pc-click-mobile-longpress-v3"
     ) {
 
         modal.remove();
@@ -1414,7 +1403,7 @@ function createImagePreview() {
 
     modal.id = "lbm-image-preview";
 
-    modal.dataset.version = "long-press-selection-v2";
+    modal.dataset.version = "pc-click-mobile-longpress-v3";
 
     modal.innerHTML = `
 
@@ -1459,9 +1448,14 @@ function createImagePreview() {
                 <h3>Select Your Pictures</h3>
 
                 <p>
-                    Tap a thumbnail briefly to preview it.
-                    Press and hold a thumbnail to select or
-                    unselect that picture.
+                    <strong>On phones:</strong>
+                    Tap a picture to preview it.
+                    Press and hold to select or unselect it.
+                </p>
+
+                <p>
+                    <strong>On computers:</strong>
+                    Click a picture to select or unselect it.
                 </p>
 
                 <p class="lbm-preview-selection-hint">
@@ -1540,6 +1534,10 @@ function createImagePreview() {
     }
 
 
+    /* ---------------------------------------------
+       RECORD POINTER TYPE AND START LONG-PRESS TIMER
+       --------------------------------------------- */
+
     thumbnailContainer.addEventListener("pointerdown", event => {
 
         const thumbnail = event.target.closest(
@@ -1551,6 +1549,11 @@ function createImagePreview() {
         if (event.pointerType === "mouse" && event.button !== 0) {
             return;
         }
+
+        // Remember whether the customer is using a
+        // mouse, touchscreen or pen.
+        thumbnailContainer.dataset.lastPointerType =
+            event.pointerType;
 
         clearThumbnailPress();
 
@@ -1564,6 +1567,8 @@ function createImagePreview() {
             thumbnail.dataset.previewIndex
         );
 
+        // Long-press selection is used on phones and
+        // other touch-based devices.
         thumbnailPressTimer = setTimeout(() => {
 
             thumbnailPressTimer = null;
@@ -1587,6 +1592,10 @@ function createImagePreview() {
     });
 
 
+    /* ---------------------------------------------
+       STOP LONG-PRESS TIMER WHEN POINTER IS RELEASED
+       --------------------------------------------- */
+
     thumbnailContainer.addEventListener("pointerup", () => {
 
         clearThumbnailPress();
@@ -1608,6 +1617,10 @@ function createImagePreview() {
     });
 
 
+    /* ---------------------------------------------
+       PREVENT RIGHT-CLICK CONTEXT MENU ON THUMBNAILS
+       --------------------------------------------- */
+
     thumbnailContainer.addEventListener("contextmenu", event => {
 
         if (event.target.closest("[data-preview-index]")) {
@@ -1619,6 +1632,19 @@ function createImagePreview() {
     });
 
 
+    /* ---------------------------------------------
+       THUMBNAIL CLICK BEHAVIOUR
+
+       COMPUTER:
+       Click = Select / Unselect
+
+       PHONE:
+       Tap = Preview
+
+       PHONE LONG-PRESS:
+       Select / Unselect
+       --------------------------------------------- */
+
     thumbnailContainer.addEventListener("click", event => {
 
         const thumbnail = event.target.closest(
@@ -1627,6 +1653,9 @@ function createImagePreview() {
 
         if (!thumbnail) return;
 
+
+        // Stop the click generated after a successful
+        // long-press from triggering a second action.
         if (Date.now() < suppressThumbnailClickUntil) {
 
             event.preventDefault();
@@ -1637,9 +1666,36 @@ function createImagePreview() {
 
         }
 
-        previewImageIndex = Number(
+
+        const imageIndex = Number(
             thumbnail.dataset.previewIndex
         );
+
+        const pointerType =
+            thumbnailContainer.dataset.lastPointerType;
+
+
+        // =========================================
+        // COMPUTER: CLICK TO SELECT / UNSELECT
+        // =========================================
+
+        if (
+            pointerType === "mouse" ||
+            event.detail === 0
+        ) {
+
+            togglePictureSelection(imageIndex);
+
+            return;
+
+        }
+
+
+        // =========================================
+        // PHONE: TAP TO PREVIEW
+        // =========================================
+
+        previewImageIndex = imageIndex;
 
         productImageIndices[previewProductId] =
             previewImageIndex;
@@ -1767,7 +1823,7 @@ function addSelectedPicturesToCart() {
 
     if (selectedURLs.length === 0) {
 
-        alert("Please long-press at least one picture to select it.");
+        alert("Please select at least one picture.");
 
         return;
 
@@ -1908,7 +1964,7 @@ function renderPreviewGallery() {
                     data-preview-index="${index}"
                     aria-label="Picture ${index + 1}. ${
                         chosen ? "Selected" : "Not selected"
-                    }. Tap to preview or long-press to select."
+                    }."
                     aria-pressed="${chosen}"
                 >
 
@@ -1953,7 +2009,7 @@ function renderPreviewGallery() {
     addButton.textContent =
         selected.size > 0
             ? "ADD " + selected.size + " SELECTED PICTURE(S) TO CART"
-            : "LONG-PRESS THUMBNAILS TO SELECT";
+            : "SELECT PICTURES TO ADD TO CART";
 
 }
 
@@ -3082,7 +3138,6 @@ async function startShop() {
 
     console.log("Starting LBM Online Shop...");
 
-    // Install search listeners before loading products.
     installProductSearch();
 
     await Promise.all([
@@ -3095,7 +3150,6 @@ async function startShop() {
 
     ]);
 
-    // Apply the initial search state after products load.
     filterProducts();
 
     updateCart();
