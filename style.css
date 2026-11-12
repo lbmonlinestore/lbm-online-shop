@@ -1,13 +1,30 @@
 
-/* =================================
-   LBM ONLINE SHOP
-   LUXURY BLACK & GOLD DESIGN
-================================= */
+/* =====================================================
+   LBM ONLINE STORE
+   COMPLETE RESPONSIVE BLACK & GOLD STYLESHEET
+   APP TEST VERSION
+===================================================== */
+
+/* =========================
+   1. GLOBAL SETTINGS
+========================= */
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+:root {
+    --gold: #D4AF37;
+    --gold-dark: #B8962E;
+    --black: #080808;
+    --dark: #111111;
+    --card: #191919;
+    --card-light: #222222;
+    --white: #FFFFFF;
+    --muted: #AAAAAA;
+    --border: #39301C;
 }
 
 html {
@@ -16,78 +33,97 @@ html {
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: #111111;
-    color: #ffffff;
+    background: var(--black);
+    color: var(--white);
     line-height: 1.6;
+    overflow-x: hidden;
 }
 
-:root {
-    --gold: #d4af37;
-    --dark-gold: #b8962e;
-    --black: #111111;
-    --card: #1b1b1b;
-    --muted: #aaaaaa;
+img {
+    max-width: 100%;
 }
 
-/* HEADER */
-
-.topbar {
-    min-height: 75px;
-    padding: 15px 6%;
-    background: #080808;
-    border-bottom: 1px solid #302716;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.brand {
-    color: var(--gold);
+a {
+    color: inherit;
     text-decoration: none;
-    font-size: 27px;
-    font-weight: 900;
-    letter-spacing: 2px;
 }
 
-.brand span {
-    display: block;
-    color: #ffffff;
-    font-size: 10px;
-    letter-spacing: 4px;
-    text-align: center;
+button,
+input,
+select,
+textarea {
+    font: inherit;
 }
 
-.navigation {
-    display: flex;
-    gap: 25px;
-}
-
-.navigation a {
-    color: #eeeeee;
-    text-decoration: none;
-    font-size: 14px;
-    transition: 0.3s;
-}
-
-.navigation a:hover {
-    color: var(--gold);
-}
-
-.cart-button {
-    background: var(--gold);
-    color: #111111;
-    border: none;
-    padding: 11px 18px;
-    border-radius: 4px;
-    font-weight: bold;
+button {
     cursor: pointer;
 }
 
-/* HERO SECTION */
+section {
+    padding: 55px 6%;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    line-height: 1.3;
+}
+
+h2 {
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* =========================
+   2. HEADER
+========================= */
+
+header {
+    width: 100%;
+    background: #050505;
+    border-bottom: 1px solid var(--border);
+    padding: 15px 6%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 10;
+}
+
+.logo,
+header h1 {
+    color: var(--gold);
+    font-weight: bold;
+}
+
+.logo {
+    font-size: 25px;
+}
+
+header nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+header nav a {
+    color: var(--white);
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+header nav a:hover {
+    color: var(--gold);
+}
+
+/* =========================
+   3. HERO SECTION
+========================= */
 
 .hero {
     min-height: 540px;
@@ -95,369 +131,470 @@ body {
     align-items: center;
     padding: 70px 8%;
     background:
-    linear-gradient(
-        rgba(0,0,0,0.45),
-        rgba(0,0,0,0.65)
-    ),
-    url("https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=85");
-
-background-size: cover;
-background-position: center;
-background-repeat: no-repeat;
+        linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.96),
+            rgba(0, 0, 0, 0.78),
+            rgba(0, 0, 0, 0.45)
         ),
         linear-gradient(135deg, #282116, #111111 65%);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .hero-content {
     max-width: 650px;
 }
 
-.hero-label,
-.section-label {
+.hero h1 {
     color: var(--gold);
-    font-size: 12px;
-    letter-spacing: 4px;
-    font-weight: bold;
+    font-size: clamp(32px, 5vw, 55px);
     margin-bottom: 18px;
 }
 
-.hero h1 {
-    font-size: clamp(42px, 7vw, 76px);
-    line-height: 1.1;
-    margin-bottom: 22px;
-    font-weight: 800;
+.hero p {
+    color: #EEEEEE;
+    font-size: 17px;
+    margin-bottom: 25px;
 }
 
-.hero h1 span {
-    color: var(--gold);
+.hero-model {
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
 }
 
-.hero-description {
-    color: #cccccc;
-    font-size: 16px;
-    max-width: 440px;
-    margin-bottom: 32px;
-}
-
-.shop-button {
+.hero-button,
+.shop-now-button {
     display: inline-block;
     background: var(--gold);
     color: #111111;
-    text-decoration: none;
-    padding: 14px 32px;
-    font-size: 13px;
+    padding: 12px 25px;
+    border-radius: 5px;
     font-weight: bold;
-    letter-spacing: 2px;
-    border-radius: 3px;
-    transition: 0.3s;
+    border: none;
 }
 
-.shop-button:hover {
-    background: #ffffff;
-    transform: translateY(-3px);
+/* =========================
+   4. GENERAL BUTTONS
+========================= */
+
+button,
+.btn,
+.add-button,
+.checkout-button,
+.whatsapp-button {
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
-/* COLLECTION HEADING */
+button:hover,
+.btn:hover,
+.add-button:hover,
+.checkout-button:hover,
+.whatsapp-button:hover {
+    transform: translateY(-1px);
+}
 
-.collection-heading {
+.add-button,
+.checkout-button {
+    background: var(--gold);
+    color: #111111;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.add-button:hover,
+.checkout-button:hover {
+    background: var(--gold-dark);
+}
+
+/* =========================
+   5. SECTION HEADINGS
+========================= */
+
+.section-title,
+.collection-title {
+    color: var(--gold);
     text-align: center;
-    padding: 75px 20px 25px;
+    font-size: 27px;
+    margin-bottom: 25px;
 }
 
-.collection-heading h2 {
-    font-size: 32px;
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-}
-
-.collection-heading > p:last-child {
-    color: var(--muted);
-}
-
-/* PRODUCTS */
-
-.products {
-    padding: 25px 6% 75px;
-}
+/* =========================
+   6. PRODUCT CATALOGUE
+========================= */
 
 .product-grid {
     display: grid;
-    grid-template-columns: repeat(
-        auto-fit,
-        minmax(220px, 1fr)
-    );
-    gap: 25px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    width: 100%;
     max-width: 1200px;
-    margin: auto;
+    margin: 0 auto;
 }
 
 .product-card {
     background: var(--card);
-    border: 1px solid #302716;
-    border-radius: 7px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
     overflow: hidden;
-    transition: 0.3s;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
 }
 
-.product-card:hover {
-    border-color: var(--gold);
-    transform: translateY(-5px);
-}
-
-.product-card img {
+.product-card img,
+.product-image {
     width: 100%;
-    height: 250px;
-    object-fit: cover;
+    height: 190px;
+    max-height: 190px;
     display: block;
-    background: #292929;
+    object-fit: cover;
+    background: var(--card-light);
 }
 
 .product-info {
-    padding: 20px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 7px;
 }
 
-.product-info h3 {
-    font-size: 17px;
-    margin-bottom: 8px;
+.product-card h3 {
+    color: var(--white);
+    font-size: 15px;
+    overflow-wrap: anywhere;
 }
 
 .product-description {
     color: var(--muted);
     font-size: 13px;
-    min-height: 42px;
 }
 
 .product-price {
     color: var(--gold);
-    font-size: 20px;
     font-weight: bold;
-    margin: 15px 0;
+    font-size: 16px;
+    margin-top: auto;
 }
 
-.add-button {
+.product-card .add-button {
     width: 100%;
-    padding: 12px;
-    background: var(--gold);
-    color: #111111;
-    border: none;
-    border-radius: 3px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
+    margin-top: 10px;
 }
 
-.add-button:hover {
-    background: #ffffff;
+/* Product search and filters */
+
+.search-container,
+.filter-container,
+.product-filters {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 15px auto 25px;
 }
 
-/* SHOPPING CART */
+.search-container input,
+.filter-container select,
+.product-filters select,
+input,
+select,
+textarea {
+    background: #1B1B1B;
+    color: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 10px;
+    max-width: 100%;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: #999999;
+}
+
+/* =========================
+   7. SHOPPING CART
+========================= */
 
 .cart-section {
-    display: none;
-    max-width: 850px;
-    margin: 30px auto 70px;
-    padding: 30px;
-    background: #1b1b1b;
-    border: 1px solid var(--gold);
+    background: #141414;
+    color: var(--white);
+    border: 1px solid var(--border);
     border-radius: 8px;
+    padding: 20px;
+    margin: 25px auto;
+    max-width: 1000px;
 }
 
-.cart-section.open {
-    display: block;
-}
-
-.cart-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-    border-bottom: 1px solid #444444;
-    padding-bottom: 20px;
-}
-
-.cart-header h2 {
-    font-size: 21px;
+.cart-section h2,
+.cart-section h3 {
     color: var(--gold);
-}
-
-.close-cart {
-    background: transparent;
-    color: #ffffff;
-    border: 1px solid #666666;
-    padding: 8px 14px;
-    cursor: pointer;
-}
-
-.cart-items {
-    padding: 20px 0;
 }
 
 .cart-item {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 15px;
-    padding: 15px 0;
+    gap: 12px;
+    padding: 12px 0;
     border-bottom: 1px solid #333333;
 }
 
-.cart-item strong {
-    display: block;
+.cart-item img {
+    width: 65px;
+    height: 65px;
+    max-width: 65px;
+    object-fit: cover;
+    border-radius: 6px;
 }
 
-.cart-item small {
-    color: var(--gold);
+.cart-item p,
+.cart-item span {
+    color: var(--white);
 }
 
-.quantity-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.quantity-controls button {
-    width: 30px;
-    height: 30px;
-    background: var(--gold);
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 18px;
-}
-
-.cart-summary {
-    border-top: 1px solid #444444;
-    padding-top: 20px;
-}
-
-.cart-summary h3 {
-    margin-bottom: 20px;
-}
-
-.cart-summary h3 span {
-    color: var(--gold);
-}
-
-.checkout-button {
-    width: 100%;
-    padding: 15px;
+.cart-item button {
     background: var(--gold);
     color: #111111;
     border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.cart-total,
+.total-price {
+    color: var(--gold);
+    font-size: 18px;
     font-weight: bold;
-    cursor: pointer;
-    border-radius: 3px;
+    margin-top: 15px;
 }
 
-.checkout-button:disabled {
-    opacity: 0.4;
+.checkout-button {
+    display: inline-block;
+    margin-top: 15px;
+}
+
+/* =========================
+   8. CHECKOUT AND WHATSAPP
+========================= */
+
+.whatsapp-button {
+    display: inline-block;
+    background: #25D366;
+    color: #FFFFFF;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.whatsapp-button:hover {
+    background: #1DA851;
+}
+
+.checkout-button:disabled,
+.add-button:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
+    transform: none;
 }
 
-/* ABOUT */
+/* =========================
+   9. CONTACT SECTION
+========================= */
 
-.about {
+.contact,
+.contact-section {
+    background: #111111;
+    color: var(--white);
     text-align: center;
-    padding: 75px 20px;
+}
+
+.contact h2,
+.contact-section h2 {
+    color: var(--gold);
+}
+
+.contact p,
+.contact-section p {
+    color: #DDDDDD;
+    margin-bottom: 10px;
+}
+
+.contact a,
+.contact-section a {
+    color: var(--gold);
+}
+
+/* =========================
+   10. ABOUT SECTION
+========================= */
+
+.about,
+.about-section {
+    background: #101010;
+    color: #DDDDDD;
+    text-align: center;
+}
+
+.about h2,
+.about-section h2 {
+    color: var(--gold);
+}
+
+.about p,
+.about-section p {
+    max-width: 850px;
+    margin: 0 auto 15px;
+}
+
+/* =========================
+   11. FOOTER
+========================= */
+
+footer {
+    background: #050505;
+    color: #AAAAAA;
+    text-align: center;
+    padding: 25px 6%;
+    border-top: 1px solid var(--border);
+}
+
+footer p {
+    font-size: 13px;
+    margin: 5px 0;
+}
+
+footer a {
+    color: var(--gold);
+}
+
+/* =========================
+   12. ADMIN LOGIN LINK
+========================= */
+
+.admin-access {
+    text-align: center;
+    margin: 12px auto 0;
+}
+
+.admin-access a {
+    color: #999999;
+    font-size: 10px;
+    text-decoration: none;
+}
+
+.admin-access a:hover {
+    color: var(--gold);
+}
+
+/* =========================
+   13. GENERAL NOTICES
+========================= */
+
+.success-message {
+    color: #35C46A;
+}
+
+.error-message {
+    color: #FF5555;
+}
+
+.empty-message {
+    color: var(--muted);
+    text-align: center;
+    padding: 20px;
+}
+
+/* =========================
+   14. TABLES
+========================= */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--white);
+}
+
+th,
+td {
+    border: 1px solid #393939;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    color: var(--gold);
     background: #191919;
 }
 
-.about h2 {
-    color: var(--gold);
-    font-size: 32px;
-    margin-bottom: 18px;
-}
-
-.about > p:last-child {
-    color: #bbbbbb;
-    max-width: 650px;
-    margin: auto;
-}
-
-/* FOOTER */
-
-.footer {
-    text-align: center;
-    background: #080808;
-    border-top: 1px solid #302716;
-    padding: 35px 20px;
-}
-
-.footer-brand {
-    color: var(--gold);
-    font-size: 20px;
-    font-weight: bold;
-    text-decoration: none;
-    letter-spacing: 2px;
-}
-
-.footer p {
-    color: #999999;
-    margin-top: 10px;
-    font-size: 13px;
-}
-
-.copyright {
-    margin-top: 20px !important;
-}
-
-/* MOBILE RESPONSIVENESS */
+/* =========================
+   15. MOBILE RESPONSIVENESS
+========================= */
 
 @media (max-width: 650px) {
 
-    .topbar {
+    header {
         padding: 12px 4%;
-        flex-wrap: wrap;
-    }
-
-    .brand {
-        font-size: 22px;
-    }
-
-    .navigation {
-        order: 3;
-        width: 100%;
         justify-content: center;
-        gap: 25px;
+        text-align: center;
     }
 
-    .cart-button {
-        padding: 9px 12px;
+    .logo {
+        font-size: 21px;
+    }
+
+    header nav {
+        justify-content: center;
+        gap: 13px;
+    }
+
+    header nav a {
         font-size: 12px;
     }
 
+    section {
+        padding: 35px 4%;
+    }
+
     .hero {
-        min-height: 450px;
-        padding: 55px 7%;
+        min-height: 400px;
+        padding: 45px 6%;
+        background-position: center;
     }
 
     .hero h1 {
-        font-size: 45px;
+        font-size: 34px;
     }
 
-    .collection-heading h2 {
-        font-size: 25px;
-    }
-
-    .products {
-        padding: 20px 5% 55px;
+    .hero p {
+        font-size: 14px;
     }
 
     .product-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 13px;
+        gap: 12px;
     }
 
-    .product-card img {
-        height: 160px;
+    .product-card img,
+    .product-image {
+        height: 145px;
+        max-height: 145px;
     }
 
     .product-info {
-        padding: 12px;
+        padding: 9px;
     }
 
-    .product-info h3 {
-        font-size: 14px;
+    .product-card h3 {
+        font-size: 13px;
     }
 
     .product-description {
@@ -465,471 +602,492 @@ background-repeat: no-repeat;
     }
 
     .product-price {
-        font-size: 17px;
+        font-size: 14px;
     }
 
     .add-button {
-        padding: 10px 5px;
+        padding: 9px 7px;
         font-size: 12px;
     }
 
     .cart-section {
-        margin: 20px 4%;
-        padding: 18px;
-    }
-
-    .cart-header h2 {
-        font-size: 16px;
+        padding: 14px;
     }
 
     .cart-item {
-        font-size: 13px;
+        gap: 9px;
+    }
+
+    .cart-item img {
+        width: 55px;
+        height: 55px;
+    }
+
+    .section-title,
+    .collection-title {
+        font-size: 23px;
     }
 }
 
-@media (max-width: 360px) {
+/* =========================
+   16. VERY SMALL PHONES
+========================= */
+
+@media (max-width: 350px) {
+
     .product-grid {
         grid-template-columns: 1fr;
     }
-}
-/* WHATSAPP CONTACT BUTTONS */
 
-.header-whatsapp {
-    background: #d4af37;
-    color: #111;
-    padding: 10px 16px;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: 4px;
+    .product-card img,
+    .product-image {
+        height: 190px;
+        max-height: 190px;
+    }
+
+    .hero h1 {
+        font-size: 28px;
+    }
 }
 
-.hero-actions {
+
+.order-items {
+    margin: 14px 0;
+    padding: 12px;
+    background: #f3f6fb;
+    border-radius: 9px;
+}
+
+.order-items h4 {
+    margin-bottom: 10px;
+    color: #173d70;
+}
+
+.order-product {
     display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
     align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #dce5f1;
 }
 
-.whatsapp-button {
-    display: inline-block;
-    background: #25D366;
-    color: #ffffff;
-    padding: 14px 22px;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: bold;
+.order-product:last-child {
+    border-bottom: none;
+}
+
+.order-product img {
+    width: 75px;
+    height: 85px;
+    object-fit: cover;
+    border-radius: 7px;
+    background: #e6ebf1;
+    flex-shrink: 0;
+}
+
+.order-product-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.order-product-info strong {
+    display: block;
+    color: #202b3c;
+    overflow-wrap: anywhere;
+}
+
+.order-product-info p {
+    margin: 5px 0;
+    font-size: 12px;
+    color: #68778b;
+}
+
+.order-product-info a {
+    color: #173d70;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+@media(max-width:420px) {
+    .order-product img {
+        width: 60px;
+        height: 70px;
+    }
+}
+
+
+/* =====================================================
+   17. LBM PREMIUM LUXURY STICKY HEADER
+   CHARCOAL BLACK + CHAMPAGNE GOLD
+===================================================== */
+
+.topbar {
+    position: sticky !important;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    min-height: 76px;
+    padding: 13px 5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+
+    background: linear-gradient(
+        135deg,
+        #080808 0%,
+        #15130e 50%,
+        #080808 100%
+    );
+
+    border-bottom: 1px solid rgba(212, 175, 55, 0.45);
+    box-shadow: 0 5px 22px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* BRAND */
+
+.topbar .brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    color: #D4AF37;
+    font-size: 27px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.topbar .brand span {
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    margin-top: 5px;
+}
+
+.topbar .brand::after {
+    content: "QUALITY. STYLE. VALUE.";
+    display: block;
+    color: #C6A45B;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-top: 7px;
+}
+
+/* NAVIGATION */
+
+.topbar .navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+}
+
+.topbar .navigation a {
+    position: relative;
+    color: #E7E3D9;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    padding: 8px 0;
+    transition: color 0.25s ease;
+}
+
+.topbar .navigation a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 0;
+    height: 2px;
+    background: #D4AF37;
+    transition: width 0.25s ease;
+}
+
+.topbar .navigation a:hover {
+    color: #D4AF37;
+}
+
+.topbar .navigation a:hover::after {
+    width: 100%;
+}
+
+/* WHATSAPP BUTTON */
+
+.topbar .header-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: 1px solid #D4AF37;
     border-radius: 4px;
-    transition: 0.3s;
+    color: #D4AF37;
+    background: transparent;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: all 0.25s ease;
 }
 
-.whatsapp-button:hover {
-    background: #1da851;
-    transform: translateY(-3px);
+.topbar .header-whatsapp:hover {
+    background: #D4AF37;
+    color: #080808;
 }
 
-/* CONTACT SECTION */
+/* CART BUTTON */
 
-.contact {
-    text-align: center;
-    padding: 75px 20px;
-    background: #111111;
+.topbar .cart-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 19px;
+    background: linear-gradient(135deg, #E5C76B, #B8962E);
+    color: #111111;
+    border: 1px solid #E5C76B;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    box-shadow: 0 3px 12px rgba(212, 175, 55, 0.15);
+    transition: all 0.25s ease;
 }
 
-.contact h2 {
-    color: #d4af37;
-    font-size: 30px;
-    margin-bottom: 15px;
+.topbar .cart-button:hover {
+    background: #F0D98C;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px rgba(212, 175, 55, 0.25);
 }
 
-.contact p {
-    color: #bbbbbb;
-    margin-bottom: 15px;
-}
-
-.contact .contact-number {
-    color: #d4af37;
-    font-size: 21px;
-    font-weight: bold;
-}
-
-/* MOBILE CONTACT LAYOUT */
+/* MOBILE HEADER */
 
 @media (max-width: 650px) {
-    .header-whatsapp {
-        padding: 9px 12px;
+
+    .topbar {
+        min-height: auto;
+        padding: 11px 4%;
+        gap: 11px;
+        justify-content: space-between;
+    }
+
+    .topbar .brand {
+        font-size: 22px;
+        letter-spacing: 1.5px;
+    }
+
+    .topbar .brand span {
+        font-size: 9px;
+        letter-spacing: 3px;
+    }
+
+    .topbar .brand::after {
+        font-size: 7px;
+        letter-spacing: 1.5px;
+        margin-top: 5px;
+    }
+
+    .topbar .navigation {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        gap: 20px;
+        padding-top: 9px;
+        border-top: 1px solid rgba(212, 175, 55, 0.15);
+    }
+
+    .topbar .navigation a {
         font-size: 11px;
+        padding: 5px 0;
     }
 
-    .hero-actions {
-        align-items: flex-start;
+    .topbar .header-whatsapp {
+        padding: 9px 11px;
+        font-size: 10px;
     }
 
-    .hero {
-        background-position: center;
+    .topbar .cart-button {
+        padding: 10px 13px;
+        font-size: 10px;
     }
-}/* MAIN FASHION MODEL */
-.hero-model {
-    width: 100%;
-    height: 450px;
-    background-image: url("images/man-in-suit.png");
-    background-size: cover;
-    background-position: center top;
-    background-repeat: no-repeat;
-    border-radius: 12px;
+}
+
+/* VERY SMALL PHONES */
+
+@media (max-width: 350px) {
+
+    .topbar {
+        padding: 10px 3%;
+        gap: 8px;
+    }
+
+    .topbar .brand {
+        font-size: 19px;
+    }
+
+    .topbar .navigation {
+        gap: 12px;
+    }
+
+    .topbar .navigation a {
+        font-size: 10px;
+    }
+
+    .topbar .header-whatsapp,
+    .topbar .cart-button {
+        padding: 8px;
+        font-size: 9px;
+    }
+}
+
+
+/* =====================================================
+   18. PREMIUM LUXURY PRODUCT CARDS
+   LBM ONLINE SHOP
+===================================================== */
+
+.product-card {
     position: relative;
-}
-
-/* MOBILE DISPLAY */
-@media (max-width: 600px) {
-    .hero-model {
-        height: 350px;
-        background-position: center top;
-    }
-}/* LBM LUXURY BLUE & GOLD THEME */
-
-:root {
-    --primary-color: #123B5D;
-    --secondary-color: #1B5278;
-    --gold-color: #D4AF37;
-    --light-gold: #F5D778;
-    --background-color: #EAF2F8;
-    --text-color: #FFFFFF;
-}
-
-/* Main website background */
-body {
-    background-color: var(--background-color);
-    color: #123B5D;
-}
-
-/* Header */
-.topbar {
-    background: #123B5D;
-    color: white;
-}
-
-/* Brand name */
-.brand {
-    color: #FFFFFF;
-}
-
-.brand span {
-    color: var(--gold-color);
-}
-
-/* Buttons */
-button,
-.cart-button {
-    background: var(--gold-color);
-    color: #123B5D;
-    border: none;
-    font-weight: bold;
-}
-
-/* Product cards */
-.product-card {
-    background: #FFFFFF;
-    border: 1px solid #D4AF37;
+    background: linear-gradient(145deg, #1B1B1B, #101010);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     border-radius: 12px;
-}
-
-/* Headings */
-h1, h2, h3 {
-    color: #123B5D;
-}
-
-/* Main fashion section */
-.hero-model {
-    border: 2px solid var(--gold-color);
-}
-
-/* Footer */
-footer {
-    background: #123B5D;
-    color: white;
-}
-
-footer a {
-    color: var(--light-gold);
-}/* REMOVE REMAINING BLACK BACKGROUNDS */
-
-footer,
-.bottom-bar,
-.bottom-nav,
-.navbar,
-.site-footer {
-    background: #123B5D !important;
-    color: #FFFFFF !important;
-}
-
-footer a,
-.bottom-bar a,
-.bottom-nav a {
-    color: #D4AF37 !important;
-}
-
-html,
-body {
-    background-color: #EAF2F8 !important;
-}/* LBM CONTACT SECTION - BLUE & GOLD */
-
-.contact {
-    background: #123B5D !important;
-    color: #FFFFFF !important;
-    padding: 40px 20px;
-    text-align: center;
-}
-
-.contact h2 {
-    color: #D4AF37 !important;
-}
-
-.contact p {
-    color: #FFFFFF !important;
-}
-
-.contact .section-label {
-    color: #F5D778 !important;
-}
-
-.contact .contact-number {
-    color: #D4AF37 !important;
-    font-weight: bold;
-}
-
-.contact .whatsapp-button {
-    background: #D4AF37 !important;
-    color: #123B5D !important;
-    border: 2px solid #D4AF37 !important;
-    border-radius: 8px;
-    padding: 14px 22px;
-    display: inline-block;
-    text-decoration: none;
-    font-weight: bold;
-}
-/* =================================
-   LBM PREMIUM PRODUCT CARDS
-================================= */
-
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 15px;
-}
-
-.product-card {
-    background: #FFFFFF;
-    border: 1px solid #D4AF37;
-    border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(18, 59, 93, 0.12);
-    transition: transform 0.3s ease;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, border-color 0.3s ease,
+                box-shadow 0.3s ease;
 }
 
 .product-card:hover {
     transform: translateY(-4px);
+    border-color: rgba(212, 175, 55, 0.7);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
 }
 
-.product-image {
+/* PRODUCT IMAGE */
+
+.product-card img,
+.product-card .product-image {
     width: 100%;
     height: 210px;
+    max-height: 210px;
+    display: block;
     object-fit: cover;
-    background: #EAF2F8;
+    background: #151515;
+    transition: transform 0.4s ease;
 }
 
+.product-card:hover img,
+.product-card:hover .product-image {
+    transform: scale(1.035);
+}
+
+/* PRODUCT DETAILS */
+
 .product-info {
-    padding: 14px;
+    padding: 15px;
+    gap: 9px;
 }
 
 .product-card h3 {
-    color: #123B5D;
-    font-size: 16px;
-    margin-bottom: 8px;
+    color: #F5F0E3;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
 }
 
 .product-description {
-    color: #64748B;
-    font-size: 13px;
+    color: #AFA99B;
+    font-size: 12px;
+    line-height: 1.6;
 }
+
+/* PRODUCT PRICE */
 
 .product-price {
-    color: #B28A20;
+    color: #E2C36B;
     font-size: 18px;
-    font-weight: bold;
-    margin: 12px 0;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    margin-top: auto;
 }
 
-.add-button {
+/* ADD TO CART */
+
+.product-card .add-button {
     width: 100%;
-    background: #123B5D !important;
-    color: #D4AF37 !important;
-    border: 1px solid #D4AF37 !important;
-    border-radius: 8px;
-    padding: 12px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.add-button:hover {
-    background: #D4AF37 !important;
-    color: #123B5D !important;
-}
-
-/* Mobile adjustments */
-@media (max-width: 380px) {
-    .product-grid {
-        gap: 10px;
-        padding: 10px;
-    }
-
-    .product-image {
-        height: 160px;
-    }
-}
-
-/* =================================
-   LBM PREMIUM SHOPPING CART
-================================= */
-
-.cart-section {
-    background: #123B5D !important;
-    color: #FFFFFF !important;
-    border: 2px solid #D4AF37;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.18);
-}
-
-.cart-section h2,
-.cart-section h3 {
-    color: #D4AF37 !important;
-}
-
-#cart-items {
-    color: #FFFFFF;
-}
-
-#cart-items > div {
-    background: #1B5278;
+    min-height: 42px;
+    margin-top: 10px;
+    padding: 11px 14px;
     border: 1px solid #D4AF37;
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 12px;
+    border-radius: 5px;
+    background: linear-gradient(135deg, #E5C76B, #B8962E);
+    color: #101010;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
-#cart-total {
-    color: #F5D778 !important;
-    font-size: 22px;
-    font-weight: bold;
-    margin-top: 15px;
+.product-card .add-button:hover {
+    background: #F0D98C;
+    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.2);
+    transform: none;
 }
 
-#checkout-button {
-    background: #D4AF37 !important;
-    color: #123B5D !important;
-    border: none;
-    border-radius: 8px;
-    padding: 14px;
-    width: 100%;
-    font-weight: bold;
-    cursor: pointer;
+/* PRODUCT SEARCH AND FILTERS */
+
+.search-container input,
+.filter-container select,
+.product-filters select {
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 7px;
+    background: #151515;
 }
 
-#close-cart {
-    background: #D4AF37 !important;
-    color: #123B5D !important;
-    border-radius: 6px;
-    font-weight: bold;
+.search-container input:focus,
+.filter-container select:focus,
+.product-filters select:focus {
+    outline: none;
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.12);
 }
 
-.cart-section button {
-    cursor: pointer;
-}
-/* PREMIUM CHECKOUT BUTTON */
+/* MOBILE PRODUCT CARDS */
 
-.checkout-button {
-    width: 100%;
-    padding: 15px;
-    background: #D4AF37 !important;
-    color: #123B5D !important;
-    border: 2px solid #D4AF37 !important;
-    border-radius: 10px;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.checkout-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.checkout-button:not(:disabled):hover {
-    background: #F5D778 !important;
-}
-
-/* =================================
-   LBM CART IMAGE SIZE FIX
-================================= */
-
-.cart-item {
-    display: grid;
-    grid-template-columns: 76px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 12px;
-}
-
-.cart-item > img {
-    width: 76px !important;
-    height: 76px !important;
-    max-width: 76px;
-    object-fit: cover;
-    display: block;
-    border-radius: 8px;
-    flex-shrink: 0;
-}
-
-.cart-item-details {
-    min-width: 0;
-}
-
-.cart-item > strong {
-    white-space: nowrap;
-}
-
-@media (max-width: 450px) {
-    .cart-item {
-        grid-template-columns: 60px minmax(0, 1fr);
+@media (max-width: 650px) {
+    .product-card {
+        border-radius: 9px;
     }
 
-    .cart-item > img {
-        width: 60px !important;
-        height: 60px !important;
-        max-width: 60px;
+    .product-card img,
+    .product-card .product-image {
+        height: 155px;
+        max-height: 155px;
     }
 
-    .cart-item > strong {
-        grid-column: 2;
+    .product-info {
+        padding: 11px;
+        gap: 7px;
     }
-}
-/* DISCREET ADMIN LOGIN */
 
-.admin-access {
-    margin-top: 12px;
-    text-align: center;
-}
+    .product-card h3 {
+        font-size: 13px;
+    }
 
-.admin-access a {
-    color: #777;
-    font-size: 10px;
-    text-decoration: none;
-    opacity: 0.65;
-    transition: 0.3s;
-}
+    .product-description {
+        font-size: 11px;
+    }
 
-.admin-access a:hover {
-    color: #d4af37;
-    opacity: 1;
+    .product-price {
+        font-size: 15px;
+    }
+
+    .product-card .add-button {
+        min-height: 39px;
+        padding: 9px 7px;
+        font-size: 11px;
+    }
 }
