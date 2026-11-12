@@ -144,7 +144,7 @@
                 font-size: 12px;
             }
 
-            /* GREETING: NORMAL PAGE FLOW */
+            /* GREETING: SCROLL-AWAY EFFECT */
 
             #lbm-welcome-greeting {
                 position: static !important;
@@ -152,19 +152,28 @@
                 bottom: auto !important;
                 left: auto !important;
                 right: auto !important;
-                transform: none !important;
                 z-index: auto !important;
+
                 width: 100%;
                 display: block;
                 box-sizing: border-box;
                 text-align: center;
+
                 margin: 0 auto;
                 padding: 14px 16px;
+
                 color: #fff;
                 background: #080808;
+
                 font-size: 17px;
                 font-weight: 600;
                 line-height: 1.6;
+
+                transform: translateY(0);
+                opacity: 1;
+
+                will-change: transform, opacity;
+                transition: opacity .08s linear;
             }
 
             #lbm-welcome-greeting span {
@@ -179,6 +188,12 @@
                 #lbm-welcome-greeting {
                     font-size: 15px;
                     padding: 12px;
+                }
+            }
+
+            @media(prefers-reduced-motion: reduce) {
+                #lbm-welcome-greeting {
+                    transition: none;
                 }
             }
         `;
@@ -199,11 +214,6 @@
             greeting = document.createElement("div");
             greeting.id = "lbm-welcome-greeting";
         }
-
-        /*
-         * Place greeting at the beginning of main content.
-         * It will scroll naturally with the page.
-         */
 
         const main = document.querySelector("main");
 
@@ -244,6 +254,59 @@
             greeting.dataset.timerInstalled = "true";
             setInterval(updateGreeting, 60000);
         }
+
+        /* =========================================
+           GREETING SCROLL ANIMATION
+
+           0–100px: Fully visible
+           100–220px: Gradually fades and moves up
+           Beyond 220px: Completely invisible
+        ========================================= */
+
+        if (!greeting.dataset.scrollInstalled) {
+            greeting.dataset.scrollInstalled = "true";
+
+            let ticking = false;
+
+            function updateGreetingScroll() {
+                const scrollY = Math.max(
+                    0,
+                    window.scrollY || window.pageYOffset
+                );
+
+                const startFade = 100;
+                const endFade = 220;
+
+                const progress = Math.min(
+                    1,
+                    Math.max(
+                        0,
+                        (scrollY - startFade) / (endFade - startFade)
+                    )
+                );
+
+                const opacity = 1 - progress;
+                const movement = -35 * progress;
+
+                greeting.style.opacity = String(opacity);
+                greeting.style.transform =
+                    `translateY(${movement}px)`;
+
+                ticking = false;
+            }
+
+            window.addEventListener("scroll", () => {
+                if (!ticking) {
+                    window.requestAnimationFrame(
+                        updateGreetingScroll
+                    );
+
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            updateGreetingScroll();
+        }
     }
 
     /* =====================================================
@@ -275,7 +338,6 @@
                 </div>
 
             </section>
-
 
             <section class="lbm-feature-section" id="lbm-reviews">
 
@@ -332,7 +394,6 @@
                 </form>
 
             </section>
-
 
             <section class="lbm-feature-section" id="lbm-return-policy">
 
@@ -596,4 +657,371 @@
         startLBMFeatures();
     }
 
+  
+    /* =====================================================
+       9. CUSTOMER DARK / LIGHT MODE SWITCH
+       SAVES CUSTOMER PREFERENCE ON DEVICE
+    ===================================================== */
+
+    function installThemeSwitcher() {
+        if (document.getElementById("lbm-theme-switcher")) return;
+
+        const style = document.createElement("style");
+
+        style.id = "lbm-theme-switcher-style";
+
+        style.textContent = `
+
+            /* THEME SWITCH BUTTON */
+
+            #lbm-theme-switcher {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                padding: 9px 12px;
+                min-height: 38px;
+                border: 1px solid #D4AF37;
+                border-radius: 5px;
+                background: transparent;
+                color: #D4AF37;
+                font-size: 11px;
+                font-weight: 700;
+                cursor: pointer;
+                white-space: nowrap;
+                transition: all .25s ease;
+            }
+
+            #lbm-theme-switcher:hover {
+                background: #D4AF37;
+                color: #080808;
+            }
+
+            /* LIGHT MODE GLOBAL */
+
+            body[data-lbm-theme="light"] {
+                background: #F5F3ED !important;
+                color: #222222 !important;
+            }
+
+            body[data-lbm-theme="light"] .topbar {
+                background: linear-gradient(
+                    135deg,
+                    #FFFFFF,
+                    #F4F0E5,
+                    #FFFFFF
+                ) !important;
+                border-bottom: 1px solid #D4AF37;
+                box-shadow: 0 4px 18px rgba(0,0,0,.10);
+            }
+
+            body[data-lbm-theme="light"] .topbar .brand {
+                color: #9B7622;
+            }
+
+            body[data-lbm-theme="light"] .topbar .brand span {
+                color: #222222;
+            }
+
+            body[data-lbm-theme="light"] .topbar .navigation a {
+                color: #292929;
+            }
+
+            body[data-lbm-theme="light"] .topbar .header-whatsapp {
+                color: #80601B;
+                border-color: #B8962E;
+            }
+
+            body[data-lbm-theme="light"] .topbar .header-whatsapp:hover {
+                background: #D4AF37;
+                color: #111111;
+            }
+
+            body[data-lbm-theme="light"] #lbm-theme-switcher {
+                color: #80601B;
+                border-color: #B8962E;
+            }
+
+            body[data-lbm-theme="light"] #lbm-theme-switcher:hover {
+                background: #D4AF37;
+                color: #111111;
+            }
+
+            /* GREETING */
+
+            body[data-lbm-theme="light"] #lbm-welcome-greeting {
+                background: #F0EBDD !important;
+                color: #292929 !important;
+            }
+
+            body[data-lbm-theme="light"] #lbm-welcome-greeting span {
+                color: #9B7622;
+            }
+
+            /* HERO */
+
+            body[data-lbm-theme="light"] .hero {
+                background:
+                    linear-gradient(
+                        90deg,
+                        rgba(255,255,255,.95),
+                        rgba(255,255,255,.78),
+                        rgba(255,255,255,.35)
+                    ),
+                    linear-gradient(135deg,#E8DFC9,#F7F5EF 65%) !important;
+            }
+
+            body[data-lbm-theme="light"] .hero h1 {
+                color: #94701E;
+            }
+
+            body[data-lbm-theme="light"] .hero p {
+                color: #333333;
+            }
+
+            /* GENERAL SECTIONS */
+
+            body[data-lbm-theme="light"] section:not(.hero) {
+                color: #292929;
+            }
+
+            body[data-lbm-theme="light"] h2,
+            body[data-lbm-theme="light"] .section-title,
+            body[data-lbm-theme="light"] .collection-title {
+                color: #96721F;
+            }
+
+            body[data-lbm-theme="light"] .about,
+            body[data-lbm-theme="light"] .about-section,
+            body[data-lbm-theme="light"] .contact,
+            body[data-lbm-theme="light"] .contact-section {
+                background: #EEEAE0 !important;
+                color: #292929 !important;
+            }
+
+            body[data-lbm-theme="light"] .about p,
+            body[data-lbm-theme="light"] .about-section p,
+            body[data-lbm-theme="light"] .contact p,
+            body[data-lbm-theme="light"] .contact-section p {
+                color: #444444;
+            }
+
+            /* PRODUCT CARDS */
+
+            body[data-lbm-theme="light"] .product-card {
+                background: linear-gradient(145deg,#FFFFFF,#F5F1E7) !important;
+                border-color: #D8C89F;
+                box-shadow: 0 5px 16px rgba(0,0,0,.08);
+            }
+
+            body[data-lbm-theme="light"] .product-card h3 {
+                color: #252525;
+            }
+
+            body[data-lbm-theme="light"] .product-description {
+                color: #666666;
+            }
+
+            body[data-lbm-theme="light"] .product-price {
+                color: #94701E;
+            }
+
+            body[data-lbm-theme="light"] .product-card img,
+            body[data-lbm-theme="light"] .product-image {
+                background: #EAE6DC;
+            }
+
+            /* CART */
+
+            body[data-lbm-theme="light"] .cart-section {
+                background: #FFFFFF !important;
+                color: #222222 !important;
+                border-color: #D8C89F;
+            }
+
+            body[data-lbm-theme="light"] .cart-section h2,
+            body[data-lbm-theme="light"] .cart-section h3,
+            body[data-lbm-theme="light"] .cart-total,
+            body[data-lbm-theme="light"] .total-price {
+                color: #94701E;
+            }
+
+            body[data-lbm-theme="light"] .cart-item p,
+            body[data-lbm-theme="light"] .cart-item span {
+                color: #292929;
+            }
+
+            body[data-lbm-theme="light"] .cart-item {
+                border-bottom-color: #E4DDCD;
+            }
+
+            /* INPUTS AND FORMS */
+
+            body[data-lbm-theme="light"] input,
+            body[data-lbm-theme="light"] select,
+            body[data-lbm-theme="light"] textarea {
+                background: #FFFFFF !important;
+                color: #222222 !important;
+                border-color: #D5C69F !important;
+            }
+
+            body[data-lbm-theme="light"] input::placeholder,
+            body[data-lbm-theme="light"] textarea::placeholder {
+                color: #888888;
+            }
+
+            /* ANNOUNCEMENTS AND REVIEWS */
+
+            body[data-lbm-theme="light"] .lbm-feature-section {
+                background: #FFFFFF !important;
+                color: #292929 !important;
+                border-color: #D8C89F;
+                box-shadow: 0 5px 18px rgba(0,0,0,.05);
+            }
+
+            body[data-lbm-theme="light"] .lbm-feature-section h2 {
+                color: #94701E;
+            }
+
+            body[data-lbm-theme="light"] .lbm-announcement-card,
+            body[data-lbm-theme="light"] .lbm-review-card {
+                background: #F7F4EC !important;
+                color: #292929 !important;
+                border-color: #E1D5B8;
+            }
+
+            body[data-lbm-theme="light"] .lbm-announcement-card h3 {
+                color: #94701E;
+            }
+
+            body[data-lbm-theme="light"] .lbm-feature-date {
+                color: #777777;
+            }
+
+            /* FOOTER */
+
+            body[data-lbm-theme="light"] footer {
+                background: #E9E4D8 !important;
+                color: #555555 !important;
+                border-top-color: #D4AF37;
+            }
+
+            body[data-lbm-theme="light"] footer a {
+                color: #94701E;
+            }
+
+            /* SEARCH AND FILTERS */
+
+            body[data-lbm-theme="light"] .search-container input,
+            body[data-lbm-theme="light"] .filter-container select,
+            body[data-lbm-theme="light"] .product-filters select {
+                background: #FFFFFF !important;
+                color: #222222 !important;
+            }
+
+            /* THEME SWITCH MOBILE */
+
+            @media(max-width:650px) {
+                #lbm-theme-switcher {
+                    padding: 8px 9px;
+                    font-size: 10px;
+                    min-height: 35px;
+                }
+            }
+
+            @media(prefers-reduced-motion:reduce) {
+                #lbm-theme-switcher {
+                    transition: none;
+                }
+            }
+        `;
+
+        document.head.appendChild(style);
+
+        /* RESTORE SAVED THEME */
+
+        let savedTheme = "dark";
+
+        try {
+            const storedTheme = localStorage.getItem("lbm-screen-theme");
+
+            if (storedTheme === "light" || storedTheme === "dark") {
+                savedTheme = storedTheme;
+            }
+        } catch (error) {
+            console.warn("LBM theme preference unavailable.");
+        }
+
+        function applyTheme(theme) {
+            document.body.setAttribute("data-lbm-theme", theme);
+
+            const button = document.getElementById(
+                "lbm-theme-switcher"
+            );
+
+            if (button) {
+                const isDark = theme === "dark";
+
+                button.innerHTML = isDark
+                    ? "☀️ Light"
+                    : "🌙 Dark";
+
+                button.setAttribute(
+                    "aria-label",
+                    isDark ? "Switch to light mode" : "Switch to dark mode"
+                );
+
+                button.setAttribute(
+                    "aria-pressed",
+                    String(!isDark)
+                );
+            }
+
+            try {
+                localStorage.setItem("lbm-screen-theme", theme);
+            } catch (error) {
+                console.warn("Could not save LBM theme preference.");
+            }
+        }
+
+        /* CREATE THE SWITCH IN THE HEADER */
+
+        const header = document.querySelector(".topbar");
+
+        if (!header) {
+            console.warn("LBM theme switch: Header not found.");
+            return;
+        }
+
+        const button = document.createElement("button");
+
+        button.type = "button";
+        button.id = "lbm-theme-switcher";
+
+        button.addEventListener("click", () => {
+            const currentTheme = document.body.getAttribute(
+                "data-lbm-theme"
+            );
+
+            applyTheme(currentTheme === "dark" ? "light" : "dark");
+        });
+
+        header.appendChild(button);
+
+        applyTheme(savedTheme);
+    }
+
+    /* INSTALL THE THEME SWITCH */
+
+    if (document.readyState === "loading") {
+        document.addEventListener(
+            "DOMContentLoaded",
+            installThemeSwitcher,
+            { once: true }
+        );
+    } else {
+        installThemeSwitcher();
+    }
+
+  
 })();
