@@ -210,11 +210,31 @@ function getStock(product) {
 }
 
 
-function makeCartKey(productId, imageURL) {
-
-    return String(productId) + "::" +
-        encodeURIComponent(String(imageURL));
-
+function normaliseOptionList(value) {
+    if (Array.isArray(value)) return [...new Set(value.map(item => String(item).trim()).filter(Boolean))];
+    if (typeof value !== "string" || !value.trim()) return [];
+    const raw = value.trim();
+    try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return [...new Set(parsed.map(item => String(item).trim()).filter(Boolean))];
+    } catch (error) {}
+    return [...new Set(raw.split(/[,;\n]/).map(item => item.trim()).filter(Boolean))];
+}
+function getProductSizes(product) { return normaliseOptionList(product?.available_sizes); }
+function getProductColours(product) { return normaliseOptionList(product?.available_colours); }
+function getCardVariantSelection(productId) {
+    const card = [...document.querySelectorAll(".product-card")].find(element => {
+        const button = element.querySelector('[data-action="add"]');
+        return button && String(button.dataset.id) === String(productId);
+    });
+    return {
+        size: card?.querySelector('[data-variant="size"]')?.value || "",
+        colour: card?.querySelector('[data-variant="colour"]')?.value || ""
+    };
+}
+function makeCartKey(productId, imageURL, size = "", colour = "") {
+    return String(productId) + "::" + encodeURIComponent(String(imageURL)) + "::" +
+        encodeURIComponent(String(size || "")) + "::" + encodeURIComponent(String(colour || ""));
 }
 
 
@@ -835,6 +855,8 @@ function displayProducts(productArray = products) {
         const stock = getStock(product);
 
         const available = stock > 0;
+        const sizes = getProductSizes(product);
+        const colours = getProductColours(product);
 
         const id = String(product.id);
 
@@ -904,6 +926,20 @@ function displayProducts(productArray = products) {
                     <p class="stock-label">
                         ${available ? stock + " in stock" : "Out of stock"}
                     </p>
+
+                    ${sizes.length ? `
+                        <label class="lbm-variant-label" for="lbm-size-${escapeHTML(id)}">Select size</label>
+                        <select class="lbm-variant-select" id="lbm-size-${escapeHTML(id)}" data-variant="size">
+                            <option value="">Choose size</option>
+                            ${sizes.map(option => `<option value="${escapeHTML(option)}">${escapeHTML(option)}</option>`).join("")}
+                        </select>` : ""}
+
+                    ${colours.length ? `
+                        <label class="lbm-variant-label" for="lbm-colour-${escapeHTML(id)}">Select colour</label>
+                        <select class="lbm-variant-select" id="lbm-colour-${escapeHTML(id)}" data-variant="colour">
+                            <option value="">Choose colour</option>
+                            ${colours.map(option => `<option value="${escapeHTML(option)}">${escapeHTML(option)}</option>`).join("")}
+                        </select>` : ""}
 
                     <button
                         type="button"
@@ -1003,15 +1039,24 @@ function changeProductImage(productId, direction) {
    15. ADD A SPECIFIC PICTURE TO CART
    ===================================================== */
 
-function addImageVariantToCart(product, imageURL, imageIndex) {
+function addImageVariantToCart(product, imageURL, imageIndex, selectedSize = "", selectedColour = "") {
 
     const stock = getStock(product);
 
     if (stock < 1) return false;
 
     const productId = String(product.id);
-
-    const cartKey = makeCartKey(productId, imageURL);
+    const sizes = getProductSizes(product);
+    const colours = getProductColours(product);
+    if (sizes.length && !sizes.includes(selectedSize)) {
+        alert("Please select an available size for " + product.name + ".");
+        return false;
+    }
+    if (colours.length && !colours.includes(selectedColour)) {
+        alert("Please select an available colour for " + product.name + ".");
+        return false;
+    }
+    const cartKey = makeCartKey(productId, imageURL, selectedSize, selectedColour);
 
     const existingItem = cart.find(
         item => item.cartKey === cartKey
@@ -1043,6 +1088,8 @@ function addImageVariantToCart(product, imageURL, imageIndex) {
             selectedImageUrl: imageURL,
 
             selectedImageIndex: imageIndex,
+            selectedSize: selectedSize,
+            selectedColour: selectedColour,
 
             style: "Picture " + (imageIndex + 1),
 
@@ -1066,8 +1113,9 @@ function addToCart(productId) {
     if (!product) return;
 
     const images = getProductImages(product);
+    const selection = getCardVariantSelection(productId);
 
-    if (!addImageVariantToCart(product, images[0], 0)) {
+    if (!addImageVariantToCart(product, images[0], 0, selection.size, selection.colour)) {
 
         alert("Sorry, the available stock for this product has been reached.");
 
@@ -1199,10 +1247,13 @@ function updateCart() {
 
             if (imageIndex < 0) imageIndex = 0;
 
-            const cartKey = makeCartKey(
-                currentProduct.id,
-                imageURL
-            );
+            const selectedSize = item.selectedSize || item.selected_size || "";
+            const selectedColour = item.selectedColour || item.selected_colour || "";
+            const validSizes = getProductSizes(currentProduct);
+            const validColours = getProductColours(currentProduct);
+            const safeSize = validSizes.includes(selectedSize) ? selectedSize : "";
+            const safeColour = validColours.includes(selectedColour) ? selectedColour : "";
+            const cartKey = makeCartKey(currentProduct.id, imageURL, safeSize, safeColour);
 
             return {
 
@@ -1218,6 +1269,8 @@ function updateCart() {
                 selectedImageUrl: imageURL,
 
                 selectedImageIndex: imageIndex,
+                selectedSize: safeSize,
+                selectedColour: safeColour,
 
                 style: "Picture " + (imageIndex + 1)
 
@@ -1297,6 +1350,8 @@ function updateCart() {
 
                         <p class="lbm-cart-style">
                             ${escapeHTML(item.style || "Selected picture")}
+                            ${item.selectedSize ? " · Size: " + escapeHTML(item.selectedSize) : ""}
+                            ${item.selectedColour ? " · Colour: " + escapeHTML(item.selectedColour) : ""}
                         </p>
 
                         <p>${formatPrice(item.price)}</p>
@@ -1829,6 +1884,18 @@ function addSelectedPicturesToCart() {
 
     }
 
+    const selection = getCardVariantSelection(product.id);
+    const sizes = getProductSizes(product);
+    const colours = getProductColours(product);
+    if (sizes.length && !sizes.includes(selection.size)) {
+        alert("Please choose a size on the product card before adding pictures.");
+        return;
+    }
+    if (colours.length && !colours.includes(selection.colour)) {
+        alert("Please choose a colour on the product card before adding pictures.");
+        return;
+    }
+
     const stock = getStock(product);
 
     const currentQuantity =
@@ -1854,7 +1921,9 @@ function addSelectedPicturesToCart() {
         addImageVariantToCart(
             product,
             imageURL,
-            imageIndex >= 0 ? imageIndex : 0
+            imageIndex >= 0 ? imageIndex : 0,
+            selection.size,
+            selection.colour
         );
 
     });
@@ -2340,6 +2409,25 @@ previewStyles.textContent = `
     font-size: 15px !important;
 }
 
+.lbm-variant-label {
+    display: block;
+    margin: 10px 0 5px;
+    font-size: 13px;
+    font-weight: 700;
+}
+.lbm-variant-select {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    margin: 0 0 8px;
+    padding: 8px 10px;
+    border: 1px solid #c9a44c;
+    border-radius: 5px;
+    background: #fff;
+    color: #222;
+    font-size: 14px;
+}
+
 #lbm-preview-add-selected {
     display: block;
     width: 100%;
@@ -2516,6 +2604,17 @@ async function checkoutWhatsApp() {
         const style =
             item.style || ("Picture " + imageIndex);
 
+        const sizes = getProductSizes(product);
+        const colours = getProductColours(product);
+        if (sizes.length && !sizes.includes(item.selectedSize || "")) {
+            alert("Please choose a valid size for " + product.name + ".");
+            return;
+        }
+        if (colours.length && !colours.includes(item.selectedColour || "")) {
+            alert("Please choose a valid colour for " + product.name + ".");
+            return;
+        }
+
         const subtotal = price * quantity;
 
         total += subtotal;
@@ -2536,7 +2635,9 @@ async function checkoutWhatsApp() {
 
             image_index: imageIndex,
 
-            style: style
+            style: style,
+            selected_size: item.selectedSize || null,
+            selected_colour: item.selectedColour || null
 
         });
 
@@ -2628,6 +2729,8 @@ async function checkoutWhatsApp() {
             message +=
                 item.name + "\n" +
                 "Selected style: " + item.style + "\n" +
+                (item.selected_size ? "Size: " + item.selected_size + "\n" : "") +
+                (item.selected_colour ? "Colour: " + item.selected_colour + "\n" : "") +
                 "Quantity: " + item.quantity + "\n" +
                 "Price: " + formatPrice(item.price) + "\n" +
                 "Subtotal: " + formatPrice(item.subtotal) + "\n" +
