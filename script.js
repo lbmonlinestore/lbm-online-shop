@@ -1,10 +1,11 @@
-
 /* =====================================================
    LBM ONLINE SHOP
    COMPLETE STOREFRONT SYSTEM
    SUPABASE + PRODUCT-SPECIFIC LONG-PRESS SELECTION
    DISTINCT CART VARIANTS + WHATSAPP CHECKOUT
    ORDER CANCELLATION
+   DYNAMIC SOCIAL MEDIA LINKS
+   LIVE PRODUCT SEARCH
    ===================================================== */
 
 
@@ -102,8 +103,10 @@ let productImageIndices = {};
 let previewProductId = null;
 let previewImageIndex = 0;
 
+// Product search state.
+let productSearchTerm = "";
+
 // Each product has its OWN selected image collection.
-// Selecting pictures in one product cannot affect another.
 const selectedPreviewImages = new Map();
 
 // Long-press handling for thumbnail selection.
@@ -209,7 +212,6 @@ function getStock(product) {
 }
 
 
-// A separate cart key for every product-picture combination.
 function makeCartKey(productId, imageURL) {
 
     return String(productId) + "::" +
@@ -218,8 +220,6 @@ function makeCartKey(productId, imageURL) {
 }
 
 
-// Calculate the total quantity of all picture variants
-// belonging to the same Supabase product.
 function getProductCartQuantity(productId) {
 
     return cart.reduce((total, item) => {
@@ -233,7 +233,6 @@ function getProductCartQuantity(productId) {
 }
 
 
-// Obtain the selected image set for a particular product.
 function getSelectedImages(productId) {
 
     const id = String(productId);
@@ -430,6 +429,160 @@ async function loadBackground() {
 
 
 /* =====================================================
+   10A. LOAD SOCIAL MEDIA LINKS FROM SUPABASE
+   ===================================================== */
+
+async function loadSocialLinks() {
+
+    const socialAccounts = [
+
+        {
+            id: "facebookLink",
+            key: "social_facebook",
+            hosts: [
+                "facebook.com",
+                "www.facebook.com",
+                "m.facebook.com",
+                "fb.com",
+                "www.fb.com"
+            ]
+        },
+
+        {
+            id: "instagramLink",
+            key: "social_instagram",
+            hosts: [
+                "instagram.com",
+                "www.instagram.com"
+            ]
+        },
+
+        {
+            id: "whatsappLink",
+            key: "social_whatsapp",
+            hosts: [
+                "wa.me",
+                "api.whatsapp.com",
+                "whatsapp.com",
+                "www.whatsapp.com"
+            ]
+        }
+
+    ];
+
+
+    socialAccounts.forEach(account => {
+
+        const element = document.getElementById(account.id);
+
+        if (element) {
+
+            element.hidden = true;
+
+            element.removeAttribute("href");
+
+        }
+
+    });
+
+
+    try {
+
+        const { data, error } = await supabaseClient
+            .from("site_settings")
+            .select("setting_key, setting_value")
+            .in(
+                "setting_key",
+                socialAccounts.map(account => account.key)
+            );
+
+        if (error) throw error;
+
+
+        const settings = new Map(
+
+            (data || []).map(item => [
+
+                item.setting_key,
+
+                item.setting_value
+
+            ])
+
+        );
+
+
+        socialAccounts.forEach(account => {
+
+            const element = document.getElementById(account.id);
+
+            if (!element) return;
+
+            let savedURL = settings.get(account.key);
+
+            if (typeof savedURL !== "string") return;
+
+            savedURL = savedURL.trim();
+
+            if (!savedURL) return;
+
+
+            if (!/^https?:\/\//i.test(savedURL)) {
+
+                savedURL = "https://" + savedURL;
+
+            }
+
+
+            try {
+
+                const parsedURL = new URL(savedURL);
+
+                if (parsedURL.protocol !== "https:") return;
+
+                if (
+                    !account.hosts.includes(
+                        parsedURL.hostname.toLowerCase()
+                    )
+                ) {
+
+                    return;
+
+                }
+
+                element.href = parsedURL.href;
+
+                element.hidden = false;
+
+
+            } catch (urlError) {
+
+                console.warn(
+                    "Invalid social media URL:",
+                    account.key
+                );
+
+            }
+
+        });
+
+
+        console.log("LBM social media links loaded.");
+
+
+    } catch (error) {
+
+        console.error(
+            "Social media links loading error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =====================================================
    11. LOAD PRODUCTS FROM SUPABASE
    ===================================================== */
 
@@ -463,6 +616,8 @@ async function loadProducts() {
             productList.innerHTML =
                 "<p>No products are currently available.</p>";
 
+            updateSearchResults(0, "");
+
             updateCart();
 
             return;
@@ -488,14 +643,201 @@ async function loadProducts() {
 
 
 /* =====================================================
-   12. DISPLAY PRODUCTS
+   12. PRODUCT SEARCH
    ===================================================== */
 
-function displayProducts() {
+// Normalise text so that searching is not case-sensitive.
+function normaliseSearchText(value) {
+
+    return String(value ?? "")
+        .toLowerCase()
+        .trim();
+
+}
+
+
+// Search across the available product information.
+// Optional fields are ignored when they do not exist.
+function searchProducts(searchTerm) {
+
+    const query = normaliseSearchText(searchTerm);
+
+    if (!query) return products;
+
+    return products.filter(product => {
+
+        const searchableFields = [
+
+            product.name,
+            product.brand,
+            product.category,
+            product.description,
+            product.sku
+
+        ];
+
+        const searchableText = searchableFields
+            .filter(value => value !== null && value !== undefined)
+            .map(value => String(value))
+            .join(" ")
+            .toLowerCase();
+
+        return searchableText.includes(query);
+
+    });
+
+}
+
+
+// Update the search result message.
+function updateSearchResults(resultCount, searchTerm) {
+
+    const results = document.getElementById(
+        "lbm-search-results"
+    );
+
+    if (!results) return;
+
+    if (!searchTerm.trim()) {
+
+        results.textContent =
+            "Showing all " + resultCount + " products";
+
+        return;
+
+    }
+
+    if (resultCount === 0) {
+
+        results.textContent =
+            'No products found for "' + searchTerm.trim() + '"';
+
+        return;
+
+    }
+
+    results.textContent =
+        "Found " + resultCount +
+        (resultCount === 1
+            ? " matching product"
+            : " matching products");
+
+}
+
+
+// Apply the search without changing the original products array.
+function filterProducts() {
+
+    const filteredProducts = searchProducts(productSearchTerm);
+
+    displayProducts(filteredProducts);
+
+    updateSearchResults(
+        filteredProducts.length,
+        productSearchTerm
+    );
+
+}
+
+
+// Install the search input and clear button.
+function installProductSearch() {
+
+    const searchInput = document.getElementById(
+        "lbm-product-search"
+    );
+
+    const clearButton = document.getElementById(
+        "lbm-clear-search"
+    );
+
+    if (!searchInput || !clearButton) {
+
+        console.warn("Product search elements were not found.");
+
+        return;
+
+    }
+
+    // Prevent duplicate event listeners.
+    if (searchInput.dataset.searchInstalled === "true") return;
+
+    searchInput.dataset.searchInstalled = "true";
+
+
+    searchInput.addEventListener("input", function() {
+
+        productSearchTerm = this.value;
+
+        clearButton.hidden = !productSearchTerm.trim();
+
+        filterProducts();
+
+    });
+
+
+    clearButton.addEventListener("click", function() {
+
+        searchInput.value = "";
+
+        productSearchTerm = "";
+
+        clearButton.hidden = true;
+
+        filterProducts();
+
+        searchInput.focus();
+
+    });
+
+}
+
+
+/* =====================================================
+   13. DISPLAY PRODUCTS
+   ===================================================== */
+
+// The optional array allows search results to be displayed
+// without modifying the original Supabase products array.
+function displayProducts(productArray = products) {
 
     if (!productList) return;
 
-    productList.innerHTML = products.map(product => {
+    if (productArray.length === 0) {
+
+        const hasSearch =
+            productSearchTerm.trim().length > 0;
+
+        productList.innerHTML = `
+
+            <div class="lbm-no-search-results">
+
+                <div class="lbm-no-search-icon" aria-hidden="true">
+                    ⌕
+                </div>
+
+                <h3>
+                    ${hasSearch
+                        ? "No products found"
+                        : "No products available"}
+                </h3>
+
+                <p>
+                    ${hasSearch
+                        ? "Try another product name, brand or category."
+                        : "Please check back later for new products."}
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    productList.innerHTML = productArray.map(product => {
 
         const images = getProductImages(product);
 
@@ -592,6 +934,7 @@ function displayProducts() {
 
     }).join("");
 
+
     productList.querySelectorAll(".product-image").forEach(image => {
 
         image.addEventListener("error", function() {
@@ -607,7 +950,7 @@ function displayProducts() {
 
 
 /* =====================================================
-   13. CHANGE PRODUCT CARD IMAGE
+   14. CHANGE PRODUCT CARD IMAGE
    ===================================================== */
 
 function changeProductImage(productId, direction) {
@@ -668,7 +1011,7 @@ function changeProductImage(productId, direction) {
 
 
 /* =====================================================
-   14. ADD A SPECIFIC PICTURE TO CART
+   15. ADD A SPECIFIC PICTURE TO CART
    ===================================================== */
 
 function addImageVariantToCart(product, imageURL, imageIndex) {
@@ -725,7 +1068,6 @@ function addImageVariantToCart(product, imageURL, imageIndex) {
 }
 
 
-// Normal product-card Add to Cart uses the first picture.
 function addToCart(productId) {
 
     const product = products.find(
@@ -758,7 +1100,7 @@ function addToCart(productId) {
 
 
 /* =====================================================
-   15. CHANGE A SPECIFIC CART LINE QUANTITY
+   16. CHANGE A SPECIFIC CART LINE QUANTITY
    ===================================================== */
 
 function changeCartLineQuantity(cartKey, change) {
@@ -812,14 +1154,13 @@ function changeCartLineQuantity(cartKey, change) {
 
 
 /* =====================================================
-   16. UPDATE SHOPPING CART
+   17. UPDATE SHOPPING CART
    ===================================================== */
 
 function updateCart() {
 
     if (!cartItems || !cartTotal) return;
 
-    // Do not discard saved cart items before products load.
     if (products.length > 0) {
 
         cart = cart.filter(item => {
@@ -832,7 +1173,7 @@ function updateCart() {
 
         });
 
-        // Refresh product details while preserving each exact picture.
+
         cart = cart.map(item => {
 
             const currentProduct = products.find(
@@ -895,7 +1236,7 @@ function updateCart() {
 
         });
 
-        // Merge duplicate product-picture lines safely.
+
         const merged = new Map();
 
         cart.forEach(item => {
@@ -916,6 +1257,7 @@ function updateCart() {
         cart = [...merged.values()];
 
     }
+
 
     const totalQuantity = cart.reduce(
         (sum, item) => sum + Number(item.quantity),
@@ -1014,6 +1356,7 @@ function updateCart() {
 
     }
 
+
     cartItems.querySelectorAll("img").forEach(image => {
 
         image.addEventListener("error", function() {
@@ -1027,7 +1370,6 @@ function updateCart() {
 
     cartTotal.textContent = formatPrice(totalPrice);
 
-    // Checkout is also blocked if any product exceeds current stock.
     const stockExceeded = products.some(product => {
 
         return getProductCartQuantity(product.id) > getStock(product);
@@ -1047,7 +1389,7 @@ function updateCart() {
 
 
 /* =====================================================
-   17. IMAGE PREVIEW MODAL
+   18. IMAGE PREVIEW MODAL
    PRODUCT-SPECIFIC LONG-PRESS SELECTION
    ===================================================== */
 
@@ -1178,10 +1520,6 @@ function createImagePreview() {
         });
 
 
-    /* ---------------------------------------------
-       THUMBNAIL SHORT TAP AND LONG-PRESS HANDLING
-       --------------------------------------------- */
-
     const thumbnailContainer = document.getElementById(
         "lbm-preview-thumbnails"
     );
@@ -1210,7 +1548,6 @@ function createImagePreview() {
 
         if (!thumbnail) return;
 
-        // Ignore right-click and non-primary mouse buttons.
         if (event.pointerType === "mouse" && event.button !== 0) {
             return;
         }
@@ -1227,12 +1564,10 @@ function createImagePreview() {
             thumbnail.dataset.previewIndex
         );
 
-        // 500 milliseconds is the long-press threshold.
         thumbnailPressTimer = setTimeout(() => {
 
             thumbnailPressTimer = null;
 
-            // Ensure the same product and thumbnail are still active.
             if (
                 previewProductId !== pressedProductId ||
                 !pressedButton.isConnected
@@ -1245,7 +1580,6 @@ function createImagePreview() {
             suppressThumbnailClickUntil =
                 Date.now() + 800;
 
-            // Select or unselect this thumbnail only.
             togglePictureSelection(imageIndex);
 
         }, 500);
@@ -1255,7 +1589,6 @@ function createImagePreview() {
 
     thumbnailContainer.addEventListener("pointerup", () => {
 
-        // If the long press has not fired, this is a normal tap.
         clearThumbnailPress();
 
     });
@@ -1294,8 +1627,6 @@ function createImagePreview() {
 
         if (!thumbnail) return;
 
-        // A long-press already selected the picture.
-        // Do not also treat the resulting click as a preview tap.
         if (Date.now() < suppressThumbnailClickUntil) {
 
             event.preventDefault();
@@ -1306,7 +1637,6 @@ function createImagePreview() {
 
         }
 
-        // Normal short tap changes the large preview only.
         previewImageIndex = Number(
             thumbnail.dataset.previewIndex
         );
@@ -1328,7 +1658,7 @@ function createImagePreview() {
 
 
 /* =====================================================
-   18. OPEN PRODUCT IMAGE PREVIEW
+   19. OPEN PRODUCT IMAGE PREVIEW
    ===================================================== */
 
 function previewProductImage(productId) {
@@ -1363,7 +1693,7 @@ function previewProductImage(productId) {
 
 
 /* =====================================================
-   19. TOGGLE A PARTICULAR THUMBNAIL SELECTION
+   20. TOGGLE A PARTICULAR THUMBNAIL SELECTION
    ===================================================== */
 
 function togglePictureSelection(imageIndex) {
@@ -1398,7 +1728,6 @@ function togglePictureSelection(imageIndex) {
 
     const imageURL = images[imageIndex];
 
-    // This selection set belongs ONLY to the open product.
     const selected = getSelectedImages(previewProductId);
 
     if (selected.has(imageURL)) {
@@ -1417,7 +1746,7 @@ function togglePictureSelection(imageIndex) {
 
 
 /* =====================================================
-   20. ADD ALL SELECTED PICTURES TO CART
+   21. ADD ALL SELECTED PICTURES TO CART
    ===================================================== */
 
 function addSelectedPicturesToCart() {
@@ -1449,8 +1778,6 @@ function addSelectedPicturesToCart() {
     const currentQuantity =
         getProductCartQuantity(product.id);
 
-    // Each selected picture adds one unit.
-    // Validate combined stock before adding anything.
     if (currentQuantity + selectedURLs.length > stock) {
 
         alert(
@@ -1476,8 +1803,6 @@ function addSelectedPicturesToCart() {
 
     });
 
-    // Clear only this product's selection.
-    // Other products' selections remain untouched.
     selected.clear();
 
     saveCart();
@@ -1496,7 +1821,7 @@ function addSelectedPicturesToCart() {
 
 
 /* =====================================================
-   21. RENDER PRODUCT GALLERY + SELECTION STATUS
+   22. RENDER PRODUCT GALLERY + SELECTION STATUS
    ===================================================== */
 
 function renderPreviewGallery() {
@@ -1634,7 +1959,7 @@ function renderPreviewGallery() {
 
 
 /* =====================================================
-   22. CHANGE PREVIEW IMAGE
+   23. CHANGE PREVIEW IMAGE
    ===================================================== */
 
 function changePreviewImage(direction) {
@@ -1662,7 +1987,7 @@ function changePreviewImage(direction) {
 
 
 /* =====================================================
-   23. CLOSE IMAGE PREVIEW
+   24. CLOSE IMAGE PREVIEW
    ===================================================== */
 
 function closeImagePreview() {
@@ -1693,7 +2018,7 @@ function closeImagePreview() {
 
 
 /* =====================================================
-   24. PREVIEW KEYBOARD CONTROLS
+   25. PREVIEW KEYBOARD CONTROLS
    ===================================================== */
 
 document.addEventListener("keydown", event => {
@@ -1724,7 +2049,7 @@ document.addEventListener("keydown", event => {
 
 
 /* =====================================================
-   25. IMAGE GALLERY + SELECTION STYLES
+   26. IMAGE GALLERY + SELECTION STYLES
    ===================================================== */
 
 document.getElementById("lbm-gallery-styles")?.remove();
@@ -1888,11 +2213,7 @@ previewStyles.textContent = `
     cursor: pointer;
     position: relative;
     flex-shrink: 0;
-
-    /* Allow vertical scrolling while supporting long-press. */
     touch-action: pan-y;
-
-    /* Prevent the browser's image dragging and text selection. */
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
@@ -2029,7 +2350,7 @@ document.head.appendChild(previewStyles);
 
 
 /* =====================================================
-   26. WHATSAPP CHECKOUT + SUPABASE ORDER SAVING
+   27. WHATSAPP CHECKOUT + SUPABASE ORDER SAVING
    ===================================================== */
 
 async function checkoutWhatsApp() {
@@ -2070,7 +2391,6 @@ async function checkoutWhatsApp() {
 
     let total = 0;
 
-    // Validate aggregate stock across every picture variant.
     for (const product of products) {
 
         const quantity = getProductCartQuantity(product.id);
@@ -2185,7 +2505,6 @@ async function checkoutWhatsApp() {
 
     try {
 
-        // Keep the existing RPC name and parameter names.
         const { data, error } = await supabaseClient.rpc(
             "place_lbm_order",
             {
@@ -2273,7 +2592,6 @@ async function checkoutWhatsApp() {
             "?text=" +
             encodeURIComponent(message);
 
-        // Clear the cart only after Supabase confirms the order.
         cart = [];
 
         saveCart();
@@ -2336,7 +2654,7 @@ async function checkoutWhatsApp() {
 
 
 /* =====================================================
-   27. CUSTOMER ORDER CANCELLATION
+   28. CUSTOMER ORDER CANCELLATION
    ===================================================== */
 
 function installOrderCancellation() {
@@ -2576,7 +2894,7 @@ function installOrderCancellation() {
 
 
 /* =====================================================
-   28. CANCELLATION STYLES
+   29. CANCELLATION STYLES
    ===================================================== */
 
 document.getElementById("lbm-cancellation-styles")?.remove();
@@ -2642,14 +2960,14 @@ document.head.appendChild(orderToolsStyles);
 
 
 /* =====================================================
-   29. INSTALL ORDER CANCELLATION
+   30. INSTALL ORDER CANCELLATION
    ===================================================== */
 
 installOrderCancellation();
 
 
 /* =====================================================
-   30. ALL STOREFRONT BUTTON EVENTS
+   31. ALL STOREFRONT BUTTON EVENTS
    ===================================================== */
 
 document.addEventListener("click", function(event) {
@@ -2704,7 +3022,7 @@ document.addEventListener("click", function(event) {
 
 
 /* =====================================================
-   31. OPEN AND CLOSE SHOPPING CART
+   32. OPEN AND CLOSE SHOPPING CART
    ===================================================== */
 
 if (cartButton && cartSection) {
@@ -2730,7 +3048,7 @@ if (closeCartButton && cartSection) {
 
 
 /* =====================================================
-   32. CHECKOUT BUTTON
+   33. CHECKOUT BUTTON
    ===================================================== */
 
 if (checkoutButton) {
@@ -2744,7 +3062,7 @@ if (checkoutButton) {
 
 
 /* =====================================================
-   33. FOOTER YEAR
+   34. FOOTER YEAR
    ===================================================== */
 
 const yearElement = document.getElementById("year");
@@ -2757,20 +3075,28 @@ if (yearElement) {
 
 
 /* =====================================================
-   34. START LBM ONLINE SHOP
+   35. START LBM ONLINE SHOP
    ===================================================== */
 
 async function startShop() {
 
     console.log("Starting LBM Online Shop...");
 
+    // Install search listeners before loading products.
+    installProductSearch();
+
     await Promise.all([
 
         loadProducts(),
 
-        loadBackground()
+        loadBackground(),
+
+        loadSocialLinks()
 
     ]);
+
+    // Apply the initial search state after products load.
+    filterProducts();
 
     updateCart();
 
