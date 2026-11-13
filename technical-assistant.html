@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173d70">
+
+  <title>LBM Technical Assistant</title>
+
+  <!-- Detect when this page is displayed inside the shop's chat window -->
+  <script>
+    if (new URLSearchParams(window.location.search).get("embedded") === "1") {
+      document.documentElement.classList.add("assistant-embedded");
+    }
+  
+  </script>
+
+  <link rel="stylesheet" href="assistant.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+  <div class="assistant-page">
+
+    <header class="assistant-header">
+      <div class="assistant-brand">
+        LBM ONLINE SHOP
+      </div>
+
+      <div class="assistant-subtitle">
+        Your Shopping Technical Assistant
+      </div>
+
+      <div class="assistant-status">
+        <span class="status-dot"></span>
+        Here to help you shop
+      </div>
+    </header>
+
+    <main class="assistant-container">
+
+      <section class="chat-card">
+
+        <div class="chat-heading">
+          <div>
+            <h2>Technical Assistant</h2>
+            <p>Ask me about products and shopping.</p>
+          </div>
+
+          <select
+            id="assistantLanguage"
+            class="language-select"
+            aria-label="Choose language"
+          >
+            <option value="en">English</option>
+            <option value="bem">Bemba</option>
+            <option value="nya">Nyanja</option>
+          </select>
+        </div>
+
+        <div
+          id="chatMessages"
+          class="chat-messages"
+          aria-live="polite"
+        >
+          <div class="message bot">
+            <strong>Welcome to LBM Online Shop!</strong>
+
+            <p>
+              I'm your Technical Assistant. I can help you find
+              products, check available sizes and colours, and
+              understand how to order.
+            </p>
+
+            <p>
+              You can communicate with me in English, Bemba or Nyanja.
+            </p>
+
+            <span class="message-time">LBM Assistant</span>
+          </div>
+        </div>
+
+        <div class="quick-questions">
+
+          <button
+            type="button"
+            class="quick-question"
+            data-question="Show me available products"
+          >
+            View Products
+          </button>
+
+          <button
+            type="button"
+            class="quick-question"
+            data-question="How can I order?"
+          >
+            How to Order
+          </button>
+
+          <button
+            type="button"
+            class="quick-question"
+            data-question="What sizes are available?"
+          >
+            Available Sizes
+          </button>
+
+          <button
+            type="button"
+            class="quick-question"
+            data-question="What colours are available?"
+          >
+            Available Colours
+          </button>
+
+        </div>
+
+        <form id="chatForm" class="chat-input-area">
+
+          <input
+            type="text"
+            id="chatInput"
+            class="chat-input"
+            placeholder="Type your question here..."
+            autocomplete="off"
+            required
+          >
+
+          <button
+            type="submit"
+            id="sendButton"
+            class="send-button"
+          >
+            Send
+          </button>
+
+        </form>
+
+      </section>
+
+    </main>
+
+    <footer class="assistant-footer">
+      LBM Online Shop | Technical Assistant
+      <br>
+      Shopping made easier.
+    </footer>
+
+  </div>
+
+  <!-- Existing assistant engine -->
+  <script src="assistant.js"></script>
+
+</body>
+</html>

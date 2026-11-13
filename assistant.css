@@ -1,0 +1,300 @@
+
+/* ==================================================
+   LBM ONLINE SHOP
+   TECHNICAL ASSISTANT - STYLESHEET
+   Version 1.0 | K0 TEST BUILD
+   ================================================== */
+
+:root {
+  --lbm-blue: #173d70;
+  --lbm-dark-blue: #102c50;
+  --lbm-gold: #d6a63c;
+  --lbm-light: #f3f6fb;
+  --lbm-white: #ffffff;
+  --lbm-text: #202b3c;
+  --lbm-muted: #718096;
+  --lbm-border: #e2e8f0;
+  --lbm-green: #16834a;
+  --lbm-radius: 16px;
+  --lbm-shadow: 0 8px 30px rgba(16, 44, 80, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--lbm-text);
+  background: var(--lbm-light);
+}
+
+/* MAIN PAGE */
+
+.assistant-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.assistant-header {
+  background: linear-gradient(
+    135deg,
+    var(--lbm-dark-blue),
+    var(--lbm-blue)
+  );
+  color: white;
+  padding: 25px 18px;
+  text-align: center;
+  border-bottom: 4px solid var(--lbm-gold);
+}
+
+.assistant-brand {
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.assistant-subtitle {
+  margin-top: 7px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.assistant-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 13px;
+  padding: 6px 12px;
+  border-radius: 30px;
+  background: rgba(255,255,255,0.13);
+  font-size: 12px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #55df91;
+}
+
+/* CHAT CONTAINER */
+
+.assistant-container {
+  width: 100%;
+  max-width: 850px;
+  margin: 25px auto;
+  padding: 0 15px;
+  flex: 1;
+}
+
+.chat-card {
+  background: var(--lbm-white);
+  border-radius: var(--lbm-radius);
+  box-shadow: var(--lbm-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+  max-height: 760px;
+}
+
+.chat-heading {
+  padding: 18px;
+  border-bottom: 1px solid var(--lbm-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.chat-heading h2 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--lbm-blue);
+}
+
+.chat-heading p {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: var(--lbm-muted);
+}
+
+.language-select {
+  border: 1px solid var(--lbm-border);
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: white;
+  color: var(--lbm-blue);
+  font-size: 13px;
+  max-width: 125px;
+}
+
+/* MESSAGES */
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 15px;
+  background: #f9fbfe;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.message {
+  max-width: 85%;
+  padding: 12px 15px;
+  border-radius: 15px;
+  font-size: 14px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.message.bot {
+  align-self: flex-start;
+  background: white;
+  border: 1px solid var(--lbm-border);
+  border-bottom-left-radius: 4px;
+}
+
+.message.user {
+  align-self: flex-end;
+  background: var(--lbm-blue);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message a {
+  color: inherit;
+  font-weight: bold;
+}
+
+.message-time {
+  display: block;
+  margin-top: 5px;
+  font-size: 10px;
+  opacity: 0.65;
+}
+
+/* QUICK QUESTIONS */
+
+.quick-questions {
+  padding: 13px 15px;
+  border-top: 1px solid var(--lbm-border);
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  background: white;
+}
+
+.quick-question {
+  flex-shrink: 0;
+  border: 1px solid #cbd8e8;
+  background: #f3f7fc;
+  color: var(--lbm-blue);
+  border-radius: 30px;
+  padding: 9px 13px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.quick-question:hover {
+  background: var(--lbm-blue);
+  color: white;
+}
+
+/* MESSAGE INPUT */
+
+.chat-input-area {
+  padding: 14px;
+  display: flex;
+  gap: 9px;
+  background: white;
+  border-top: 1px solid var(--lbm-border);
+}
+
+.chat-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--lbm-border);
+  outline: none;
+  border-radius: 12px;
+  padding: 13px;
+  font-size: 14px;
+}
+
+.chat-input:focus {
+  border-color: var(--lbm-blue);
+}
+
+.send-button {
+  border: none;
+  border-radius: 12px;
+  background: var(--lbm-blue);
+  color: white;
+  padding: 0 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.send-button:hover {
+  background: var(--lbm-dark-blue);
+}
+
+/* PRODUCT RESULTS */
+
+.product-result {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--lbm-border);
+  border-radius: 12px;
+  background: white;
+}
+
+.product-result h3 {
+  margin: 0 0 7px;
+  font-size: 15px;
+  color: var(--lbm-blue);
+}
+
+.product-result p {
+  margin: 5px 0;
+  font-size: 13px;
+}
+
+.product-price {
+  font-weight: bold;
+  color: var(--lbm-green);
+}
+
+.product-link {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: var(--lbm-blue);
+  color: white !important;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+/* FLOATING CHAT LAUNCHER */
+
+.assistant-launcher {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 9999;
+  width: 62px;
+  height: 62px;
+  border: 3px solid white;
+  border-radius: 50%;
+  background: var(--lbm-blue);
+  color: white;
+  box-shadow: var(--lbm-shadow);
+  font
