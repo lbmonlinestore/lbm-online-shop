@@ -61,13 +61,13 @@ body.image-viewer-open{overflow:hidden}
 <form id="productForm"><input type="hidden" id="productId"><label>Product Name</label><input id="productName" required placeholder="e.g. Classic Men's Shirt"><label>Description</label><textarea id="productDescription" placeholder="Describe your product"></textarea>
 <label>Category</label><select id="productCategory" required><option value="">Select category</option><option>Men's Clothing</option><option>Women's Clothing</option><option>Men's Shoes</option><option>Women's Shoes</option><option>Shoes</option><option>Accessories</option><option>Other</option></select>
 <label>Price (ZMW)</label><input id="productPrice" type="number" min="0" step=".01" required><label>Stock Quantity</label><input id="productStock" type="number" min="0" step="1" required>
-<label>Size Format</label><select id="productSizeType"><option value="none">No Sizes</option><option value="numeric">Numeric Sizes (Shoes)</option><option value="letters">Letter Sizes (Clothing)</option></select>
-<label>Available Sizes</label><input id="productAvailableSizes" placeholder="Example: 38, 39, 40, 41, 42"><p class="upload-note">Separate each size with commas. For letters, use XS, S, M, L, XL, XXL.</p>
-<label>Available Colours</label><input id="productAvailableColours" placeholder="Example: Black, Blue, White, Grey"><p class="upload-note">Separate each colour with a comma. Only entered colours will be available to customers.</p>
+<label>Size Format</label><select id="productSizeType"><option value="none">No Sizes</option><option value="custom">Custom Sizes</option></select>
+<label>Available Sizes</label><textarea id="productAvailableSizes" rows="4" placeholder="Enter one size per line. Example:&#10;Small&#10;XL&#10;42&#10;Free Size&#10;2-4 Years&#10;Size_A&amp;B"></textarea><p class="upload-note">Enter one size per line. You may use any letters, numbers, spaces or punctuation, including commas, hyphens, underscores, ampersands and slashes. Edit or delete any line whenever needed.</p>
+<label>Available Colours</label><textarea id="productAvailableColours" rows="4" placeholder="Enter one colour per line. Example:&#10;Black&#10;Sky Blue&#10;Red &amp; White"></textarea><p class="upload-note">Enter one colour per line. Only the colours entered here will be available to customers.</p>
 <label>Product Photos</label><input id="productImageFile" type="file" accept="image/jpeg,image/png,image/webp" multiple><p class="upload-note">Select multiple JPG, PNG or WEBP photographs. Maximum 5 MB each.</p>
 <div id="imagePreviewContainer" class="image-grid"></div><p id="existingImageNote" class="small"></p>
 <button id="saveButton" type="submit" style="width:100%">Save Product</button><button type="button" id="cancelEdit" class="secondary hidden" style="width:100%;margin-top:8px">Cancel Editing</button></form><div id="productMessage" class="message hidden"></div></div>
-<div class="panel"><h2>Product Instructions</h2><p style="line-height:1.8;font-size:14px">1. Enter product details.<br><br>2. Choose the size format.<br><br>3. Enter available sizes and colours.<br><br>4. Select photographs from your phone Gallery.<br><br>5. Press Save Product.<br><br>6. Photographs upload to Supabase Storage.<br><br>7. The product is saved to the shop database.</p><br><p class="small">When editing, existing photographs are retained unless removed.</p></div></div>
+<div class="panel"><h2>Product Instructions</h2><p style="line-height:1.8;font-size:14px">1. Enter product details.<br><br>2. Choose Custom Sizes if the product has sizes, or No Sizes if it does not.<br><br>3. Enter one size or colour per line. You may use any text and punctuation.<br><br>4. Select photographs from your phone Gallery.<br><br>5. Press Save Product.<br><br>6. Photographs upload to Supabase Storage.<br><br>7. The product is saved to the shop database.</p><br><p class="small">When editing, existing photographs are retained unless removed. To add, edit or delete a size or colour, add, change or remove its line.</p></div></div>
 <div class="panel"><h2>All Products</h2><button id="refreshProducts" class="secondary">Refresh Products</button><div id="productList" class="empty">Loading products...</div></div></section>
 <section id="ordersTab" class="tab-content hidden"><div class="panel"><h2>Customer Orders</h2><button id="refreshOrders" class="secondary">Refresh Orders</button><div id="ordersList" class="empty">Loading orders...</div></div></section>
 <section id="reviewsTab" class="tab-content hidden"><div class="panel"><h2>Customer Reviews Management</h2><p class="small">Review submissions before they appear publicly. Only approved reviews are visible to customers.</p>
@@ -88,6 +88,12 @@ const SUPABASE_URL="https://toovotqrcsulhgdrcsmn.supabase.co";
 const SUPABASE_KEY="sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY),BUCKET="product-images";
 let currentUser=null,productsCache=[],ordersCache=[],selectedProductFiles=[],existingProductImages=[],currentBackgroundUrl="";
+  window.LBM_ADMIN_CONTEXT = {
+  db: db,
+  get currentUser() {
+    return currentUser;
+  }
+};
 const $=id=>document.getElementById(id);
 const loginSection=$("loginSection"),dashboard=$("dashboard"),loginMessage=$("loginMessage"),mainMessage=$("mainMessage"),productMessage=$("productMessage");
 function showMessage(el,msg,type=""){el.textContent=msg;el.className="message";if(type==="error")el.classList.add("error");if(type==="success")el.classList.add("success-message");}
@@ -150,27 +156,48 @@ async function loadProducts(){
  if(error){list.textContent="Could not load products: "+error.message;throw error;}
  productsCache=data||[];$("totalProducts").textContent=productsCache.length;list.innerHTML="";
  if(!productsCache.length){list.innerHTML='<p class="empty">No products added yet.</p>';return;}
- productsCache.forEach(p=>{const row=document.createElement("div");row.className="product";const img=document.createElement("img");img.src=getProductImageUrls(p)[0]||"";img.alt=p.name||"Product";img.onerror=function(){this.style.display="none";};const info=document.createElement("div");info.className="product-info";const name=document.createElement("strong");name.textContent=p.name||"Unnamed product";const detail=document.createElement("p");detail.textContent=money(p.price)+" | Stock: "+(p.stock??0)+" | "+(p.category||"Uncategorised");const options=document.createElement("p");options.textContent="Sizes: "+(Array.isArray(p.available_sizes)?p.available_sizes.join(", "):"None")+" | Colours: "+(Array.isArray(p.available_colours)?p.available_colours.join(", "):"None");const actions=document.createElement("div");actions.className="actions";const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>editProduct(p.id);const del=document.createElement("button");del.textContent="Delete";del.className="danger";del.onclick=()=>deleteProduct(p.id);actions.append(edit,del);info.append(name,detail,options,actions);row.append(img,info);list.append(row);});
+ productsCache.forEach(p=>{const row=document.createElement("div");row.className="product";const img=document.createElement("img");img.src=getProductImageUrls(p)[0]||"";img.alt=p.name||"Product";img.onerror=function(){this.style.display="none";};const info=document.createElement("div");info.className="product-info";const name=document.createElement("strong");name.textContent=p.name||"Unnamed product";const detail=document.createElement("p");detail.textContent=money(p.price)+" | Stock: "+(p.stock??0)+" | "+(p.category||"Uncategorised");const options=document.createElement("p");options.textContent="Sizes: "+(getProductOptions(p.available_sizes).join(" • ")||"None")+" | Colours: "+(getProductOptions(p.available_colours).join(" • ")||"None");const actions=document.createElement("div");actions.className="actions";const edit=document.createElement("button");edit.textContent="Edit";edit.onclick=()=>editProduct(p.id);const del=document.createElement("button");del.textContent="Delete";del.className="danger";del.onclick=()=>deleteProduct(p.id);actions.append(edit,del);info.append(name,detail,options,actions);row.append(img,info);list.append(row);});
 }
 
-/* SECTION 7 — RESET PRODUCT FORM */
+/* SECTION 7 — SIZE AND COLOUR OPTION HELPERS */
+function getProductOptions(value){
+ if(Array.isArray(value))return value.map(item=>String(item));
+ if(typeof value==="string"&&value.trim()){
+  try{const parsed=JSON.parse(value);if(Array.isArray(parsed))return parsed.map(item=>String(item));}catch(error){}
+  /* Backward compatibility for older comma-separated records.
+     New records are saved as arrays, so punctuation inside labels is preserved. */
+  return value.split(/[,\n;]/).map(item=>item.trim()).filter(Boolean);
+ }
+ return [];
+}
+function getUniqueOptionLines(value){
+ return [...new Set(String(value??"").split(/\r?\n/).map(item=>item.trim()).filter(Boolean))];
+}
+
+/* SECTION 8 — RESET PRODUCT FORM */
 function resetProductForm(){$("productForm").reset();$("productSizeType").value="none";$("productId").value="";$("formHeading").textContent="Add New Product";$("saveButton").textContent="Save Product";$("cancelEdit").classList.add("hidden");selectedProductFiles=[];existingProductImages=[];$("existingImageNote").textContent="";$("productImageFile").value="";renderProductImagePreviews();hideMessage(productMessage);}
 
-/* SECTION 8 — EDIT PRODUCT */
-function editProduct(id){const p=productsCache.find(x=>String(x.id)===String(id));if(!p)return;$("productId").value=p.id;$("productName").value=p.name||"";$("productDescription").value=p.description||"";$("productCategory").value=p.category||"";$("productPrice").value=p.price??"";$("productStock").value=p.stock??"";$("productSizeType").value=p.size_type||"none";$("productAvailableSizes").value=Array.isArray(p.available_sizes)?p.available_sizes.join(", "):"";$("productAvailableColours").value=Array.isArray(p.available_colours)?p.available_colours.join(", "):"";existingProductImages=getProductImageUrls(p);selectedProductFiles=[];$("productImageFile").value="";renderProductImagePreviews();$("existingImageNote").textContent=existingProductImages.length+" existing photo(s). Remove any you no longer want.";$("formHeading").textContent="Edit Product";$("saveButton").textContent="Update Product";$("cancelEdit").classList.remove("hidden");$("productForm").scrollIntoView({behavior:"smooth",block:"start"});}
+/* SECTION 9 — EDIT PRODUCT */
+function editProduct(id){
+ const p=productsCache.find(x=>String(x.id)===String(id));if(!p)return;
+ $("productId").value=p.id;$("productName").value=p.name||"";$("productDescription").value=p.description||"";$("productCategory").value=p.category||"";$("productPrice").value=p.price??"";$("productStock").value=p.stock??"";
+ const sizes=getProductOptions(p.available_sizes),colours=getProductOptions(p.available_colours);
+ $("productSizeType").value=sizes.length?"custom":"none";
+ $("productAvailableSizes").value=sizes.join("\n");$("productAvailableColours").value=colours.join("\n");
+ existingProductImages=getProductImageUrls(p);selectedProductFiles=[];$("productImageFile").value="";renderProductImagePreviews();$("existingImageNote").textContent=existingProductImages.length+" existing photo(s). Remove any you no longer want.";$("formHeading").textContent="Edit Product";$("saveButton").textContent="Update Product";$("cancelEdit").classList.remove("hidden");$("productForm").scrollIntoView({behavior:"smooth",block:"start"});
+}
 $("cancelEdit").addEventListener("click",resetProductForm);
 
-/* SECTION 9 — SAVE PRODUCT */
+/* SECTION 10 — SAVE PRODUCT */
 $("productForm").addEventListener("submit",async e=>{
  e.preventDefault();const button=$("saveButton");button.disabled=true;const id=$("productId").value;
  try{
   const name=$("productName").value.trim(),description=$("productDescription").value.trim(),category=$("productCategory").value,price=Number($("productPrice").value),stock=Number($("productStock").value);
   if(!name)throw new Error("Enter a product name.");if(!category)throw new Error("Select a category.");if(!Number.isFinite(price)||price<0)throw new Error("Enter a valid price.");if(!Number.isInteger(stock)||stock<0)throw new Error("Enter a valid stock quantity.");
-  const sizeInput=$("productAvailableSizes").value.trim();let availableSizes=sizeInput?sizeInput.split(/[,\s-]+/).map(x=>x.trim()).filter(Boolean):[];availableSizes=[...new Set(availableSizes.map(x=>x.toUpperCase()))];
-  const colourInput=$("productAvailableColours").value.trim(),colourEntries=colourInput?colourInput.split(/[,\n]+/).map(x=>x.trim()).filter(Boolean):[];
-  const uniqueColours=[...new Map(colourEntries.map(x=>[x.toLowerCase(),x])).values()];
-  const sizeType=$("productSizeType")?$("productSizeType").value:"none";if(!["none","numeric","letters"].includes(sizeType))throw new Error("Choose a valid size format.");if(sizeType==="none")availableSizes=[];if(sizeType!=="none"&&!availableSizes.length)throw new Error("Enter at least one available size.");
-  if(sizeType==="numeric"&&availableSizes.some(x=>!/^\d+(\.\d+)?$/.test(x)))throw new Error("Numeric sizes must contain numbers only.");
+  const availableSizes=getUniqueOptionLines($("productAvailableSizes").value);
+  const uniqueColours=getUniqueOptionLines($("productAvailableColours").value);
+  const sizeType=availableSizes.length?"custom":"none";
+  $("productSizeType").value=sizeType;
   const productData={name,description,category,price,stock,size_type:sizeType,available_sizes:availableSizes,available_colours:uniqueColours};
   const uploaded=[];for(let i=0;i<selectedProductFiles.length;i++){button.textContent="Uploading photo "+(i+1)+" of "+selectedProductFiles.length+"...";uploaded.push(await uploadProductImage(selectedProductFiles[i]));}
   const allImages=[...existingProductImages,...uploaded];productData.images=allImages;productData.image=allImages[0]||null;button.textContent=id?"Updating...":"Saving...";
@@ -180,23 +207,23 @@ $("productForm").addEventListener("submit",async e=>{
  finally{button.disabled=false;button.textContent=$("productId").value?"Update Product":"Save Product";}
 });
 
-/* SECTION 10 — DELETE PRODUCT */
+/* SECTION 11 — DELETE PRODUCT */
 async function deleteProduct(id){const p=productsCache.find(x=>String(x.id)===String(id));if(!p||!confirm("Delete "+p.name+"?"))return;const {error}=await db.from("products").delete().eq("id",id);if(error){showMessage(mainMessage,error.message,"error");return;}showMessage(mainMessage,"Product deleted successfully.","success");await loadProducts();}
 
-/* SECTION 11 — ORDER HELPERS */
+/* SECTION 12 — ORDER HELPERS */
 function getOrderValue(o,keys,fallback=""){for(const k of keys)if(o[k]!==undefined&&o[k]!==null)return o[k];return fallback;}
 function getOrderStatus(o){return String(getOrderValue(o,["status","order_status","payment_status"],"Pending"));}
 function getOrderTotal(o){return Number(getOrderValue(o,["total","total_amount","amount","grand_total","total_price"],0))||0;}
 function getOrderCustomer(o){return getOrderValue(o,["customer_name","name","full_name","customer","buyer_name"],"Customer");}
 function getOrderDate(o){return getOrderValue(o,["created_at","order_date","date"],"Not provided");}
 
-/* SECTION 12 — IMAGE VIEWER */
+/* SECTION 13 — IMAGE VIEWER */
 const imageViewer=$("imageViewer"),imageViewerPhoto=$("imageViewerPhoto"),imageViewerCaption=$("imageViewerCaption");
 function openOrderImage(url,caption="Ordered product"){if(typeof url!=="string"||!/^https?:\/\//i.test(url))return;imageViewerPhoto.src=url;imageViewerPhoto.alt=caption;imageViewerCaption.textContent=caption;imageViewer.classList.add("active");document.body.classList.add("image-viewer-open");}
 function closeOrderImage(){imageViewer.classList.remove("active");document.body.classList.remove("image-viewer-open");imageViewerPhoto.removeAttribute("src");imageViewerCaption.textContent="";}
 $("closeImageViewer").addEventListener("click",closeOrderImage);imageViewer.addEventListener("click",e=>{if(e.target===imageViewer)closeOrderImage();});imageViewerPhoto.addEventListener("click",e=>e.stopPropagation());document.addEventListener("keydown",e=>{if(e.key==="Escape"&&imageViewer.classList.contains("active"))closeOrderImage();});
 
-/* SECTION 13 — ORDER ITEMS */
+/* SECTION 14 — ORDER ITEMS */
 function renderOrderItems(order){
  const box=document.createElement("div"),h=document.createElement("h4");box.className="order-items";h.textContent="Ordered Products";box.append(h);let items=order.items||[];
  if(typeof items==="string"){try{items=JSON.parse(items);}catch{items=[];}}
@@ -208,7 +235,7 @@ function renderOrderItems(order){
  if(url&&/^https?:\/\//i.test(url)){const a=document.createElement("a");a.href="#";a.textContent="View product image";a.onclick=e=>{e.preventDefault();openOrderImage(url,item.name||"Ordered product");};info.append(a);}row.append(img,info);box.append(row);});return box;
 }
 
-/* SECTION 14 — LOAD ORDERS AND DELIVERY STATUS */
+/* SECTION 15 — LOAD ORDERS AND DELIVERY STATUS */
 async function loadOrders(){
  const list=$("ordersList"),recent=$("recentOrders");list.textContent="Loading orders...";
  const {data,error}=await db.from("orders").select("*").order("created_at",{ascending:false}).limit(100);
@@ -229,25 +256,25 @@ async function loadOrders(){
  recent.innerHTML="";ordersCache.slice(0,5).forEach(o=>{const item=document.createElement("div");item.className="order";const t=document.createElement("strong");t.textContent="Order #"+(o.id??"—")+" - "+getOrderCustomer(o);const d=document.createElement("p");d.textContent=money(getOrderTotal(o))+" | "+getOrderStatus(o);item.append(t,d);recent.append(item);});
 }
 
-/* SECTION 15 — REFRESH */
+/* SECTION 16 — REFRESH */
 async function refreshAll(){if(!currentUser)return;const results=await Promise.allSettled([loadProducts(),loadOrders()]);const errors=results.filter(x=>x.status==="rejected");if(errors.length)showMessage(mainMessage,"Some dashboard data could not be refreshed. Check the relevant panel for details.","error");}
 $("refreshProducts").addEventListener("click",loadProducts);$("refreshOrders").addEventListener("click",loadOrders);$("refreshAnalytics").addEventListener("click",refreshAll);
 
-/* SECTION 16 — SHOP BACKGROUND */
+/* SECTION 17 — SHOP BACKGROUND */
 const backgroundInput=$("backgroundImageFile"),backgroundPreview=$("backgroundPreview"),backgroundMessage=$("backgroundMessage");
 async function loadBackground(){const {data,error}=await db.from("site_settings").select("setting_value").eq("setting_key","shop_background").maybeSingle();if(error){showMessage(backgroundMessage,error.message,"error");throw error;}currentBackgroundUrl=data?.setting_value||"";if(currentBackgroundUrl)backgroundPreview.src=currentBackgroundUrl;else backgroundPreview.removeAttribute("src");}
 backgroundInput.addEventListener("change",function(){const f=this.files[0];if(!f)return;if(!["image/jpeg","image/png","image/webp"].includes(f.type)){showMessage(backgroundMessage,"Choose JPG, PNG or WEBP.","error");this.value="";return;}if(f.size>5*1024*1024){showMessage(backgroundMessage,"Image must not exceed 5 MB.","error");this.value="";return;}backgroundPreview.src=URL.createObjectURL(f);hideMessage(backgroundMessage);});
 $("saveBackground").addEventListener("click",async function(){if(!currentUser){showMessage(backgroundMessage,"Please log in again.","error");return;}const file=backgroundInput.files[0];if(!file&&!currentBackgroundUrl){showMessage(backgroundMessage,"Choose a background photo first.","error");return;}this.disabled=true;this.textContent="Saving...";try{const url=file?await uploadProductImage(file):currentBackgroundUrl;const {error}=await db.from("site_settings").upsert({setting_key:"shop_background",setting_value:url},{onConflict:"setting_key"});if(error)throw error;currentBackgroundUrl=url;backgroundInput.value="";showMessage(backgroundMessage,"Background saved successfully!","success");}catch(e){showMessage(backgroundMessage,e.message,"error");}finally{this.disabled=false;this.textContent="Save Background";}});
 $("resetBackground").addEventListener("click",async function(){if(!confirm("Remove the shop background?"))return;this.disabled=true;try{const {error}=await db.from("site_settings").delete().eq("setting_key","shop_background");if(error)throw error;currentBackgroundUrl="";backgroundInput.value="";backgroundPreview.removeAttribute("src");showMessage(backgroundMessage,"Background removed successfully.","success");}catch(e){showMessage(backgroundMessage,e.message,"error");}finally{this.disabled=false;}});
 
-/* SECTION 17 — SOCIAL MEDIA */
+/* SECTION 18 — SOCIAL MEDIA */
 const facebookUrl=$("facebookUrl"),instagramUrl=$("instagramUrl"),whatsappUrl=$("whatsappUrl"),socialMessage=$("socialMessage");
 async function loadSocialLinks(){const {data,error}=await db.from("site_settings").select("setting_key, setting_value").in("setting_key",["social_facebook","social_instagram","social_whatsapp"]);if(error){showMessage(socialMessage,error.message,"error");throw error;}const a=data||[];facebookUrl.value=a.find(x=>x.setting_key==="social_facebook")?.setting_value||"";instagramUrl.value=a.find(x=>x.setting_key==="social_instagram")?.setting_value||"";whatsappUrl.value=a.find(x=>x.setting_key==="social_whatsapp")?.setting_value||"";}
 $("saveSocial").addEventListener("click",async function(){if(!currentUser){showMessage(socialMessage,"Please log in again.","error");return;}const f=facebookUrl.value.trim(),i=instagramUrl.value.trim(),w=whatsappUrl.value.trim();
  function validate(v,label,hosts){if(!v)return;try{const u=new URL(v);if(u.protocol!=="https:"||!hosts.includes(u.hostname.toLowerCase()))throw 0;}catch{throw new Error("Enter a valid "+label+" URL.");}}
  try{validate(f,"Facebook",["facebook.com","www.facebook.com","m.facebook.com","fb.com","www.fb.com"]);validate(i,"Instagram",["instagram.com","www.instagram.com"]);validate(w,"WhatsApp",["wa.me","www.wa.me"]);this.disabled=true;this.textContent="Saving...";const {error}=await db.from("site_settings").upsert([{setting_key:"social_facebook",setting_value:f},{setting_key:"social_instagram",setting_value:i},{setting_key:"social_whatsapp",setting_value:w}],{onConflict:"setting_key"});if(error)throw error;showMessage(socialMessage,"Social media links saved successfully!","success");}catch(e){showMessage(socialMessage,e.message,"error");}finally{this.disabled=false;this.textContent="Save Social Media Links";}});
 
-/* SECTION 18 — CUSTOMER REVIEWS */
+/* SECTION 19 — CUSTOMER REVIEWS */
 let currentReviewFilter="Pending",reviewsCache=[];
 async function loadAdminReviews(){if(!currentUser)return;const list=$("reviewsList");list.textContent="Loading customer reviews...";const {data,error}=await db.from("customer_reviews").select("*").order("created_at",{ascending:false});if(error){list.textContent="Could not load reviews: "+error.message;showMessage($("reviewsMessage"),error.message,"error");throw error;}reviewsCache=data||[];renderAdminReviews();}
 function renderAdminReviews(){const list=$("reviewsList"),filtered=currentReviewFilter==="All"?reviewsCache:reviewsCache.filter(r=>r.status===currentReviewFilter);list.innerHTML="";if(!filtered.length){list.innerHTML='<p class="empty">No '+escapeHTML(currentReviewFilter.toLowerCase())+" reviews found.</p>";return;}
@@ -259,7 +286,7 @@ async function deleteCustomerReview(id){if(!currentUser||!confirm("Permanently d
 document.querySelectorAll("[data-review-filter]").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("[data-review-filter]").forEach(x=>x.classList.remove("active"));b.classList.add("active");currentReviewFilter=b.dataset.reviewFilter;renderAdminReviews();}));
 $("refreshReviews").addEventListener("click",loadAdminReviews);
 
-/* SECTION 19 — ANNOUNCEMENTS */
+/* SECTION 20 — ANNOUNCEMENTS */
 let announcementsCache=[];
 function resetAnnouncementForm(){$("announcementForm").reset();$("announcementId").value="";$("announcementFormHeading").textContent="Create Announcement";$("saveAnnouncement").textContent="Save Announcement";$("cancelAnnouncementEdit").classList.add("hidden");hideMessage($("announcementMessageBox"));}
 async function loadAdminAnnouncements(){if(!currentUser)return;const list=$("announcementsAdminList");list.textContent="Loading announcements...";const {data,error}=await db.from("announcements").select("*").order("created_at",{ascending:false});if(error){list.textContent="Could not load announcements: "+error.message;showMessage($("announcementMessageBox"),error.message,"error");throw error;}announcementsCache=data||[];renderAdminAnnouncements();}
@@ -271,7 +298,7 @@ async function toggleAnnouncementPublication(id,publish){if(!currentUser||!confi
 async function deleteAnnouncement(id){if(!currentUser||!confirm("Permanently delete this announcement?"))return;const {error}=await db.from("announcements").delete().eq("id",id);if(error){showMessage($("announcementMessageBox"),error.message,"error");return;}if(String($("announcementId").value)===String(id))resetAnnouncementForm();showMessage($("announcementMessageBox"),"Announcement deleted successfully.","success");await loadAdminAnnouncements();}
 $("refreshAnnouncements").addEventListener("click",loadAdminAnnouncements);
 
-/* SECTION 20 — RETURNS & EXCHANGES ADMIN INTEGRATION */
+/* SECTION 21 — RETURNS & EXCHANGES ADMIN INTEGRATION */
 (function(){
  "use strict";if(window.lbmReturnsAdminInstalled)return;window.lbmReturnsAdminInstalled=true;let requests=[],filter="Pending";
  const style=document.createElement("style");style.textContent=`
@@ -322,5 +349,8 @@ $("refreshAnnouncements").addEventListener("click",loadAdminAnnouncements);
 
 /* END OF ADMIN DASHBOARD */
 </script>
+
+  <script src="lay-bay/lay-bay-admin.js"></script>
+  
 </body>
 </html>
