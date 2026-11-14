@@ -2673,6 +2673,10 @@ let layBaySelectionCart = [];
       (selected.size ? "Size: " + selected.size + "\n" : "") +
       (selected.colour ? "Colour: " + selected.colour + "\n" : "") +
       "Lay-Bay price: " + money(productPrice(product)) +
+      "\nFirst deposit required: " +
+      money(Number((productPrice(product) * 0.5).toFixed(2))) +
+      " (50%)." +
+      "\nThe remaining balance is due within 30 days after LBM approves the first deposit." +
       "\n\nContinue?"
     );
 
@@ -2708,7 +2712,7 @@ let layBaySelectionCart = [];
       message(
         "plansMessage",
         matchingPlan
-          ? "Your Lay-Bay plan is ready. You can now submit a deposit."
+          ? "Your Lay-Bay plan is awaiting its first deposit of at least 50%. Submit that amount for verification to activate the plan and start the 30-day period."
           : "The plan request was processed. Please refresh your plans."
       );
 
@@ -2920,9 +2924,11 @@ let layBaySelectionCart = [];
       const expiry = createElement(
         "p",
         "",
-        "Deadline: " + dateText(
-          balance?.expires_at || plan.expires_at
-        )
+        plan.plan_status === "pending_initial_deposit"
+          ? "30-day payment period: Starts after the first 50% deposit is approved"
+          : "Deadline: " + dateText(
+              balance?.expires_at || plan.expires_at
+            )
       );
 
       const bar = createElement("div", "lb-progress");
