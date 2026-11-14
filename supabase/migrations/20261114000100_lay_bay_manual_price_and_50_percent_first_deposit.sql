@@ -945,7 +945,8 @@ BEGIN
 
     IF v_plan.plan_status = 'active' THEN
         UPDATE public.lay_bay_plans
-        SET plan_status = 'cancellation_requested'
+        SET plan_status = 'cancellation_requested',
+            cancellation_requested_at = now()
         WHERE id = p_plan_id
           AND user_id = v_user_id;
     END IF;
