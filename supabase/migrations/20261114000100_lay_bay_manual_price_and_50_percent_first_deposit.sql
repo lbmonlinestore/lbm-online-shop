@@ -49,7 +49,7 @@ SET lay_bay_price = pg_catalog.round(price * 1.22, 2)
 WHERE price IS NOT NULL;
 
 -- New plans remain pending_initial_deposit until a qualifying first payment
--- is approved by an administrator. The 45-day countdown begins at approval.
+-- is approved by an administrator. The 30-day countdown begins at approval.
 
 CREATE OR REPLACE FUNCTION public.create_lay_bay_plan(p_product_id bigint)
  RETURNS uuid
@@ -729,7 +729,7 @@ BEGIN
         first_deposit_at = COALESCE(first_deposit_at, v_now),
         expires_at = COALESCE(
             expires_at,
-            v_now + INTERVAL '45 days'
+            v_now + INTERVAL '30 days'
         ),
         plan_status = CASE
             WHEN v_balance >= lay_bay_price_snapshot
@@ -774,7 +774,7 @@ BEGIN
 END;
 $function$;
 
--- Keep the scheduled expiry worker aligned with the 45-day plan period.
+-- Keep the scheduled expiry worker aligned with the 30-day plan period.
 CREATE OR REPLACE FUNCTION public.expire_lay_bay_plans()
 RETURNS integer
 LANGUAGE plpgsql
@@ -830,7 +830,7 @@ BEGIN
             'automatic_plan_expiry',
             'lay_bay_plan',
             v_plan.id,
-            'Lay-Bay plan reached its 45-day deadline.',
+            'Lay-Bay plan reached its 30-day deadline.',
             jsonb_build_object(
                 'plan_status', 'active',
                 'expires_at', v_plan.expires_at
