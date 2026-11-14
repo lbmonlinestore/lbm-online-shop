@@ -20,7 +20,6 @@
   let customerOverviewBusy = false;
 
   const productBusyIds = new Set();
-  const LAY_BAY_MARKUP = 1.22;
 
   // =========================================
   // 2. ADMIN CONNECTION
@@ -101,10 +100,13 @@
     }
   }
 
-  function getLayBayPrice(normalPrice) {
-    return Number(
-      (Number(normalPrice || 0) * LAY_BAY_MARKUP).toFixed(2)
-    );
+  function getLayBayPrice(product) {
+    const normal = Number(product?.price || 0);
+    const configured = Number(product?.lay_bay_price || 0);
+
+    return Number.isFinite(configured) && configured > normal
+      ? Number(configured.toFixed(2))
+      : 0;
   }
 
   function getProductName(product) {
@@ -230,10 +232,12 @@
             </p>
 
             <p style="font-size:13px;color:#777">
-              Lay-Bay prices are calculated automatically using a
-              22% increase on the normal product price. Disabling
-              a product affects new plans only. Existing customer
-              plans remain intact.
+              Set each product's Lay-Bay price manually. It must be
+              higher than the normal shop price. Customers must pay
+              at least 50% of the Lay-Bay price as their first deposit;
+              the remaining balance is due within 30 days after that
+              first deposit is approved. Disabling a product affects
+              new plans only. Existing customer plans remain intact.
             </p>
 
             <div style="
@@ -651,7 +655,7 @@
       const enabled = product.lay_bay_enabled === true;
 
       const normalPrice = Number(product.price || 0);
-      const layBayPrice = getLayBayPrice(normalPrice);
+      const layBayPrice = getLayBayPrice(product);
       const stock = getProductStock(product);
 
       const productId = String(product.id);
@@ -689,9 +693,28 @@
                 ${lbEscape(lbMoney(normalPrice))}
               </p>
 
+              <label style="display:block;margin:10px 0 5px;font-weight:bold">
+                Lay-Bay price (ZMW)
+              </label>
+              <input
+                type="number"
+                min="${(normalPrice + 0.01).toFixed(2)}"
+                step="0.01"
+                value="${layBayPrice ? layBayPrice.toFixed(2) : ""}"
+                placeholder="Enter a price above ${normalPrice.toFixed(2)}"
+                data-lb-price-input="${lbEscape(productId)}"
+                style="width:100%;max-width:220px;padding:9px;margin-bottom:8px"
+                ${busy ? "disabled" : ""}
+              >
+              <button
+                type="button"
+                data-lb-save-price="${lbEscape(productId)}"
+                ${busy ? "disabled" : ""}
+                style="padding:9px 12px;margin-bottom:8px"
+              >Save Lay-Bay price</button>
               <p style="margin:5px 0">
-                <strong>Lay-Bay price:</strong>
-                ${lbEscape(lbMoney(layBayPrice))}
+                <strong>Configured Lay-Bay price:</strong>
+                ${layBayPrice ? lbEscape(lbMoney(layBayPrice)) : "Not configured"}
               </p>
 
               <p style="margin:5px 0">
@@ -756,6 +779,12 @@
       `;
     }).join("");
 
+    list.querySelectorAll("[data-lb-save-price]").forEach(button => {
+      button.addEventListener("click", () => {
+        saveLayBayProductPrice(button.dataset.lbSavePrice);
+      });
+    });
+
     list.querySelectorAll("[data-lb-product-toggle]").forEach(button => {
       button.addEventListener("click", function () {
         const productId = button.dataset.lbProductToggle;
@@ -773,6 +802,59 @@
   // =========================================
   // 9. ENABLE OR DISABLE A PRODUCT
   // =========================================
+
+  async function saveLayBayProductPrice(productId) {
+    const db = getAdminDb();
+    if (!db) {
+      alert("Supabase connection not found.");
+      return;
+    }
+    if (productBusyIds.has(String(productId))) return;
+
+    const product = layBayProducts.find(item => String(item.id) === String(productId));
+    const input = document.querySelector(
+      `[data-lb-price-input="${CSS.escape(String(productId))}"]`
+    );
+    const value = Number(input?.value);
+    const normal = Number(product?.price || 0);
+
+    if (!product || !Number.isFinite(value) || value <= normal) {
+      alert("Enter a valid Lay-Bay price that is higher than the normal shop price.");
+      return;
+    }
+
+    productBusyIds.add(String(productId));
+    renderLayBayProducts();
+
+    try {
+      const { data, error } = await db
+        .from("products")
+        .update({ lay_bay_price: Number(value.toFixed(2)) })
+        .eq("id", productId)
+        .select("id, lay_bay_price");
+
+      if (error) throw error;
+      if (!data || !data.length) {
+        throw new Error("No product was updated. Check administrator permissions.");
+      }
+
+      layBayProducts = layBayProducts.map(item =>
+        String(item.id) === String(productId)
+          ? { ...item, lay_bay_price: Number(value.toFixed(2)) }
+          : item
+      );
+
+      const message = document.getElementById("lbProductMessage");
+      if (message) message.textContent =
+        `Lay-Bay price saved for ${getProductName(product)}.`;
+
+    } catch (error) {
+      alert("Could not save Lay-Bay price: " + error.message);
+    } finally {
+      productBusyIds.delete(String(productId));
+      renderLayBayProducts();
+    }
+  }
 
   async function setLayBayProductAvailability(productId, enabled) {
     const db = getAdminDb();
@@ -795,9 +877,19 @@
 
     const productName = getProductName(product);
 
+    const configuredPrice = getLayBayPrice(product);
     const confirmation = enabled
-      ? `Enable Lay-Bay for "${productName}"? The Lay-Bay price will be calculated automatically using the 22% increase.`
+      ? (
+          configuredPrice <= Number(product.price || 0)
+            ? `Set a Lay-Bay price higher than the normal price for "${productName}" before enabling it.`
+            : `Enable Lay-Bay for "${productName}" at ${lbMoney(configuredPrice)}?`
+        )
       : `Disable Lay-Bay for "${productName}"? Existing customer plans will not be affected.`;
+
+    if (enabled && configuredPrice <= Number(product.price || 0)) {
+      alert(confirmation);
+      return;
+    }
 
     if (!confirm(confirmation)) return;
 
