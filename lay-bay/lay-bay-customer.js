@@ -2698,7 +2698,7 @@ let layBaySelectionCart = [];
         String(plan.product_id) === String(product.id) &&
         String(plan.selected_size || "") === String(selected.size || "") &&
         String(plan.selected_colour || "") === String(selected.colour || "") &&
-        plan.plan_status === "active"
+        ["active", "pending_initial_deposit"].includes(plan.plan_status)
       );
 
       if (matchingPlan && $("selectedPlan")) {
@@ -3035,10 +3035,10 @@ let layBaySelectionCart = [];
     if (!select) return;
 
     select.innerHTML =
-      '<option value="">Choose an active plan</option>';
+      '<option value="">Choose a Lay-Bay plan</option>';
 
     plans.filter(plan =>
-      plan.plan_status === "active"
+      ["active", "pending_initial_deposit"].includes(plan.plan_status)
     ).forEach(plan => {
       const option = document.createElement("option");
 
@@ -3058,7 +3058,10 @@ let layBaySelectionCart = [];
         (plan.product_name_snapshot || "Lay-Bay Product") +
         (variants.length ? " (" + variants.join(", ") + ")" : "") +
         " — " +
-        money(plan.lay_bay_price_snapshot);
+        money(plan.lay_bay_price_snapshot) +
+        (plan.plan_status === "pending_initial_deposit"
+          ? " — Awaiting 50% first deposit"
+          : " — Active");
 
       select.appendChild(option);
     });
