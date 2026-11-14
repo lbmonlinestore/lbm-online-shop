@@ -2,979 +2,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#080808">
-
-    <link rel="manifest" href="./manifest.json">
-    <link rel="icon" type="image/png" href="./icons/icon-192.png">
-
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="LBM Store">
-
-    <title>LBM Online Shop | Fashion & Style</title>
-
-    <meta name="description" content="Discover stylish clothing, footwear and accessories at LBM Online Shop. Serving customers across Zambia.">
-
-    <link rel="stylesheet" href="style.css">
-
-    <style>
-        .lbm-assistant-launcher {
-            position: fixed;
-            right: 20px;
-            bottom: 20px;
-            z-index: 99990;
-            width: 62px;
-            height: 62px;
-            border: 3px solid #fff;
-            border-radius: 50%;
-            background: #173d70;
-            color: #fff;
-            font-size: 27px;
-            cursor: pointer;
-            box-shadow: 0 8px 30px rgba(16,44,80,.2);
-        }
-
-        .lbm-assistant-panel {
-            display: none;
-            position: fixed;
-            right: 20px;
-            bottom: 95px;
-            z-index: 99989;
-            width: min(390px, calc(100vw - 30px));
-            height: min(570px, calc(100vh - 125px));
-            background: #fff;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 30px rgba(16,44,80,.2);
-            flex-direction: column;
-        }
-
-        .lbm-assistant-panel.open {
-            display: flex;
-        }
-
-        .lbm-assistant-widget-header {
-            height: 52px;
-            flex-shrink: 0;
-            padding: 0 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #173d70;
-            color: #fff;
-            font-family: Arial, sans-serif;
-        }
-
-        .lbm-assistant-widget-header strong {
-            font-size: 14px;
-        }
-
-        .lbm-assistant-close {
-            border: 0;
-            background: transparent;
-            color: #fff;
-            font-size: 27px;
-            cursor: pointer;
-        }
-
-        .lbm-assistant-frame {
-            width: 100%;
-            height: calc(100% - 52px);
-            flex: 1;
-            border: 0;
-            display: block;
-        }
-
-        @media (max-width: 600px) {
-            .lbm-assistant-launcher {
-                right: 15px;
-                bottom: 15px;
-            }
-
-            .lbm-assistant-panel {
-                right: 10px;
-                bottom: 88px;
-                width: calc(100vw - 20px);
-                height: min(570px, calc(100vh - 110px));
-            }
-        }
-
-        .lbm-search-panel {
-            width: 100%;
-            max-width: 850px;
-            margin: 0 auto 30px;
-            padding: 0 15px;
-            box-sizing: border-box;
-        }
-
-        .lbm-search-panel label {
-            display: block;
-            margin-bottom: 10px;
-            color: #222;
-            font-size: 15px;
-            font-weight: 700;
-            text-align: left;
-        }
-
-        .lbm-search-box {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            min-height: 54px;
-            padding: 0 15px;
-            box-sizing: border-box;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            box-shadow: 0 4px 18px rgba(0,0,0,.06);
-            transition: border-color .2s, box-shadow .2s;
-        }
-
-        .lbm-search-box:focus-within {
-            border-color: #c9a44c;
-            box-shadow: 0 0 0 3px rgba(201,164,76,.15);
-        }
-
-        .lbm-search-icon {
-            color: #a17b26;
-            font-size: 25px;
-            line-height: 1;
-            margin-right: 12px;
-        }
-
-        #lbm-product-search {
-            flex: 1;
-            width: 100%;
-            min-width: 0;
-            height: 52px;
-            padding: 0;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: #222;
-            font-size: 15px;
-        }
-
-        #lbm-product-search::placeholder {
-            color: #999;
-        }
-
-        #lbm-clear-search {
-            width: 32px;
-            height: 32px;
-            flex-shrink: 0;
-            border: none;
-            border-radius: 50%;
-            background: #eee;
-            color: #333;
-            font-size: 22px;
-            line-height: 1;
-            cursor: pointer;
-        }
-
-        #lbm-clear-search[hidden] {
-            display: none !important;
-        }
-
-        #lbm-search-results {
-            margin: 10px 2px 0;
-            color: #777;
-            font-size: 13px;
-            text-align: left;
-        }
-
-        .lbm-no-search-results {
-            grid-column: 1 / -1;
-            width: 100%;
-            padding: 45px 15px;
-            box-sizing: border-box;
-            text-align: center;
-            color: #555;
-        }
-
-        .lbm-no-search-icon {
-            margin-bottom: 12px;
-            color: #c9a44c;
-            font-size: 42px;
-            line-height: 1;
-        }
-
-        .lbm-no-search-results h3 {
-            margin: 0 0 8px;
-            color: #222;
-            font-size: 19px;
-        }
-
-        .lbm-no-search-results p {
-            margin: 0;
-            color: #777;
-            font-size: 14px;
-        }
-
-        @media (max-width: 480px) {
-            .lbm-search-panel {
-                padding: 0 12px;
-                margin-bottom: 22px;
-            }
-
-            .lbm-search-box {
-                min-height: 50px;
-                padding: 0 12px;
-            }
-
-            #lbm-product-search {
-                height: 48px;
-                font-size: 14px;
-            }
-        }
-
-        .payment-section {
-            padding: 65px 20px;
-            text-align: center;
-            background: #f7f7f7;
-        }
-
-        .payment-section h2 {
-            margin-bottom: 12px;
-        }
-
-        .payment-methods {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            justify-content: center;
-            gap: 22px;
-            margin: 35px auto;
-            max-width: 750px;
-        }
-
-        .payment-card {
-            background: white;
-            padding: 25px 15px;
-            border-radius: 15px;
-            min-width: 0;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .payment-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 22px rgba(0,0,0,0.12);
-        }
-
-        .payment-logo {
-            width: 125px;
-            height: 85px;
-            object-fit: contain;
-            display: block;
-        }
-
-        .mtn-card {
-            border-bottom: 4px solid #ffcc00;
-        }
-
-        .airtel-card {
-            border-bottom: 4px solid #e40000;
-        }
-
-        .zamtel-card {
-            border-bottom: 4px solid #2bb349;
-        }
-
-        .zamtel-wordmark {
-            color: #008542;
-            font-size: 29px;
-            font-weight: 800;
-            letter-spacing: -1.5px;
-            text-decoration: none;
-        }
-
-        .payment-card h3 {
-            font-size: 16px;
-            margin: 0;
-            color: #222;
-        }
-
-        .payment-card p {
-            font-size: 13px;
-            color: #666;
-            margin: 0;
-        }
-
-        .payment-app-link {
-            text-decoration: none;
-            color: inherit;
-            cursor: pointer;
-        }
-
-        .payment-app-link:focus-visible {
-            outline: 3px solid #d4af37;
-            outline-offset: 4px;
-        }
-
-        .payment-app-link:active {
-            transform: scale(0.97);
-        }
-
-        .payment-note {
-            color: #555;
-            margin-top: 15px;
-        }
-
-        .call-options {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin: 25px 0;
-        }
-
-        .call-button {
-            display: inline-block;
-            padding: 14px 22px;
-            background: #111;
-            color: white;
-            text-decoration: none;
-            border-radius: 7px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .call-button:hover {
-            background: #333;
-        }
-
-        .service-area {
-            margin-top: 25px;
-            font-weight: bold;
-        }
-
-        @media (max-width: 480px) {
-            .payment-section {
-                padding: 45px 12px;
-            }
-
-            .payment-methods {
-                gap: 10px;
-            }
-
-            .payment-card {
-                padding: 17px 7px;
-                border-radius: 10px;
-                gap: 10px;
-            }
-
-            .payment-logo {
-                width: 85px;
-                height: 65px;
-            }
-
-            .zamtel-wordmark {
-                font-size: 21px;
-            }
-
-            .payment-card h3 {
-                font-size: 13px;
-            }
-
-            .payment-card p {
-                font-size: 11px;
-            }
-
-            .call-options {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .call-button {
-                width: 100%;
-                max-width: 280px;
-            }
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 18px;
-            margin: 22px auto;
-        }
-
-        .social-icon-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 46px;
-            height: 46px;
-            padding: 9px;
-            border: 1px solid rgba(255,255,255,0.25);
-            border-radius: 50%;
-            text-decoration: none;
-            transition: transform 0.25s ease, background 0.25s ease;
-        }
-
-        .social-icon-link svg {
-            display: block;
-            width: 25px;
-            height: 25px;
-        }
-
-        .social-icon-link:hover {
-            transform: translateY(-4px);
-            background: rgba(255,255,255,0.12);
-        }
-
-        .social-icon-link:focus-visible {
-            outline: 2px solid #d4af37;
-            outline-offset: 4px;
-        }
-
-        .social-icon-link.facebook {
-            color: #1877F2;
-        }
-
-        .social-icon-link.instagram {
-            color: #E4405F;
-        }
-
-        .social-icon-link.whatsapp {
-            color: #25D366;
-        }
-
-        .social-icon-link[hidden] {
-            display: none !important;
-        }
-
-        .developer-credit {
-            margin-top: 12px;
-            font-size: 12px;
-            color: #999;
-            letter-spacing: 0.5px;
-        }
-
-        .developer-credit strong {
-            color: #d4af37;
-            font-weight: 700;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#173d70">
+  <title>LBM Lay-Bay | Save Towards Your Product</title>
+  <link rel="stylesheet" href="lay-bay.css">
 </head>
 
 <body>
 
-    <header class="topbar">
-
-        <a href="#home" class="brand">
-            LBM <span>ONLINE SHOP</span>
-        </a>
-
-        <nav class="navigation" aria-label="Main navigation">
-            <a href="#home">Home</a>
-            <a href="#products">Shop</a>
-            <a href="lay-bay/lay-bay-landing.html">Lay-Bay</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
-            <a href="technical-assistant.html">Technical Assistant</a>
-            <a href="returns.html">Returns & Exchanges</a>
-        </nav>
-
-        <a class="header-whatsapp"
-           href="https://wa.me/260969034955"
-           target="_blank"
-           rel="noopener noreferrer">
-            WhatsApp
-        </a>
-
-        <button class="cart-button" id="cart-button">
-            Cart (<span id="cart-count">0</span>)
-        </button>
-
-    </header>
-
-    <main>
-
-        <section class="hero" id="home">
-
-            <div class="hero-content">
-
-                <p class="hero-label">
-                    STYLE • ELEGANCE • CONFIDENCE
-                </p>
-
-                <h1>
-                    Discover Your<br>
-                    <span>Perfect Style.</span>
-                </h1>
-
-                <p class="hero-description">
-                    Elevate your wardrobe with fashionable
-                    clothing, footwear and accessories.
-                </p>
-
-                <div class="hero-actions">
-
-                    <a href="#products" class="hero-text-link">
-                        SHOP NOW →
-                    </a>
-
-                    <div class="laybay-links">
-
-                        <a href="lay-bay/lay-bay-landing.html" class="hero-text-link">
-    SHOP WITH LAY-BAY →
-</a>
-</a>
-
-                        <div class="laybay-sub-links">
-                            <a href="lay-bay/lay-bay-landing.html">CATALOG</a>
-                            <a href="lay-bay/login.html">LOG IN</a>
-                        </div>
-
-                    </div>
-
-                    <a href="https://wa.me/260969034955"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="hero-text-link">
-                        CHAT WITH US →
-                    </a>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <section class="collection-heading" id="products">
-
-            <p class="section-label">
-                THE LBM COLLECTION
-            </p>
-
-            <h2>FEATURED PRODUCTS</h2>
-
-            <p>
-                Explore our latest fashion selections.
-            </p>
-
-        </section>
-
-        <section class="products">
-
-            <div class="lbm-search-panel">
-
-                <label for="lbm-product-search">
-                    Find what you're looking for
-                </label>
-
-                <div class="lbm-search-box">
-
-                    <span class="lbm-search-icon" aria-hidden="true">
-                        ⌕
-                    </span>
-
-                    <input
-                        type="search"
-                        id="lbm-product-search"
-                        placeholder="Search products, brands or categories..."
-                        aria-label="Search products"
-                        autocomplete="off"
-                    >
-
-                    <button
-                        type="button"
-                        id="lbm-clear-search"
-                        aria-label="Clear search"
-                        hidden
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-                <p id="lbm-search-results" aria-live="polite">
-                    Browse our latest products
-                </p>
-
-            </div>
-
-            <div class="product-grid" id="product-list">
-                <p>Loading products...</p>
-            </div>
-
-        </section>
-
-        <section class="cart-section" id="cart-section">
-
-            <div class="cart-header">
-
-                <h2>YOUR SHOPPING CART</h2>
-
-                <button id="close-cart" class="close-cart">
-                    Close ×
-                </button>
-
-            </div>
-
-            <div id="cart-items" class="cart-items">
-                <p>Your cart is empty.</p>
-            </div>
-
-            <div class="cart-summary">
-
-                <h3>
-                    Total:
-                    <span id="cart-total">K0.00</span>
-                </h3>
-
-                <button id="checkout-button"
-                        class="checkout-button"
-                        disabled>
-                    CHECKOUT VIA WHATSAPP
-                </button>
-
-            </div>
-
-        </section>
-
-        <section class="about" id="about">
-
-            <p class="section-label">ABOUT LBM</p>
-
-            <h2>Style That Speaks.</h2>
-
-            <p>
-                At LBM Online Shop, we believe fashion is more
-                than clothing. It is a way to express your
-                personality, confidence and individuality.
-            </p>
-
-        </section>
-
-        <section class="payment-section" id="payments">
-
-            <p class="section-label">
-                CONVENIENT PAYMENTS
-            </p>
-
-            <h2>WE ACCEPT MOBILE MONEY</h2>
-
-            <p>
-                Shop easily and pay conveniently using your
-                preferred mobile money service.
-            </p>
-
-            <div class="payment-methods">
-
-                <a
-                    class="payment-card payment-app-link mtn-card"
-                    href="https://appbiz.momo.africa"
-                    aria-label="Open MTN MoMo app"
-                >
-
-                    <img
-                        class="payment-logo"
-                        src="https://commons.wikimedia.org/wiki/Special:FilePath/MTN_Logo.svg"
-                        alt="MTN logo"
-                        loading="lazy"
-                    >
-
-                    <h3>MTN</h3>
-                    <p>Mobile Money</p>
-                    <p>Tap to open MoMo</p>
-
-                </a>
-
-                <a
-                    class="payment-card payment-app-link airtel-card"
-                    href="https://airtelafricaone.page.link"
-                    aria-label="Open My Airtel app"
-                >
-
-                    <img
-                        class="payment-logo"
-                        src="https://commons.wikimedia.org/wiki/Special:FilePath/Airtel_logo.svg"
-                        alt="Airtel logo"
-                        loading="lazy"
-                    >
-
-                    <h3>Airtel</h3>
-                    <p>Airtel Money</p>
-                    <p>Tap to open My Airtel</p>
-
-                </a>
-
-                <div class="payment-card zamtel-card">
-
-                    <a
-                        href="https://www.zamtel.zm/brand"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="zamtel-wordmark"
-                        aria-label="Zamtel official brand page"
-                    >
-                        zamtel
-                    </a>
-
-                    <h3>Zamtel</h3>
-                    <p>Zamtel Money</p>
-
-                </div>
-
-            </div>
-
-            <p class="payment-note">
-                Select Airtel or MTN to open the relevant mobile
-                money app. Complete your payment manually and
-                confirm your order through WhatsApp.
-            </p>
-
-        </section>
-
-        <section class="contact" id="contact">
-
-            <p class="section-label">GET IN TOUCH</p>
-
-            <h2>Contact LBM Online Shop</h2>
-
-            <p>
-                Interested in our products?
-                We would love to hear from you.
-            </p>
-
-            <h3>CALL US</h3>
-
-            <div class="call-options">
-
-                <a href="tel:+260764701367"
-                   class="call-button">
-                    ☎ 076 470 1367
-                </a>
-
-                <a href="tel:+260975004041"
-                   class="call-button">
-                    ☎ 097 500 4041
-                </a>
-
-            </div>
-
-            <h3>CHAT WITH US ON WHATSAPP</h3>
-
-            <p class="contact-number">
-                +260 969 034 955
-            </p>
-
-            <a href="https://wa.me/260969034955"
-               target="_blank"
-               rel="noopener noreferrer"
-               class="whatsapp-button">
-                CONTACT US ON WHATSAPP
-            </a>
-
-            <p class="service-area">
-                🇿🇲 Proudly serving customers across Zambia.
-            </p>
-
-        </section>
-
-    </main>
-
-    <footer class="footer">
-
-        <a href="#home" class="footer-brand">
-            LBM ONLINE SHOP
-        </a>
-
-        <p>Fashion. Elegance. Confidence.</p>
-        <p>MTN • Airtel • Zamtel Mobile Money</p>
-
-        <div class="social-links" aria-label="LBM social media">
-
-            <a
-                id="facebookLink"
-                class="social-icon-link facebook"
-                aria-label="Visit LBM on Facebook"
-                title="Facebook"
-                target="_blank"
-                rel="noopener noreferrer"
-                hidden
-            >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        fill="currentColor"
-                        d="M13.5 21v-8h2.7l.4-3.1h-3.1V7.9c0-.9.3-1.5 1.6-1.5h1.7V3.6c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.1H7.3V13h2.8v8h3.4z"
-                    />
-                </svg>
-            </a>
-
-            <a
-                id="instagramLink"
-                class="social-icon-link instagram"
-                aria-label="Visit LBM on Instagram"
-                title="Instagram"
-                target="_blank"
-                rel="noopener noreferrer"
-                hidden
-            >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <rect
-                        x="3"
-                        y="3"
-                        width="18"
-                        height="18"
-                        rx="5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    />
-                    <circle
-                        cx="12"
-                        cy="12"
-                        r="4"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    />
-                    <circle
-                        cx="17.5"
-                        cy="6.5"
-                        r="1.2"
-                        fill="currentColor"
-                    />
-                </svg>
-            </a>
-
-            <a
-                id="whatsappLink"
-                class="social-icon-link whatsapp"
-                aria-label="Chat with LBM on WhatsApp"
-                title="WhatsApp"
-                target="_blank"
-                rel="noopener noreferrer"
-                hidden
-            >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        fill="currentColor"
-                        d="M12 2a9.8 9.8 0 0 0-8.5 14.7L2 22l5.5-1.4A10 10 0 1 0 12 2zm0 17.9a8 8 0 0 1-4.1-1.1l-.3-.2-3.3.9.9-3.2-.2-.4A8 8 0 1 1 12 19.9z"
-                    />
-                    <path
-                        fill="currentColor"
-                        d="M16.4 13.7c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8.9-.1.2-.3.2-.5.1-1.3-.6-2.2-1.2-3.1-2.8-.2-.3.2-.3.6-1.1.1-.2.1-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1.1 1.7-.9 2.7.2 1.2 1.1 2.5 2.1 3.5 1.3 1.3 2.6 2 4.1 2.4 1 .3 1.8.2 2.5-.3.5-.4.8-.9.9-1.4.1-.3 0-.5-.3-.6z"
-                    />
-                </svg>
-            </a>
-
-        </div>
-
-        <p class="copyright">
-            &copy; <span id="year"></span>
-            LBM Online Shop.
-            All rights reserved.
-        </p>
-
-        <p class="developer-credit">
-            Website developed by
-            <strong>BC Mwansa Jr</strong>
-        </p>
-
-        <div class="admin-access">
-            <a href="lay-bay/lay-bay-landing.html">Lay-Bay Payment Plan</a>
-            |
-            <a href="returns.html">Returns & Exchanges</a>
-            |
-            <a href="admin.html">Admin Login</a>
-        </div>
-
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <script src="script.js"></script>
-    <script src="features.js"></script>
-
-    <script>
-        if ("serviceWorker" in navigator) {
-            window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./sw.js")
-                    .then(registration => {
-                        console.log(
-                            "LBM App Service Worker registered:",
-                            registration.scope
-                        );
-                    })
-                    .catch(error => {
-                        console.error(
-                            "LBM App registration failed:",
-                            error
-                        );
-                    });
-            });
-        }
-    </script>
-
-    <button
-        type="button"
-        id="lbmAssistantLauncher"
-        class="lbm-assistant-launcher"
-        aria-label="Open LBM Technical Assistant"
-        aria-expanded="false"
-    >
-        💬
-    </button>
-
-    <div
-        id="lbmAssistantPanel"
-        class="lbm-assistant-panel"
-        aria-label="LBM Technical Assistant chat"
-    >
-        <div class="lbm-assistant-widget-header">
-            <strong>LBM Technical Assistant</strong>
-
-            <button
-                type="button"
-                id="lbmAssistantClose"
-                class="lbm-assistant-close"
-                aria-label="Close assistant"
-            >
-                &times;
-            </button>
-        </div>
-
-        <iframe
-            class="lbm-assistant-frame"
-            src="technical-assistant.html?embedded=1"
-            title="LBM Technical Assistant"
-            loading="lazy"
-        ></iframe>
+<header class="topbar">
+  <a href="../index.html" class="brand">LBM <span>LAY-BAY</span></a>
+  <a href="../index.html" class="back-link">Back to Shop</a>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="hero-content">
+      <span class="tag">A smarter way to shop</span>
+
+      <h1>Save little by little.<br>
+      Own what you love.</h1>
+
+      <p>
+        Choose your favourite LBM product, save towards its full price
+        and redeem your savings when you're ready.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="signup.html" class="btn primary">Create Account</a>
+        <a href="login.html" class="btn secondary">Login</a>
+      </div>
     </div>
 
-    <script>
-        (function () {
-            const launcher = document.getElementById("lbmAssistantLauncher");
-            const panel = document.getElementById("lbmAssistantPanel");
-            const closeButton = document.getElementById("lbmAssistantClose");
+    <div class="hero-card">
+      <div class="card-icon">₭</div>
+      <h3>Your savings journey</h3>
+      <p>Choose a product and start saving.</p>
+      <div class="progress-track">
+        <div class="progress-fill"></div>
+      </div>
+      <small>Every deposit brings you closer.</small>
+    </div>
+  </section>
 
-            if (!launcher || !panel || !closeButton) return;
+  <section class="how">
+    <h2>How LBM Lay-Bay Works</h2>
+    <p class="section-intro">Four simple steps to your chosen product.</p>
 
-            launcher.addEventListener("click", function () {
-                panel.classList.toggle("open");
+    <div class="steps">
+      <article>
+        <span>01</span>
+        <h3>Create an account</h3>
+        <p>Register using your mobile number or email address.</p>
+      </article>
 
-                const isOpen = panel.classList.contains("open");
-                launcher.setAttribute("aria-expanded", String(isOpen));
-            });
+      <article>
+        <span>02</span>
+        <h3>Select a product</h3>
+        <p>Choose the exact LBM product you want to purchase.</p>
+      </article>
 
-            closeButton.addEventListener("click", function () {
-                panel.classList.remove("open");
-                launcher.setAttribute("aria-expanded", "false");
-            });
-        })();
-    </script>
+      <article>
+        <span>03</span>
+        <h3>Save towards it</h3>
+        <p>Make deposits and track your savings progress.</p>
+      </article>
+
+      <article>
+        <span>04</span>
+        <h3>Complete payment</h3>
+        <p>Once fully funded and verified, redeem your savings.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="rules">
+    <h2>Important Information</h2>
+
+    <ul>
+      <li>Each savings plan is linked to one specific product.</li>
+      <li>The maximum saving period is 30 calendar days.</li>
+      <li>The first 14 days are the proposed penalty-free cancellation period.</li>
+      <li>From Day 15, a proposed 50% penalty applies only to qualifying later deposits, subject to the approved policy and applicable law.</li>
+      <li>Incomplete plans expire automatically on Day 30.</li>
+      <li>Expired plans require a customer refund request.</li>
+      <li>LBM aims to process approved refund requests within 5 working days.</li>
+    </ul>
+
+    <p class="disclaimer">
+      These are proposed programme rules. Final terms, payment arrangements
+      and cancellation deductions are subject to legal review and formal approval.
+    </p>
+  </section>
+
+  <section class="bottom-cta">
+    <h2>Ready to start saving?</h2>
+    <p>Your next purchase can start with your first deposit.</p>
+    <a href="signup.html" class="btn primary">Join LBM Lay-Bay</a>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2026 LBM Online Shop. All rights reserved.</p>
+  <p>LBM Lay-Bay | Save with a purpose.</p>
+</footer>
 
 </body>
 </html>
