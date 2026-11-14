@@ -1454,13 +1454,13 @@
         return alert("A clear rejection reason is required.");
       }
     } else {
-      const rawDays = prompt(`Approve how many days? Customer requested ${request.requested_days} days. The total plan period must not exceed 45 days.`, String(request.requested_days));
+      const rawDays = prompt(`Approve how many days? Customer requested ${request.requested_days} days. The approved extension must not exceed the agreed 30-day extension limit.`, String(request.requested_days));
       if (rawDays === null) return;
       approvedDays = Number.parseInt(rawDays, 10);
       if (!Number.isInteger(approvedDays) || approvedDays < 1 || approvedDays > Number(request.requested_days)) {
         return alert("Enter a whole number between 1 and the requested number of days.");
       }
-      if (!confirm("Approve this extension? The database must enforce the 45-day maximum.")) return;
+      if (!confirm("Approve this extension? The database enforces the agreed 30-day extension limit.")) return;
     }
     try {
       const { data, error } = await db.rpc("review_lay_bay_extension", {
