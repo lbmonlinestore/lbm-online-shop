@@ -235,6 +235,7 @@
         let matches = products;
         if (intent !== "all") {
           const queryWords = query.toLowerCase().split(/[^a-z0-9]+/).filter(x => x.length > 1 && !["what","which","show","find","product","products","available","size","sizes","colour","colours","color","colors","price","much","how","the","for","of","is","are","do","you","have","check","tell","me"].includes(x));
+          if (!queryWords.length) { say(t(intent === "price" ? "ask" : intent)); return; }
           matches = products.filter(p => {
             const haystack = [productName(p), p.description, p.category, p.brand].filter(Boolean).join(" ").toLowerCase();
             return queryWords.length ? queryWords.some(w => haystack.includes(w)) : false;
