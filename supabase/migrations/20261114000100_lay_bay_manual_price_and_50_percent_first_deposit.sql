@@ -15,7 +15,7 @@ ALTER TABLE public.lay_bay_plans
         'unavailable'::text
     ]));
 
--- LBM Lay-Bay manual pricing and 50% initial deposit policy.
+-- LBM Lay-Bay automatic 22% pricing and 50% initial deposit policy.
 -- Apply after the integration branch has been reviewed and approved.
 -- Keep the Lay-Bay price synchronized with the normal shop price.
 -- Existing product prices are recalculated at 22% above the normal price.
@@ -773,3 +773,99 @@ BEGIN
     RETURN 'Deposit approved and ledger credited successfully.';
 END;
 $function$;
+
+-- Keep the scheduled expiry worker aligned with the 45-day plan period.
+CREATE OR REPLACE FUNCTION public.expire_lay_bay_plans()
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+DECLARE
+    v_plan RECORD;
+    v_balance numeric;
+    v_new_status text;
+    v_count integer := 0;
+BEGIN
+    FOR v_plan IN
+        SELECT *
+        FROM public.lay_bay_plans
+        WHERE plan_status = 'active'
+          AND first_deposit_at IS NOT NULL
+          AND expires_at <= now()
+        FOR UPDATE SKIP LOCKED
+    LOOP
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN entry_type = 'credit' THEN amount
+                WHEN entry_type = 'debit' THEN -amount
+                ELSE 0
+            END
+        ), 0)
+        INTO v_balance
+        FROM public.lay_bay_ledger
+        WHERE plan_id = v_plan.id;
+
+        IF v_balance >= v_plan.lay_bay_price_snapshot THEN
+            v_new_status := 'completed';
+        ELSE
+            v_new_status := 'expired';
+        END IF;
+
+        UPDATE public.lay_bay_plans
+        SET plan_status = v_new_status,
+            completed_at = CASE
+                WHEN v_new_status = 'completed' THEN now()
+                ELSE completed_at
+            END,
+            updated_at = now()
+        WHERE id = v_plan.id;
+
+        INSERT INTO public.lay_bay_audit_logs (
+            actor_role, action, entity_type, entity_id,
+            description, old_values, new_values
+        )
+        VALUES (
+            'system',
+            'automatic_plan_expiry',
+            'lay_bay_plan',
+            v_plan.id,
+            'Lay-Bay plan reached its 45-day deadline.',
+            jsonb_build_object(
+                'plan_status', 'active',
+                'expires_at', v_plan.expires_at
+            ),
+            jsonb_build_object(
+                'plan_status', v_new_status,
+                'approved_balance', v_balance,
+                'target_price', v_plan.lay_bay_price_snapshot
+            )
+        );
+
+        v_count := v_count + 1;
+    END LOOP;
+
+    RETURN v_count;
+END;
+$function$;
+
+-- Remove the obsolete one-argument route so all new plans use variant checks.
+DROP FUNCTION IF EXISTS public.create_lay_bay_plan(bigint);
+
+-- Restrict SECURITY DEFINER RPCs to authenticated users; expiry runs via cron.
+REVOKE ALL ON FUNCTION public.set_lay_bay_price_22_percent()
+    FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.create_lay_bay_plan(bigint, text, text)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.create_lay_bay_plan(bigint, text, text)
+    TO authenticated;
+REVOKE ALL ON FUNCTION public.submit_lay_bay_deposit(uuid, numeric, text, text, text)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.submit_lay_bay_deposit(uuid, numeric, text, text, text)
+    TO authenticated;
+REVOKE ALL ON FUNCTION public.review_lay_bay_deposit(uuid, text, text)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.review_lay_bay_deposit(uuid, text, text)
+    TO authenticated;
+REVOKE ALL ON FUNCTION public.expire_lay_bay_plans()
+    FROM PUBLIC, anon, authenticated;
