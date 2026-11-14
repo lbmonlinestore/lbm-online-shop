@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080808">
+  <title>Create Account | LBM Lay-Bay</title>
+  <link rel="stylesheet" href="lay-bay.css">
+
+  <style>
+    body{background:#080808;color:#eee}
+    .topbar{background:#080808;border-bottom:1px solid #D4AF37}
+    .brand span{color:#D4AF37}
+    .back-link,a{color:#D4AF37}
+    .hero-card{background:#151515;color:#eee;border:1px solid #D4AF37}
+    h2{color:#D4AF37!important}
+    label{display:block;margin:15px 0 6px}
+    input{width:100%;padding:13px;border:1px solid #777;border-radius:7px;background:#080808;color:#fff}
+    .btn.primary{background:#D4AF37;color:#080808;font-weight:bold}
+    #signupMessage{white-space:pre-wrap}
+    .field-note{font-size:12px;color:#aaa;margin-top:6px}
+    .password-field{position:relative}
+    .password-field input{padding-right:58px}
+    .password-toggle{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;align-items:center;justify-content:center;gap:5px;min-width:48px;padding:7px;border:0;border-radius:6px;background:transparent;color:#D4AF37;font-size:12px;font-weight:700;cursor:pointer}
+    .password-toggle:focus-visible{outline:2px solid #D4AF37;outline-offset:2px}
+    .password-toggle svg{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <a href="../index.html" class="brand">LBM <span>LAY-BAY</span></a>
+  <a href="../index.html" class="back-link">Back to Shop</a>
+</header>
+
+<main style="max-width:520px;margin:45px auto;padding:20px">
+
+  <section class="hero-card">
+
+    <h2>Create your account</h2>
+
+    <p>Create an account to save towards your chosen LBM product.</p>
+
+    <form id="signupForm" style="margin-top:22px">
+
+      <label for="fullName">Full name</label>
+      <input
+        id="fullName"
+        type="text"
+        autocomplete="name"
+        maxlength="100"
+        placeholder="Enter your full name"
+        required
+      >
+
+      <label for="username">Choose your Lay-Bay username</label>
+      <input
+        id="username"
+        type="text"
+        minlength="3"
+        maxlength="20"
+        pattern="[A-Za-z]{3,20}"
+        autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="Example: Mwansa"
+        aria-describedby="usernameNote"
+        required
+      >
+
+      <p id="usernameNote" class="field-note">
+        Use 3–20 letters only. No spaces, numbers or symbols.
+        Your username must be unique.
+      </p>
+
+      <label for="email">Email address</label>
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        placeholder="example@email.com"
+        required
+      >
+
+      <label for="password">Password</label>
+      <div class="password-field">
+        <input
+          id="password"
+          type="password"
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="At least 8 characters"
+          aria-describedby="passwordNote"
+          required
+        >
+        <button
+          type="button"
+          class="password-toggle"
+          data-password-toggle="password"
+          aria-label="Show password"
+          aria-controls="password"
+          aria-pressed="false"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Show</span>
+        </button>
+      </div>
+      <p id="passwordNote" class="field-note">Use at least 8 characters.</p>
+
+      <label for="confirmPassword">Confirm password</label>
+      <div class="password-field">
+        <input
+          id="confirmPassword"
+          type="password"
+          minlength="8"
+          autocomplete="new-password"
+          placeholder="Enter password again"
+          required
+        >
+        <button
+          type="button"
+          class="password-toggle"
+          data-password-toggle="confirmPassword"
+          aria-label="Show confirm password"
+          aria-controls="confirmPassword"
+          aria-pressed="false"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span>Show</span>
+        </button>
+      </div>
+
+      <label style="display:flex;gap:9px;align-items:flex-start">
+        <input
+          id="agree"
+          type="checkbox"
+          required
+          style="width:auto;margin-top:4px"
+        >
+        <span>I have read and agree to the LBM Lay-Bay terms and conditions.</span>
+      </label>
+
+      <button
+        id="signupBtn"
+        type="submit"
+        class="btn primary"
+        style="width:100%;border:0;margin-top:20px;cursor:pointer"
+      >
+        Create Account
+      </button>
+
+      <p
+        id="signupMessage"
+        role="status"
+        aria-live="polite"
+        style="margin-top:15px"
+      ></p>
+
+    </form>
+
+    <p style="margin-top:20px;text-align:center">
+      Already registered? <a href="login.html">Login</a>
+    </p>
+
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="lay-bay-auth.js"></script>
+
+<script>
+(function () {
+  "use strict";
+
+  const eyeIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const eyeOffIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.1 3.8M6.2 6.2C3.5 8.1 2 12 2 12s3.6 7 10 7c1.5 0 2.8-.4 4-1"/></svg>';
+
+  document.querySelectorAll("[data-password-toggle]").forEach(function (button) {
+    const input = document.getElementById(button.getAttribute("data-password-toggle"));
+    if (!input) return;
+
+    button.addEventListener("click", function () {
+      const shouldShow = input.type === "password";
+      input.type = shouldShow ? "text" : "password";
+      button.setAttribute("aria-pressed", String(shouldShow));
+      button.setAttribute(
+        "aria-label",
+        shouldShow ? "Hide " + (input.id === "confirmPassword" ? "confirm password" : "password") : "Show " + (input.id === "confirmPassword" ? "confirm password" : "password")
+      );
+      button.innerHTML = (shouldShow ? eyeOffIcon : eyeIcon) + "<span>" + (shouldShow ? "Hide" : "Show") + "</span>";
+    });
+  });
+})();
+</script>
+</body>
+</html>
