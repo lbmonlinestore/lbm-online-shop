@@ -3359,7 +3359,17 @@ let layBaySelectionCart = [];
         createElement(
           "p",
           "",
-          "Requested amount: " + money(refund.refund_amount)
+          "Verified deposited balance: " + money(refund.total_deposited)
+        ),
+        createElement(
+          "p",
+          "",
+          "Refund approved: " + money(refund.refund_amount)
+        ),
+        createElement(
+          "p",
+          "",
+          "Administrator deduction: " + money(refund.proposed_deduction || 0)
         ),
         createElement(
           "p",
@@ -3377,6 +3387,16 @@ let layBaySelectionCart = [];
           "Requested: " + dateText(refund.requested_at)
         )
       );
+
+      if (
+        Number(refund.proposed_deduction || 0) > 0 &&
+        refund.deduction_reason &&
+        ["approved", "processing", "processed"].includes(refund.request_status)
+      ) {
+        card.appendChild(createElement(
+          "p", "", "Deduction explanation: " + refund.deduction_reason
+        ));
+      }
 
       if (
         refund.request_status === "rejected" &&
