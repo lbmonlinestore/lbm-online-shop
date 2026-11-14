@@ -2892,7 +2892,11 @@ let layBaySelectionCart = [];
       const status = createElement(
         "p",
         "",
-        "Plan status: " + (plan.plan_status || "Unknown")
+        "Plan status: " + (
+          plan.plan_status === "pending_initial_deposit"
+            ? "Awaiting 50% first deposit"
+            : (plan.plan_status || "Unknown")
+        )
       );
 
       const total = createElement(
