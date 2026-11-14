@@ -102,11 +102,18 @@
 
   function getLayBayPrice(product) {
     const normal = Number(product?.price || 0);
+    const configured = Number(product?.lay_bay_price);
 
-    if (!Number.isFinite(normal) || normal <= 0) return 0;
+    // The database trigger owns the 22% markup.
+    // The admin screen must display the stored price, not recalculate it.
+    if (
+      !Number.isFinite(normal) ||
+      normal <= 0 ||
+      !Number.isFinite(configured) ||
+      configured <= normal
+    ) return 0;
 
-    // Lay-Bay price is automatically calculated as 22% above the shop price.
-    return Number((normal * 1.22).toFixed(2));
+    return Number(configured.toFixed(2));
   }
 
   function getProductName(product) {
