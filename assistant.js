@@ -52,7 +52,7 @@
       none: "Nshaisanga iyi product. Yesheni ishina line kapena mututumine pa WhatsApp.",
       error: "Ndi na akashishi pa kulolesha ama product. Mukwai, yesheniko nakabili kapena mututumine pa WhatsApp.",
       all: "Aya ni ma product yalembwa mu shop:",
-      ask: "Ni product inshi mulefwaya ndiloleshe?",
+      ask: "Ni product inshi mulefwaya?",
       size: "Ndeipusha ishina lya product kuti ndiloleshe ama size.",
       colour: "Ndeipusha ishina lya product kuti ndiloleshe ama colour.",
       order: "Pa ku order, funguleni product mu shop, kabili mututumine pa WhatsApp kuti twikilishe availability, size, colour na delivery.",
