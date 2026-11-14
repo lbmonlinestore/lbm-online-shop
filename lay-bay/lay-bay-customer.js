@@ -2676,7 +2676,7 @@ let layBaySelectionCart = [];
       "\nFirst deposit required: " +
       money(Number((productPrice(product) * 0.5).toFixed(2))) +
       " (50%)." +
-      "\nThe remaining balance is due within 45 days after LBM approves the first deposit." +
+      "\nThe remaining balance is due within 30 days after LBM approves the first deposit." +
       "\n\nContinue?"
     );
 
@@ -2712,7 +2712,7 @@ let layBaySelectionCart = [];
       message(
         "plansMessage",
         matchingPlan
-          ? "Your Lay-Bay plan is awaiting its first deposit of at least 50%. Submit that amount for verification to activate the plan and start the 45-day period."
+          ? "Your Lay-Bay plan is awaiting its first deposit of at least 50%. Submit that amount for verification to activate the plan and start the 30-day period."
           : "The plan request was processed. Please refresh your plans."
       );
 
@@ -2925,7 +2925,7 @@ let layBaySelectionCart = [];
         "p",
         "",
         plan.plan_status === "pending_initial_deposit"
-          ? "45-day payment period: Starts after the first 50% deposit is approved"
+          ? "30-day payment period: Starts after the first 50% deposit is approved"
           : "Deadline: " + dateText(
               balance?.expires_at || plan.expires_at
             )
