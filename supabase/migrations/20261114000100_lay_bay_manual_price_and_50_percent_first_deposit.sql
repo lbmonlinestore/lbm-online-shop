@@ -1140,3 +1140,15 @@ BEGIN
              THEN 'approved.' ELSE 'rejected.' END;
 END;
 $function$;
+
+
+-- Restrict these SECURITY DEFINER RPCs to signed-in users.
+REVOKE ALL ON FUNCTION public.request_lay_bay_refund(uuid, text)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.request_lay_bay_refund(uuid, text)
+    TO authenticated;
+
+REVOKE ALL ON FUNCTION public.review_lay_bay_refund(uuid, text, text)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.review_lay_bay_refund(uuid, text, text)
+    TO authenticated;
