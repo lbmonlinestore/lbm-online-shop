@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,99 +17,89 @@
 
     <meta name="description" content="Discover stylish clothing, footwear and accessories at LBM Online Shop. Serving customers across Zambia.">
 
-    <<link rel="stylesheet" href="style.css">
-
-<style>
-
-/* =========================================
-   LBM TECHNICAL ASSISTANT - STORE WIDGET
-   ========================================= */
-.lbm-assistant-launcher {
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  z-index: 99990;
-  width: 62px;
-  height: 62px;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  background: #173d70;
-  color: #fff;
-  font-size: 27px;
-  cursor: pointer;
-  box-shadow: 0 8px 30px rgba(16,44,80,.2);
-}
-
-.lbm-assistant-panel {
-  display: none;
-  position: fixed;
-  right: 20px;
-  bottom: 95px;
-  z-index: 99989;
-  width: min(390px, calc(100vw - 30px));
-  height: min(570px, calc(100vh - 125px));
-  background: #fff;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 8px 30px rgba(16,44,80,.2);
-  flex-direction: column;
-}
-
-.lbm-assistant-panel.open {
-  display: flex;
-}
-
-.lbm-assistant-widget-header {
-  height: 52px;
-  flex-shrink: 0;
-  padding: 0 15px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #173d70;
-  color: #fff;
-  font-family: Arial, sans-serif;
-}
-
-.lbm-assistant-widget-header strong {
-  font-size: 14px;
-}
-
-.lbm-assistant-close {
-  border: 0;
-  background: transparent;
-  color: #fff;
-  font-size: 27px;
-  cursor: pointer;
-}
-
-.lbm-assistant-frame {
-  width: 100%;
-  height: calc(100% - 52px);
-  flex: 1;
-  border: 0;
-  display: block;
-}
-
-@media (max-width: 600px) {
-  .lbm-assistant-launcher {
-    right: 15px;
-    bottom: 15px;
-  }
-
-  .lbm-assistant-panel {
-    right: 10px;
-    bottom: 88px;
-    width: calc(100vw - 20px);
-    height: min(570px, calc(100vh - 110px));
-  }
-}
+    <link rel="stylesheet" href="style.css">
 
     <style>
+        .lbm-assistant-launcher {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 99990;
+            width: 62px;
+            height: 62px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            background: #173d70;
+            color: #fff;
+            font-size: 27px;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(16,44,80,.2);
+        }
 
-        /* =================================
-           PRODUCT SEARCH
-           ================================= */
+        .lbm-assistant-panel {
+            display: none;
+            position: fixed;
+            right: 20px;
+            bottom: 95px;
+            z-index: 99989;
+            width: min(390px, calc(100vw - 30px));
+            height: min(570px, calc(100vh - 125px));
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(16,44,80,.2);
+            flex-direction: column;
+        }
+
+        .lbm-assistant-panel.open {
+            display: flex;
+        }
+
+        .lbm-assistant-widget-header {
+            height: 52px;
+            flex-shrink: 0;
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #173d70;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+
+        .lbm-assistant-widget-header strong {
+            font-size: 14px;
+        }
+
+        .lbm-assistant-close {
+            border: 0;
+            background: transparent;
+            color: #fff;
+            font-size: 27px;
+            cursor: pointer;
+        }
+
+        .lbm-assistant-frame {
+            width: 100%;
+            height: calc(100% - 52px);
+            flex: 1;
+            border: 0;
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            .lbm-assistant-launcher {
+                right: 15px;
+                bottom: 15px;
+            }
+
+            .lbm-assistant-panel {
+                right: 10px;
+                bottom: 88px;
+                width: calc(100vw - 20px);
+                height: min(570px, calc(100vh - 110px));
+            }
+        }
 
         .lbm-search-panel {
             width: 100%;
@@ -223,7 +214,6 @@
         }
 
         @media (max-width: 480px) {
-
             .lbm-search-panel {
                 padding: 0 12px;
                 margin-bottom: 22px;
@@ -238,13 +228,7 @@
                 height: 48px;
                 font-size: 14px;
             }
-
         }
-
-
-        /* =================================
-           PAYMENT METHODS
-           ================================= */
 
         .payment-section {
             padding: 65px 20px;
@@ -343,11 +327,6 @@
             margin-top: 15px;
         }
 
-
-        /* =================================
-           PHONE CONTACT
-           ================================= */
-
         .call-options {
             display: flex;
             justify-content: center;
@@ -376,13 +355,7 @@
             font-weight: bold;
         }
 
-
-        /* =================================
-           MOBILE RESPONSIVENESS
-           ================================= */
-
         @media (max-width: 480px) {
-
             .payment-section {
                 padding: 45px 12px;
             }
@@ -423,13 +396,7 @@
                 width: 100%;
                 max-width: 280px;
             }
-
         }
-
-
-        /* =================================
-           SOCIAL MEDIA BRAND ICONS
-           ================================= */
 
         .social-links {
             display: flex;
@@ -485,11 +452,6 @@
             display: none !important;
         }
 
-
-        /* =================================
-           DEVELOPER CREDIT
-           ================================= */
-
         .developer-credit {
             margin-top: 12px;
             font-size: 12px;
@@ -501,7 +463,6 @@
             color: #d4af37;
             font-weight: 700;
         }
-
     </style>
 </head>
 
@@ -513,14 +474,15 @@
             LBM <span>ONLINE SHOP</span>
         </a>
 
-        <nav class="navigation">
-    <a href="#home">Home</a>
-    <a href="#products">Shop</a>
-    <a href="#about">About</a>
-    <a href="#contact">Contact</a>
-   <a href="technical-assistant.html">Technical Assistant</a>
-    <a href="returns.html">Returns & Exchanges</a>
-</nav>
+        <nav class="navigation" aria-label="Main navigation">
+            <a href="#home">Home</a>
+            <a href="#products">Shop</a>
+            <a href="lay-bay.html">Lay-Bay</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <a href="technical-assistant.html">Technical Assistant</a>
+            <a href="returns.html">Returns & Exchanges</a>
+        </nav>
 
         <a class="header-whatsapp"
            href="https://wa.me/260969034955"
@@ -534,7 +496,6 @@
         </button>
 
     </header>
-
 
     <main>
 
@@ -558,15 +519,28 @@
 
                 <div class="hero-actions">
 
-                    <a href="#products" class="shop-button">
-                        SHOP NOW
+                    <a href="#products" class="hero-text-link">
+                        SHOP NOW →
                     </a>
+
+                    <div class="laybay-links">
+
+                        <a href="lay-bay.html" class="hero-text-link">
+                            SHOP WITH LAY-BAY →
+                        </a>
+
+                        <div class="laybay-sub-links">
+                            <a href="lay-bay.html">CATALOG</a>
+                            <a href="lay-bay.html">LOG IN</a>
+                        </div>
+
+                    </div>
 
                     <a href="https://wa.me/260969034955"
                        target="_blank"
                        rel="noopener noreferrer"
-                       class="whatsapp-button">
-                        CHAT WITH US
+                       class="hero-text-link">
+                        CHAT WITH US →
                     </a>
 
                 </div>
@@ -574,7 +548,6 @@
             </div>
 
         </section>
-
 
         <section class="collection-heading" id="products">
 
@@ -589,9 +562,6 @@
             </p>
 
         </section>
-
-
-        <!-- PRODUCT CATALOGUE AND SEARCH -->
 
         <section class="products">
 
@@ -632,13 +602,11 @@
 
             </div>
 
-
             <div class="product-grid" id="product-list">
                 <p>Loading products...</p>
             </div>
 
         </section>
-
 
         <section class="cart-section" id="cart-section">
 
@@ -673,7 +641,6 @@
 
         </section>
 
-
         <section class="about" id="about">
 
             <p class="section-label">ABOUT LBM</p>
@@ -687,7 +654,6 @@
             </p>
 
         </section>
-
 
         <section class="payment-section" id="payments">
 
@@ -718,13 +684,10 @@
                     >
 
                     <h3>MTN</h3>
-
                     <p>Mobile Money</p>
-
                     <p>Tap to open MoMo</p>
 
                 </a>
-
 
                 <a
                     class="payment-card payment-app-link airtel-card"
@@ -740,13 +703,10 @@
                     >
 
                     <h3>Airtel</h3>
-
                     <p>Airtel Money</p>
-
                     <p>Tap to open My Airtel</p>
 
                 </a>
-
 
                 <div class="payment-card zamtel-card">
 
@@ -761,7 +721,6 @@
                     </a>
 
                     <h3>Zamtel</h3>
-
                     <p>Zamtel Money</p>
 
                 </div>
@@ -775,7 +734,6 @@
             </p>
 
         </section>
-
 
         <section class="contact" id="contact">
 
@@ -825,7 +783,6 @@
 
     </main>
 
-
     <footer class="footer">
 
         <a href="#home" class="footer-brand">
@@ -833,9 +790,7 @@
         </a>
 
         <p>Fashion. Elegance. Confidence.</p>
-
         <p>MTN • Airtel • Zamtel Mobile Money</p>
-
 
         <div class="social-links" aria-label="LBM social media">
 
@@ -856,7 +811,6 @@
                 </svg>
             </a>
 
-
             <a
                 id="instagramLink"
                 class="social-icon-link instagram"
@@ -867,7 +821,6 @@
                 hidden
             >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-
                     <rect
                         x="3"
                         y="3"
@@ -878,7 +831,6 @@
                         stroke="currentColor"
                         stroke-width="2"
                     />
-
                     <circle
                         cx="12"
                         cy="12"
@@ -887,17 +839,14 @@
                         stroke="currentColor"
                         stroke-width="2"
                     />
-
                     <circle
                         cx="17.5"
                         cy="6.5"
                         r="1.2"
                         fill="currentColor"
                     />
-
                 </svg>
             </a>
-
 
             <a
                 id="whatsappLink"
@@ -909,22 +858,18 @@
                 hidden
             >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
-
                     <path
                         fill="currentColor"
                         d="M12 2a9.8 9.8 0 0 0-8.5 14.7L2 22l5.5-1.4A10 10 0 1 0 12 2zm0 17.9a8 8 0 0 1-4.1-1.1l-.3-.2-3.3.9.9-3.2-.2-.4A8 8 0 1 1 12 19.9z"
                     />
-
                     <path
                         fill="currentColor"
                         d="M16.4 13.7c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8.9-.1.2-.3.2-.5.1-1.3-.6-2.2-1.2-3.1-2.8-.2-.3.2-.3.6-1.1.1-.2.1-.3 0-.5l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.8.8-1.1 1.7-.9 2.7.2 1.2 1.1 2.5 2.1 3.5 1.3 1.3 2.6 2 4.1 2.4 1 .3 1.8.2 2.5-.3.5-.4.8-.9.9-1.4.1-.3 0-.5-.3-.6z"
                     />
-
                 </svg>
             </a>
 
         </div>
-
 
         <p class="copyright">
             &copy; <span id="year"></span>
@@ -932,120 +877,103 @@
             All rights reserved.
         </p>
 
-
         <p class="developer-credit">
             Website developed by
             <strong>BC Mwansa Jr</strong>
         </p>
 
-
         <div class="admin-access">
-    <a href="returns.html">Returns & Exchanges</a>
-    |
-    <a href="admin.html">Admin Login</a>
-</div>
+            <a href="lay-bay.html">Lay-Bay Payment Plan</a>
+            |
+            <a href="returns.html">Returns & Exchanges</a>
+            |
+            <a href="admin.html">Admin Login</a>
+        </div>
 
     </footer>
-
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script src="script.js"></script>
-  <script src="features.js"></script>
-
+    <script src="features.js"></script>
 
     <script>
         if ("serviceWorker" in navigator) {
-
             window.addEventListener("load", () => {
-
                 navigator.serviceWorker.register("./sw.js")
-
                     .then(registration => {
-
                         console.log(
                             "LBM App Service Worker registered:",
                             registration.scope
                         );
-
                     })
-
                     .catch(error => {
-
                         console.error(
                             "LBM App registration failed:",
                             error
                         );
-
                     });
-
             });
-
         }
     </script>
 
-<!-- =========================================
-     LBM TECHNICAL ASSISTANT
-     FLOATING CHAT WIDGET
-     ========================================= -->
-
-<button
-  type="button"
-  id="lbmAssistantLauncher"
-  class="lbm-assistant-launcher"
-  aria-label="Open LBM Technical Assistant"
-  aria-expanded="false"
->
-  💬
-</button>
-
-<div
-  id="lbmAssistantPanel"
-  class="lbm-assistant-panel"
-  aria-label="LBM Technical Assistant chat"
->
-  <div class="lbm-assistant-widget-header">
-    <strong>LBM Technical Assistant</strong>
-
     <button
-      type="button"
-      id="lbmAssistantClose"
-      class="lbm-assistant-close"
-      aria-label="Close assistant"
+        type="button"
+        id="lbmAssistantLauncher"
+        class="lbm-assistant-launcher"
+        aria-label="Open LBM Technical Assistant"
+        aria-expanded="false"
     >
-      &times;
+        💬
     </button>
-  </div>
 
-  <iframe
-    class="lbm-assistant-frame"
-    src="technical-assistant.html?embedded=1"
-    title="LBM Technical Assistant"
-    loading="lazy"
-  ></iframe>
-</div>
+    <div
+        id="lbmAssistantPanel"
+        class="lbm-assistant-panel"
+        aria-label="LBM Technical Assistant chat"
+    >
+        <div class="lbm-assistant-widget-header">
+            <strong>LBM Technical Assistant</strong>
 
-<script>
-(function () {
-  const launcher = document.getElementById("lbmAssistantLauncher");
-  const panel = document.getElementById("lbmAssistantPanel");
-  const closeButton = document.getElementById("lbmAssistantClose");
+            <button
+                type="button"
+                id="lbmAssistantClose"
+                class="lbm-assistant-close"
+                aria-label="Close assistant"
+            >
+                &times;
+            </button>
+        </div>
 
-  if (!launcher || !panel || !closeButton) return;
+        <iframe
+            class="lbm-assistant-frame"
+            src="technical-assistant.html?embedded=1"
+            title="LBM Technical Assistant"
+            loading="lazy"
+        ></iframe>
+    </div>
 
-  launcher.addEventListener("click", function () {
-    panel.classList.toggle("open");
+    <script>
+        (function () {
+            const launcher = document.getElementById("lbmAssistantLauncher");
+            const panel = document.getElementById("lbmAssistantPanel");
+            const closeButton = document.getElementById("lbmAssistantClose");
 
-    const isOpen = panel.classList.contains("open");
-    launcher.setAttribute("aria-expanded", String(isOpen));
-  });
+            if (!launcher || !panel || !closeButton) return;
 
-  closeButton.addEventListener("click", function () {
-    panel.classList.remove("open");
-    launcher.setAttribute("aria-expanded", "false");
-  });
-})();
-</script>
+            launcher.addEventListener("click", function () {
+                panel.classList.toggle("open");
+
+                const isOpen = panel.classList.contains("open");
+                launcher.setAttribute("aria-expanded", String(isOpen));
+            });
+
+            closeButton.addEventListener("click", function () {
+                panel.classList.remove("open");
+                launcher.setAttribute("aria-expanded", "false");
+            });
+        })();
+    </script>
 
 </body>
 </html>
