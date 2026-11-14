@@ -1,3 +1,20 @@
+-- Extend the permitted plan states for the initial-deposit activation stage.
+ALTER TABLE public.lay_bay_plans
+    DROP CONSTRAINT IF EXISTS lay_bay_plans_plan_status_check;
+
+ALTER TABLE public.lay_bay_plans
+    ADD CONSTRAINT lay_bay_plans_plan_status_check
+    CHECK (plan_status = ANY (ARRAY[
+        'pending_initial_deposit'::text,
+        'active'::text,
+        'completed'::text,
+        'fulfilled'::text,
+        'cancellation_requested'::text,
+        'cancelled'::text,
+        'expired'::text,
+        'unavailable'::text
+    ]));
+
 -- LBM Lay-Bay manual pricing and 50% initial deposit policy.
 -- Apply after the integration branch has been reviewed and approved.
 -- New plans remain pending_initial_deposit until a qualifying first payment
