@@ -141,3 +141,111 @@ REVOKE ALL ON FUNCTION public.review_lay_bay_refund(uuid, text, numeric, text, t
     FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.review_lay_bay_refund(uuid, text, numeric, text, text)
     TO authenticated;
+
+
+CREATE OR REPLACE FUNCTION public.process_lay_bay_refund(
+    p_refund_id uuid,
+    p_payment_reference text
+)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+DECLARE
+    v_admin_id uuid;
+    v_refund public.lay_bay_refunds%ROWTYPE;
+BEGIN
+    v_admin_id := auth.uid();
+
+    IF v_admin_id IS NULL OR NOT EXISTS (
+        SELECT 1 FROM public.admin_users WHERE user_id = v_admin_id
+    ) THEN
+        RAISE EXCEPTION 'Administrator access required.';
+    END IF;
+
+    IF p_payment_reference IS NULL OR length(btrim(p_payment_reference)) < 3 THEN
+        RAISE EXCEPTION 'Enter the actual refund payment reference.';
+    END IF;
+
+    SELECT * INTO v_refund
+    FROM public.lay_bay_refunds
+    WHERE id = p_refund_id
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Refund request not found.';
+    END IF;
+
+    IF v_refund.request_status NOT IN ('approved', 'processing') THEN
+        RAISE EXCEPTION 'Only approved refunds can be processed.';
+    END IF;
+
+    IF v_refund.refund_amount <= 0 THEN
+        RAISE EXCEPTION 'Refund amount must be greater than zero.';
+    END IF;
+
+    -- Debit the amount actually paid back to the customer.
+    INSERT INTO public.lay_bay_ledger (
+        plan_id, user_id, entry_type, amount, currency,
+        source_type, source_id, description, recorded_by
+    )
+    VALUES (
+        v_refund.plan_id, v_refund.user_id, 'debit',
+        v_refund.refund_amount, v_refund.currency,
+        'refund', v_refund.id,
+        'Refund payment sent; reference: ' || btrim(p_payment_reference),
+        v_admin_id
+    );
+
+    -- Also settle the individually approved deduction so the plan balance
+    -- is zero after the refund and deduction have both been accounted for.
+    IF COALESCE(v_refund.proposed_deduction, 0) > 0 THEN
+        INSERT INTO public.lay_bay_ledger (
+            plan_id, user_id, entry_type, amount, currency,
+            source_type, source_id, description, recorded_by
+        )
+        VALUES (
+            v_refund.plan_id, v_refund.user_id, 'debit',
+            v_refund.proposed_deduction, v_refund.currency,
+            'adjustment', v_refund.id,
+            'Administrator-approved cancellation deduction: ' ||
+                COALESCE(v_refund.deduction_reason, 'Reason not recorded'),
+            v_admin_id
+        );
+    END IF;
+
+    UPDATE public.lay_bay_refunds
+    SET request_status = 'processed',
+        processed_by = v_admin_id,
+        processed_at = now(),
+        refund_payment_reference = btrim(p_payment_reference),
+        updated_at = now()
+    WHERE id = p_refund_id;
+
+    INSERT INTO public.lay_bay_audit_logs (
+        actor_user_id, actor_role, action, entity_type, entity_id,
+        description, new_values
+    )
+    VALUES (
+        v_admin_id, 'admin', 'refund_processed',
+        'lay_bay_refund', p_refund_id,
+        'Refund payment and any approved cancellation deduction were posted to the ledger.',
+        jsonb_build_object(
+            'refund_amount', v_refund.refund_amount,
+            'deduction_amount', COALESCE(v_refund.proposed_deduction, 0),
+            'deduction_reason', v_refund.deduction_reason,
+            'payment_reference', btrim(p_payment_reference),
+            'request_status', 'processed'
+        )
+    );
+
+    RETURN 'Refund payment and cancellation accounting recorded successfully.';
+END;
+$function$;
+
+REVOKE ALL ON FUNCTION public.process_lay_bay_refund(uuid, text)
+    FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.process_lay_bay_refund(uuid, text)
+    TO authenticated;
+
