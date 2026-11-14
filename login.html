@@ -1,0 +1,691 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080808">
+
+  <title>Login | LBM Lay-Bay</title>
+
+  <link rel="stylesheet" href="lay-bay.css">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      background: #080808;
+      color: #eee;
+    }
+
+    .topbar {
+      background: #080808;
+      border-bottom: 1px solid #D4AF37;
+    }
+
+    .brand span, .back-link, a {
+      color: #D4AF37;
+    }
+
+    main {
+      max-width: 480px;
+      margin: 55px auto;
+      padding: 20px;
+    }
+
+    .hero-card {
+      background: #151515;
+      color: #eee;
+      border: 1px solid #D4AF37;
+      border-radius: 12px;
+      padding: 22px;
+    }
+
+    h2 { color: #D4AF37; }
+
+    label {
+      display: block;
+      margin-top: 17px;
+    }
+
+    .login-input {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #777;
+      border-radius: 8px;
+      margin-top: 7px;
+      background: #080808;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .login-input:focus {
+      outline: 1px solid #D4AF37;
+      border-color: #D4AF37;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 18px;
+    }
+
+    .btn.primary {
+      background: #D4AF37;
+      color: #080808;
+      border: 0;
+    }
+
+    .btn.google {
+      background: #fff;
+      color: #222;
+      border: 1px solid #ccc;
+    }
+
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    #loginMessage {
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      font-size: 14px;
+    }
+
+    #usernameSetupPanel {
+      display: none;
+      margin-top: 22px;
+      padding: 18px;
+      border: 1px solid #D4AF37;
+      border-radius: 9px;
+      background: #101010;
+    }
+
+    #usernameSetupPanel input {
+      width: 100%;
+      padding: 13px;
+      margin-top: 12px;
+      border: 1px solid #777;
+      border-radius: 7px;
+      background: #080808;
+      color: white;
+      font-size: 15px;
+    }
+
+    #usernameSetupMessage {
+      overflow-wrap: anywhere;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <a href="index.html" class="brand">
+    LBM <span>LAY-BAY</span>
+  </a>
+
+  <a href="index.html" class="back-link">Back</a>
+</header>
+
+<main>
+  <section class="hero-card">
+
+    <h2>Welcome back</h2>
+
+    <p>Login to continue your savings journey.</p>
+
+    <button
+      type="button"
+      id="googleLoginButton"
+      class="btn google"
+    >
+      Continue with Google
+    </button>
+
+    <p style="text-align:center;color:#aaa;font-size:13px;">
+      Or login using your Lay-Bay account
+    </p>
+
+    <form id="loginForm" style="margin-top:20px;">
+
+      <label for="method">Login using</label>
+
+      <select id="method" class="login-input">
+        <option value="email">Email address</option>
+        <option value="phone">Mobile number</option>
+      </select>
+
+      <div id="emailField">
+        <label for="email">Email address</label>
+
+        <input
+          id="email"
+          class="login-input"
+          type="email"
+          placeholder="example@email.com"
+          autocomplete="username"
+        >
+      </div>
+
+      <div id="phoneField" style="display:none;">
+
+        <label for="phone">Mobile number</label>
+
+        <input
+          id="phone"
+          class="login-input"
+          type="tel"
+          placeholder="+260 9XX XXX XXX"
+          autocomplete="username"
+        >
+
+        <small style="display:block;margin-top:6px;">
+          Enter the mobile number registered to your Lay-Bay account.
+        </small>
+
+      </div>
+
+      <label for="password">Password</label>
+
+      <input
+        id="password"
+        class="login-input"
+        type="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        required
+      >
+
+      <button
+        id="loginButton"
+        type="submit"
+        class="btn primary"
+      >
+        Login
+      </button>
+
+      <p id="loginMessage" role="status" aria-live="polite"></p>
+
+    </form>
+
+    <div id="usernameSetupPanel">
+      <h2>Choose Your Lay-Bay Username</h2>
+
+      <p>
+        Before entering your dashboard, choose a unique username.
+      </p>
+
+      <small style="color:#bbb;">
+        Use 3–20 characters. Letters, numbers and underscores only.
+      </small>
+
+      <input
+        id="firstUsername"
+        type="text"
+        minlength="3"
+        maxlength="20"
+        autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="Choose your username"
+      >
+
+      <button
+        type="button"
+        id="saveFirstUsername"
+        class="btn primary"
+      >
+        Save Username
+      </button>
+
+      <p id="usernameSetupMessage"></p>
+    </div>
+
+    <p style="margin-top:22px;text-align:center;">
+      Don't have an account?
+
+      <a href="signup.html" style="font-weight:bold;">
+        Sign up
+      </a>
+    </p>
+
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+(function () {
+  "use strict";
+
+  // ==================================================
+  // 1. SUPABASE CONFIGURATION
+  // ==================================================
+
+  const SUPABASE_URL =
+    "https://toovotqrcsulhgdrcsmn.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
+
+  // ==================================================
+  // 2. ELEMENTS
+  // ==================================================
+
+  const $ = id => document.getElementById(id);
+
+  const method = $("method");
+  const emailField = $("emailField");
+  const phoneField = $("phoneField");
+  const emailInput = $("email");
+  const phoneInput = $("phone");
+  const passwordInput = $("password");
+  const loginForm = $("loginForm");
+  const loginButton = $("loginButton");
+  const loginMessage = $("loginMessage");
+  const googleButton = $("googleLoginButton");
+
+  let db = null;
+  let loginInProgress = false;
+  let redirecting = false;
+  let currentUser = null;
+
+  // ==================================================
+  // 3. MESSAGES AND VALIDATION
+  // ==================================================
+
+  function showMessage(message, success) {
+    loginMessage.textContent = message;
+    loginMessage.style.color = success ? "#D4AF37" : "#ff7777";
+  }
+
+  function validUsername(username) {
+    return /^[A-Za-z0-9_]{3,20}$/.test(username);
+  }
+
+  function normaliseZambianPhone(value) {
+    let number = value.replace(/[\s\-()]/g, "");
+
+    if (number.startsWith("0")) {
+      number = "+260" + number.substring(1);
+    } else if (number.startsWith("260")) {
+      number = "+" + number;
+    }
+
+    return number;
+  }
+
+  // ==================================================
+  // 4. LOGIN METHOD SWITCHING
+  // ==================================================
+
+  function updateLoginMethod() {
+    const usingPhone = method.value === "phone";
+
+    phoneField.style.display = usingPhone ? "block" : "none";
+    emailField.style.display = usingPhone ? "none" : "block";
+
+    phoneInput.required = usingPhone;
+    emailInput.required = !usingPhone;
+
+    showMessage("", true);
+  }
+
+  // ==================================================
+  // 5. INITIALISE SUPABASE
+  // ==================================================
+
+  function initialiseSupabase() {
+    if (!window.supabase || !window.supabase.createClient) {
+      throw new Error(
+        "Supabase could not load. Check your internet connection."
+      );
+    }
+
+    db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    window.LBM_LOGIN_DB = db;
+  }
+
+  // ==================================================
+  // 6. LOAD CUSTOMER PROFILE
+  // ==================================================
+
+  async function getCustomerProfile(userId) {
+    const { data, error } = await db
+      .from("lay_bay_profiles")
+      .select("username, account_status")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data;
+  }
+
+  // ==================================================
+  // 7. SAVE USERNAME THROUGH SECURE DATABASE RPC
+  // ==================================================
+
+  async function saveUsername(username) {
+    if (!validUsername(username)) {
+      throw new Error(
+        "Username must contain 3–20 characters using letters, numbers or underscores."
+      );
+    }
+
+    const { data, error } = await db.rpc(
+      "set_lay_bay_username",
+      {
+        p_username: username.trim()
+      }
+    );
+
+    if (error) throw error;
+
+    return data;
+  }
+
+  // ==================================================
+  // 8. FIRST-TIME USERNAME SETUP
+  // ==================================================
+
+  function showUsernameSetup() {
+    $("usernameSetupPanel").style.display = "block";
+    loginForm.style.display = "none";
+    googleButton.style.display = "none";
+
+    $("firstUsername").focus();
+  }
+
+  $("saveFirstUsername").addEventListener("click", async function () {
+    const username = $("firstUsername").value.trim();
+    const button = $("saveFirstUsername");
+    const message = $("usernameSetupMessage");
+
+    if (!currentUser) {
+      message.textContent =
+        "Your session could not be verified. Please log in again.";
+      message.style.color = "#ff7777";
+      return;
+    }
+
+    if (!validUsername(username)) {
+      message.textContent =
+        "Enter 3–20 characters using letters, numbers or underscores.";
+      message.style.color = "#ff7777";
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = "Saving...";
+
+    try {
+      await saveUsername(username);
+
+      message.textContent =
+        "Username saved. Opening your dashboard...";
+
+      message.style.color = "#D4AF37";
+
+      window.location.replace("dashboard.html");
+
+    } catch (error) {
+      message.textContent = error.message || "Could not save username.";
+      message.style.color = "#ff7777";
+
+      button.disabled = false;
+      button.textContent = "Save Username";
+    }
+  });
+
+  // ==================================================
+  // 9. VERIFY ACCOUNT BEFORE DASHBOARD ACCESS
+  // ==================================================
+
+  async function continueAfterAuthentication(user) {
+    if (redirecting) return;
+
+    currentUser = user;
+
+    showMessage("Verifying your Lay-Bay profile...", true);
+
+    let profile = await getCustomerProfile(user.id);
+
+    if (!profile) {
+      throw new Error(
+        "Your Lay-Bay profile has not been created yet. Please contact support."
+      );
+    }
+
+    if (profile.account_status !== "active") {
+      await db.auth.signOut();
+
+      throw new Error(
+        "Your Lay-Bay account is not currently active. Please contact support."
+      );
+    }
+
+    // Email signup may have stored the chosen username
+    // in authentication metadata while awaiting confirmation.
+
+    if (!profile.username && user.user_metadata?.username) {
+      try {
+        await saveUsername(user.user_metadata.username);
+
+        profile = await getCustomerProfile(user.id);
+
+      } catch (error) {
+        console.warn("Saved signup username could not be registered:", error);
+      }
+    }
+
+    if (!profile || !profile.username) {
+      showUsernameSetup();
+      return;
+    }
+
+    redirecting = true;
+
+    showMessage("Login successful. Opening your dashboard...", true);
+
+    window.location.replace("dashboard.html");
+  }
+
+  // ==================================================
+  // 10. GOOGLE LOGIN
+  // ==================================================
+
+  googleButton.addEventListener("click", async function () {
+    if (!db || loginInProgress || redirecting) return;
+
+    googleButton.disabled = true;
+    googleButton.textContent = "Connecting to Google...";
+
+    showMessage("Opening Google sign-in...", true);
+
+    try {
+      const redirectTo =
+        window.location.origin + window.location.pathname;
+
+      const { error } = await db.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectTo
+        }
+      });
+
+      if (error) throw error;
+
+    } catch (error) {
+      showMessage(error.message || "Google sign-in failed.", false);
+
+      googleButton.disabled = false;
+      googleButton.textContent = "Continue with Google";
+    }
+  });
+
+  // ==================================================
+  // 11. EMAIL AND MOBILE LOGIN
+  // ==================================================
+
+  loginForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    if (loginInProgress || redirecting) return;
+
+    const password = passwordInput.value;
+
+    if (!password) {
+      showMessage("Please enter your password.", false);
+      return;
+    }
+
+    const usingPhone = method.value === "phone";
+    let credentials;
+
+    if (!usingPhone) {
+      const email = emailInput.value.trim().toLowerCase();
+
+      if (!email) {
+        showMessage("Please enter your email address.", false);
+        return;
+      }
+
+      credentials = {
+        email: email,
+        password: password
+      };
+
+    } else {
+      const phone = normaliseZambianPhone(phoneInput.value);
+
+      if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+        showMessage(
+          "Enter a valid mobile number, including the country code.",
+          false
+        );
+        return;
+      }
+
+      credentials = {
+        phone: phone,
+        password: password
+      };
+    }
+
+    loginInProgress = true;
+
+    loginButton.disabled = true;
+    googleButton.disabled = true;
+    loginButton.textContent = "Logging in...";
+
+    showMessage("Checking your account...", true);
+
+    try {
+      const { data, error } = await db.auth.signInWithPassword(
+        credentials
+      );
+
+      if (error) throw error;
+
+      if (!data.session || !data.user) {
+        throw new Error("Login did not create a session.");
+      }
+
+      await continueAfterAuthentication(data.user);
+
+    } catch (error) {
+      console.error("LBM login error:", error);
+
+      let message = error.message || "Login failed.";
+
+      if (message.toLowerCase().includes("invalid login credentials")) {
+        message =
+          "Incorrect email/mobile number or password. Please check your details.";
+      }
+
+      if (
+        usingPhone &&
+        (
+          message.toLowerCase().includes("phone") ||
+          message.toLowerCase().includes("provider")
+        )
+      ) {
+        message =
+          "Mobile login may not be enabled in Supabase yet. Try your email address.";
+      }
+
+      showMessage(message, false);
+
+      loginInProgress = false;
+
+      loginButton.disabled = false;
+      googleButton.disabled = false;
+      loginButton.textContent = "Login";
+    }
+  });
+
+  // ==================================================
+  // 12. CHECK EXISTING SESSION
+  // ==================================================
+
+  async function checkExistingSession() {
+    try {
+      const { data, error } = await db.auth.getSession();
+
+      if (error) throw error;
+
+      if (data.session) {
+        await continueAfterAuthentication(data.session.user);
+      }
+
+    } catch (error) {
+      console.error("LBM session check:", error);
+
+      showMessage(
+        error.message || "We could not verify your session.",
+        false
+      );
+    }
+  }
+
+  // ==================================================
+  // 13. START LOGIN PAGE
+  // ==================================================
+
+  try {
+    initialiseSupabase();
+
+    updateLoginMethod();
+
+    method.addEventListener("change", updateLoginMethod);
+
+    checkExistingSession();
+
+  } catch (error) {
+    console.error("LBM initialisation error:", error);
+
+    showMessage(error.message, false);
+
+    loginButton.disabled = true;
+    googleButton.disabled = true;
+  }
+
+})();
+</script>
+
+</body>
+</html>

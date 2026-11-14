@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080808">
+  <title>My Dashboard | LBM Lay-Bay</title>
+  <link rel="stylesheet" href="lay-bay.css">
+
+  <style>
+    :root {
+      --gold: #D4AF37;
+      --black: #080808;
+      --panel: #151515;
+      --muted: #aaa;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--black);
+      color: #eee;
+    }
+
+    .topbar {
+      background: var(--black);
+      border-bottom: 1px solid var(--gold);
+    }
+
+    .brand span { color: var(--gold); }
+    .back-link, a { color: var(--gold); }
+
+    main {
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 16px;
+    }
+
+    h1, h2, h3 { color: var(--gold); }
+
+    .lb-panel, .lb-stat, .lb-card {
+      background: var(--panel);
+      border: 1px solid #51451f;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 16px 0;
+    }
+
+    .lb-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .lb-stat strong {
+      display: block;
+      font-size: 25px;
+      color: var(--gold);
+      margin-top: 8px;
+    }
+
+    button, .lb-button {
+      background: var(--gold);
+      color: #080808;
+      border: 0;
+      border-radius: 7px;
+      padding: 11px 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      background: #080808;
+      color: white;
+      border: 1px solid #777;
+      border-radius: 7px;
+      margin: 6px 0 12px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    .lb-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .lb-product img {
+      width: 100%;
+      height: 190px;
+      object-fit: contain;
+      background: #080808;
+      border-radius: 8px;
+    }
+
+    .lb-muted { color: var(--muted); }
+
+    .lb-message {
+      white-space: pre-wrap;
+      margin: 12px 0;
+    }
+
+    .lb-progress {
+      height: 9px;
+      background: #444;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    .lb-progress span {
+      display: block;
+      height: 100%;
+      background: var(--gold);
+    }
+
+    .lb-hidden { display: none !important; }
+
+    .lb-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* Payment instructions */
+    .payment-instructions {
+      background: #201c10;
+      border: 1px solid var(--gold);
+      border-radius: 9px;
+      padding: 15px;
+      margin: 4px 0 16px;
+      line-height: 1.6;
+    }
+
+    .payment-instructions h3 {
+      margin-top: 0;
+    }
+
+    .receiving-number {
+      display: block;
+      font-size: 25px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      color: var(--gold);
+      margin: 8px 0;
+    }
+
+    .payment-warning {
+      color: #ffd980;
+      font-size: 13px;
+    }
+
+    @media(max-width: 500px) {
+      main { padding: 10px; }
+      .lb-panel, .lb-stat, .lb-card { padding: 13px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <a href="../index.html" class="brand">
+    LBM <span>LAY-BAY</span>
+  </a>
+
+  <div class="lb-row">
+    <a href="../index.html" class="back-link">Shop</a>
+    <button id="logoutBtn" type="button">Logout</button>
+  </div>
+</header>
+
+<main>
+
+  <section id="pageMessage" class="lb-message"
+    role="status" aria-live="polite"></section>
+
+  <section class="lb-panel">
+    <h1>My Lay-Bay Dashboard</h1>
+    <p class="lb-muted">
+      Welcome, <span id="customerEmail">Customer</span>.
+    </p>
+    <p class="lb-muted">
+      Your savings are linked to the specific products you choose.
+    </p>
+  </section>
+
+  <section class="lb-stats">
+    <article class="lb-stat">
+      Total verified savings
+      <strong id="totalSavings">K0.00</strong>
+    </article>
+
+    <article class="lb-stat">
+      Active plans
+      <strong id="activePlans">0</strong>
+    </article>
+
+    <article class="lb-stat">
+      Completed plans
+      <strong id="completedPlans">0</strong>
+    </article>
+
+    <article class="lb-stat">
+      Pending deposits
+      <strong id="pendingDeposits">0</strong>
+    </article>
+  </section>
+
+  <section class="lb-panel" id="productsSection">
+    <h2>Available Lay-Bay Products</h2>
+    <p class="lb-muted">
+      Choose a product to start a product-specific savings plan.
+    </p>
+    <div id="productsMessage" class="lb-message"></div>
+    <div id="productsList" class="lb-grid"></div>
+  </section>
+
+  <section class="lb-panel" id="accountSection">
+    <h2>My Savings Plans</h2>
+    <div id="plansMessage" class="lb-message"></div>
+    <div id="plansList"></div>
+  </section>
+
+  <section class="lb-panel" id="depositSection">
+    <h2>Submit a Deposit</h2>
+
+    <p class="lb-muted">
+      Your deposit remains pending until LBM verifies it.
+    </p>
+
+    <form id="depositForm">
+
+      <label for="selectedPlan">Select savings plan</label>
+      <select id="selectedPlan" required>
+        <option value="">Choose an active plan</option>
+      </select>
+
+      <label for="depositAmount">Amount (ZMW)</label>
+      <input
+        id="depositAmount"
+        type="number"
+        min="0.01"
+        step="0.01"
+        required
+      >
+
+      <label for="paymentMethod">Payment method</label>
+      <select id="paymentMethod" required>
+        <option value="">Choose method</option>
+        <option value="MTN Mobile Money">MTN Mobile Money</option>
+        <option value="Airtel Money">Airtel Money</option>
+        <option value="Zamtel Kwacha">Zamtel Kwacha</option>
+        <option value="Bank Transfer">Bank Transfer</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <!-- Receiving-account instructions appear here -->
+      <div
+        id="paymentInstructions"
+        class="payment-instructions lb-hidden"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <label for="paymentReference">Payment reference</label>
+      <input
+        id="paymentReference"
+        type="text"
+        maxlength="150"
+        required
+        placeholder="Enter transaction reference"
+      >
+
+      <label for="paymentProof">Proof URL (optional)</label>
+      <input
+        id="paymentProof"
+        type="url"
+        placeholder="https://..."
+      >
+
+      <button id="submitDepositBtn" type="submit">
+        Submit Deposit for Verification
+      </button>
+
+      <p
+        id="depositMessage"
+        class="lb-message"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+    </form>
+  </section>
+
+  <section class="lb-panel">
+    <h2>Recent Deposit Records</h2>
+    <div id="depositHistory"></div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<div id="lbDiagnostic" style="
+  margin:15px;
+  padding:15px;
+  background:#222;
+  color:white;
+  border:1px solid #D4AF37;
+  border-radius:8px;
+  white-space:pre-wrap;
+">
+Checking dashboard...
+</div>
+
+<!-- Payment instruction display -->
+<script>
+(function () {
+  const method = document.getElementById("paymentMethod");
+  const instructions = document.getElementById("paymentInstructions");
+
+  if (!method || !instructions) return;
+
+  method.addEventListener("change", function () {
+    const selected = method.value;
+
+    instructions.innerHTML = "";
+    instructions.classList.add("lb-hidden");
+
+    if (!selected) return;
+
+    instructions.classList.remove("lb-hidden");
+
+    if (selected === "Airtel Money") {
+      const heading = document.createElement("h3");
+      heading.textContent = "LBM Airtel Money Receiving Account";
+
+      const label = document.createElement("p");
+      label.textContent = "Send your Lay-Bay payment to:";
+
+      const number = document.createElement("span");
+      number.className = "receiving-number";
+      number.textContent = "0975004041";
+
+      const account = document.createElement("p");
+      account.textContent = "Account name: LBM Receiving Account";
+
+      const steps = document.createElement("p");
+      steps.textContent =
+        "After making your payment, enter the actual Airtel Money transaction reference in the payment reference field below.";
+
+      const warning = document.createElement("p");
+      warning.className = "payment-warning";
+      warning.textContent =
+        "Keep your transaction confirmation. Your deposit will remain pending until LBM verifies the payment.";
+
+      instructions.append(
+        heading, label, number, account, steps, warning
+      );
+
+    } else {
+      const heading = document.createElement("h3");
+      heading.textContent = selected + " Payment Instructions";
+
+      const message = document.createElement("p");
+      message.textContent =
+        "Please obtain the correct LBM receiving-account details for this payment method before sending money. Do not send payment to an unconfirmed number or account.";
+
+      const warning = document.createElement("p");
+      warning.className = "payment-warning";
+      warning.textContent =
+        "After payment, enter the actual transaction reference below. Your deposit must be verified by LBM.";
+
+      instructions.append(heading, message, warning);
+    }
+  });
+})();
+</script>
+
+<!-- Dashboard diagnostic -->
+<script>
+(async function () {
+  const box = document.getElementById("lbDiagnostic");
+  const results = [];
+
+  results.push("1. Dashboard HTML: LOADED");
+
+  results.push(
+    "2. Supabase library: " +
+    (window.supabase ? "LOADED" : "NOT LOADED")
+  );
+
+  try {
+    const response = await fetch("lay-bay-customer.js", {
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    const source = await response.text();
+
+    results.push("3. Customer JavaScript file: FOUND");
+
+    try {
+      new Function(source);
+      results.push("4. JavaScript syntax: VALID");
+    } catch (error) {
+      results.push("4. JavaScript syntax: ERROR");
+      results.push(error.message);
+    }
+
+  } catch (error) {
+    results.push("3. Customer JavaScript file: FAILED");
+    results.push(error.message);
+    results.push("4. JavaScript syntax: NOT CHECKED");
+  }
+
+  results.push("");
+  results.push("Dashboard diagnostic complete.");
+
+  box.textContent = results.join("\n");
+})();
+</script>
+
+<script src="lay-bay-customer.js"></script>
+
+<script>
+window.addEventListener("load", async function () {
+  const box = document.getElementById("lbDiagnostic");
+
+  try {
+    if (!window.LBM_CUSTOMER_DB) {
+      box.textContent +=
+        "\n5. Customer Supabase connection: NOT EXPOSED";
+      return;
+    }
+
+    const { data, error } =
+      await window.LBM_CUSTOMER_DB.auth.getSession();
+
+    if (error) {
+      box.textContent +=
+        "\n5. Session check: ERROR - " + error.message;
+      return;
+    }
+
+    box.textContent += data.session
+      ? "\n5. Customer session: ACTIVE"
+      : "\n5. Customer session: NOT ACTIVE";
+
+  } catch (error) {
+    box.textContent +=
+      "\n5. Session check: FAILED - " + error.message;
+  }
+});
+</script>
+
+</body>
+</html>

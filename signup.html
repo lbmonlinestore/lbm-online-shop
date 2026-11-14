@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080808">
+  <title>Create Account | LBM Lay-Bay</title>
+  <link rel="stylesheet" href="lay-bay.css">
+
+  <style>
+    body{background:#080808;color:#eee}
+    .topbar{background:#080808;border-bottom:1px solid #D4AF37}
+    .brand span{color:#D4AF37}
+    .back-link,a{color:#D4AF37}
+    .hero-card{background:#151515;color:#eee;border:1px solid #D4AF37}
+    h2{color:#D4AF37!important}
+    label{display:block;margin:15px 0 6px}
+    input{width:100%;padding:13px;border:1px solid #777;border-radius:7px;background:#080808;color:#fff}
+    .btn.primary{background:#D4AF37;color:#080808;font-weight:bold}
+    #signupMessage{white-space:pre-wrap}
+    .field-note{font-size:12px;color:#aaa;margin-top:6px}
+  </style>
+</head>
+
+<body>
+
+<header class="topbar">
+  <a href="../index.html" class="brand">LBM <span>LAY-BAY</span></a>
+  <a href="../index.html" class="back-link">Back to Shop</a>
+</header>
+
+<main style="max-width:520px;margin:45px auto;padding:20px">
+
+  <section class="hero-card">
+
+    <h2>Create your account</h2>
+
+    <p>Create an account to save towards your chosen LBM product.</p>
+
+    <form id="signupForm" style="margin-top:22px">
+
+      <label for="fullName">Full name</label>
+      <input
+        id="fullName"
+        type="text"
+        autocomplete="name"
+        maxlength="100"
+        placeholder="Enter your full name"
+        required
+      >
+
+      <label for="username">Choose your Lay-Bay username</label>
+      <input
+        id="username"
+        type="text"
+        minlength="3"
+        maxlength="20"
+        pattern="[A-Za-z0-9_]{3,20}"
+        autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
+        placeholder="Example: Mwansa2026"
+        aria-describedby="usernameNote"
+        required
+      >
+
+      <p id="usernameNote" class="field-note">
+        Use 3–20 characters. Letters, numbers and underscores only.
+        Your username must be unique.
+      </p>
+
+      <label for="email">Email address</label>
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        placeholder="example@email.com"
+        required
+      >
+
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        minlength="8"
+        autocomplete="new-password"
+        placeholder="At least 8 characters"
+        required
+      >
+
+      <label for="confirmPassword">Confirm password</label>
+      <input
+        id="confirmPassword"
+        type="password"
+        minlength="8"
+        autocomplete="new-password"
+        placeholder="Enter password again"
+        required
+      >
+
+      <label style="display:flex;gap:9px;align-items:flex-start">
+        <input
+          id="agree"
+          type="checkbox"
+          required
+          style="width:auto;margin-top:4px"
+        >
+        <span>I have read and agree to the LBM Lay-Bay terms and conditions.</span>
+      </label>
+
+      <button
+        id="signupBtn"
+        type="submit"
+        class="btn primary"
+        style="width:100%;border:0;margin-top:20px;cursor:pointer"
+      >
+        Create Account
+      </button>
+
+      <p
+        id="signupMessage"
+        role="status"
+        aria-live="polite"
+        style="margin-top:15px"
+      ></p>
+
+    </form>
+
+    <p style="margin-top:20px;text-align:center">
+      Already registered? <a href="login.html">Login</a>
+    </p>
+
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="lay-bay-auth.js"></script>
+
+</body>
+</html>

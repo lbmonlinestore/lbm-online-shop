@@ -1,0 +1,489 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101010">
+
+  <title>LBM Lay-Bay | Online Store</title>
+
+  <style>
+    /* =================================
+       1. GLOBAL SETTINGS
+    ================================= */
+
+    :root {
+      --gold: #d4af37;
+      --black: #101010;
+      --panel: #1c1c1c;
+      --muted: #aaa;
+      --white: #fff;
+      --border: #383838;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--black);
+      color: var(--white);
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+    }
+
+    /* =================================
+       2. HEADER
+    ================================= */
+
+    header {
+      padding: 22px 15px;
+      text-align: center;
+      background: #080808;
+      border-bottom: 1px solid var(--gold);
+    }
+
+    header h1 {
+      color: var(--gold);
+      margin: 0;
+      letter-spacing: 2px;
+      font-size: 25px;
+    }
+
+    header p {
+      color: var(--muted);
+      margin: 6px 0 0;
+    }
+
+    /* =================================
+       3. MAIN CONTAINER
+    ================================= */
+
+    .container {
+      width: 92%;
+      max-width: 900px;
+      margin: 25px auto;
+    }
+
+    /* =================================
+       4. CARDS
+    ================================= */
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      color: var(--gold);
+      margin-top: 0;
+    }
+
+    h3 {
+      color: var(--gold);
+    }
+
+    /* =================================
+       5. FORM ELEMENTS
+    ================================= */
+
+    label {
+      display: block;
+      margin: 14px 0 6px;
+    }
+
+    input,
+    select {
+      display: block;
+      width: 100%;
+      padding: 13px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: #101010;
+      color: var(--white);
+      font-size: 16px;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--gold);
+    }
+
+    /* =================================
+       6. BUTTONS
+    ================================= */
+
+    button {
+      background: var(--gold);
+      color: #111;
+      border: none;
+      padding: 13px 18px;
+      border-radius: 7px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 15px;
+      font-size: 15px;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .secondary {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+    }
+
+    /* =================================
+       7. GENERAL ELEMENTS
+    ================================= */
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .notice {
+      padding: 12px;
+      background: #29230e;
+      border-left: 3px solid var(--gold);
+      border-radius: 5px;
+      margin: 15px 0;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+
+    .product-card,
+    .plan-card {
+      background: #141414;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 15px;
+      margin: 15px 0;
+    }
+
+    .product-card img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .price {
+      color: var(--gold);
+    }
+
+    /* =================================
+       8. FOOTER
+    ================================= */
+
+    footer {
+      text-align: center;
+      padding: 25px 15px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+    }
+
+    /* =================================
+       9. MOBILE RESPONSIVENESS
+    ================================= */
+
+    @media (max-width: 600px) {
+      .container {
+        width: 94%;
+        margin: 18px auto;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      header h1 {
+        font-size: 22px;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =================================
+       10. HEADER
+  ================================= -->
+
+  <header>
+    <h1>LBM ONLINE STORE</h1>
+    <p>Lay-Bay Payment Plan</p>
+  </header>
+
+  <main class="container">
+
+    <!-- =================================
+         11. WELCOME SECTION
+    ================================= -->
+
+    <section class="card">
+      <h2>Welcome to Lay-Bay</h2>
+
+      <p>
+        Secure your selected product and pay gradually
+        according to the available Lay-Bay plan.
+      </p>
+
+      <div class="notice">
+        Your payments must be verified before they
+        are added to your approved Lay-Bay balance.
+      </div>
+    </section>
+
+    <!-- =================================
+         12. CUSTOMER SIGN IN / REGISTRATION
+    ================================= -->
+
+    <section class="card" id="authSection">
+
+      <h2>Customer Account</h2>
+
+      <p class="muted">
+        Sign in or create an account to manage your Lay-Bay plan.
+      </p>
+
+      <label for="email">Email address</label>
+
+      <input
+        id="email"
+        type="email"
+        placeholder="Enter your email"
+        autocomplete="email"
+      >
+
+      <label for="password">Password</label>
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter password"
+        autocomplete="current-password"
+      >
+
+      <button id="loginBtn" type="button">
+        Sign In
+      </button>
+
+      <button
+        id="registerBtn"
+        class="secondary"
+        type="button"
+      >
+        Create Account
+      </button>
+
+      <p id="authMessage" aria-live="polite"></p>
+
+    </section>
+
+    <!-- =================================
+         13. CUSTOMER ACCOUNT
+    ================================= -->
+
+    <section class="card hidden" id="accountSection">
+
+      <h2>My Lay-Bay Account</h2>
+
+      <p id="customerEmail"></p>
+
+      <button
+        id="logoutBtn"
+        class="secondary"
+        type="button"
+      >
+        Sign Out
+      </button>
+
+      <hr>
+
+      <!-- CUSTOMER PLANS -->
+
+      <h3>My Plans</h3>
+
+      <div id="plansList">
+        Loading your plans...
+      </div>
+
+      <hr>
+
+      <!-- AVAILABLE PRODUCTS -->
+
+      <div id="productsSection">
+
+        <h3>Available Products</h3>
+
+        <p class="muted">
+          Browse eligible products from LBM Online Store.
+        </p>
+
+        <div id="productsList">
+          Loading products...
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- =================================
+         14. CUSTOMER DEPOSIT SECTION
+    ================================= -->
+
+    <section class="card hidden" id="depositSection">
+
+      <h2>Submit a Deposit</h2>
+
+      <p class="muted">
+        Select an active plan and provide your payment details.
+      </p>
+
+      <label for="selectedPlan">
+        Select your Lay-Bay plan
+      </label>
+
+      <select id="selectedPlan">
+        <option value="">Select your Lay-Bay plan</option>
+      </select>
+
+      <label for="depositAmount">
+        Deposit amount (ZMW)
+      </label>
+
+      <input
+        id="depositAmount"
+        type="number"
+        min="1"
+        step="0.01"
+        inputmode="decimal"
+        placeholder="Enter deposit amount"
+      >
+
+      <label for="paymentMethod">
+        Payment method
+      </label>
+
+      <select id="paymentMethod">
+
+        <option value="">
+          Select payment method
+        </option>
+
+        <option value="MTN Mobile Money">
+          MTN Mobile Money
+        </option>
+
+        <option value="Airtel Money">
+          Airtel Money
+        </option>
+
+        <option value="Zamtel Kwacha">
+          Zamtel Kwacha
+        </option>
+
+        <option value="Bank Transfer">
+          Bank Transfer
+        </option>
+
+      </select>
+
+      <!-- AIRTEL PAYMENT DETAILS -->
+
+      <div
+        id="airtelPaymentDetails"
+        class="notice"
+        style="display:none;"
+      >
+
+        <strong>Airtel Money Payment Details</strong>
+
+        <p>
+          Send your payment to:
+          <strong>0975004041</strong>
+        </p>
+
+        <p>
+          Enter your actual transaction reference below
+          after making payment.
+        </p>
+
+      </div>
+
+      <label for="paymentReference">
+        Payment reference
+      </label>
+
+      <input
+        id="paymentReference"
+        type="text"
+        placeholder="Enter payment transaction reference"
+      >
+
+      <label for="paymentProof">
+        Payment proof URL (optional)
+      </label>
+
+      <input
+        id="paymentProof"
+        type="url"
+        placeholder="Enter an uploaded proof link"
+      >
+
+      <button
+        id="submitDepositBtn"
+        type="button"
+      >
+        Submit Deposit
+      </button>
+
+      <p id="depositMessage" aria-live="polite"></p>
+
+    </section>
+
+  </main>
+
+  <!-- =================================
+       15. FOOTER
+  ================================= -->
+
+  <footer>
+    LBM Online Store<br>
+    Lay-Bay Management
+  </footer>
+
+  <!-- =================================
+       16. SUPABASE LIBRARY
+  ================================= -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- =================================
+       17. LAY-BAY CUSTOMER JAVASCRIPT
+  ================================= -->
+
+  <script src="lay-bay.js"></script>
+
+</body>
+</html>

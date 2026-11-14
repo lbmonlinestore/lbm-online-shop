@@ -1,0 +1,284 @@
+
+:root {
+  --blue: #173d70;
+  --dark-blue: #102c50;
+  --gold: #d6a63c;
+  --light: #f3f6fb;
+  --white: #ffffff;
+  --text: #202b3c;
+  --muted: #718096;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--light);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+a {
+  text-decoration: none;
+}
+
+.topbar {
+  background: var(--white);
+  padding: 17px 7%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 12px rgba(0,0,0,.05);
+}
+
+.brand {
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--blue);
+}
+
+.brand span {
+  color: var(--gold);
+}
+
+.back-link {
+  color: var(--blue);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.hero {
+  background: linear-gradient(120deg, var(--dark-blue), var(--blue));
+  color: var(--white);
+  padding: 75px 8%;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 45px;
+  align-items: center;
+}
+
+.tag {
+  display: inline-block;
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+.hero h1 {
+  font-size: clamp(34px, 5vw, 55px);
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+
+.hero-content > p {
+  color: #dce6f3;
+  max-width: 540px;
+  margin-bottom: 28px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-block;
+  padding: 13px 23px;
+  border-radius: 8px;
+  font-weight: 700;
+  text-align: center;
+  transition: .2s;
+}
+
+.primary {
+  background: var(--gold);
+  color: #17263b;
+}
+
+.primary:hover {
+  background: #edc45f;
+  transform: translateY(-2px);
+}
+
+.secondary {
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,.5);
+}
+
+.secondary:hover {
+  background: rgba(255,255,255,.1);
+}
+
+.hero-card {
+  background: var(--white);
+  color: var(--text);
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 15px 40px rgba(0,0,0,.18);
+}
+
+.card-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #fff3d7;
+  color: var(--blue);
+  font-size: 27px;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+
+.hero-card h3 {
+  margin-bottom: 7px;
+}
+
+.hero-card p,
+.hero-card small {
+  color: var(--muted);
+}
+
+.progress-track {
+  height: 9px;
+  background: #e7edf5;
+  border-radius: 20px;
+  overflow: hidden;
+  margin: 22px 0 10px;
+}
+
+.progress-fill {
+  width: 45%;
+  height: 100%;
+  background: var(--gold);
+  border-radius: 20px;
+}
+
+.how {
+  padding: 65px 7%;
+  text-align: center;
+}
+
+.how h2,
+.rules h2,
+.bottom-cta h2 {
+  font-size: 29px;
+  color: var(--blue);
+}
+
+.section-intro {
+  color: var(--muted);
+  margin: 8px 0 35px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  text-align: left;
+}
+
+.steps article {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 23px;
+  border: 1px solid #e8edf4;
+}
+
+.steps article span {
+  color: var(--gold);
+  font-weight: 800;
+  font-size: 23px;
+}
+
+.steps article h3 {
+  color: var(--blue);
+  font-size: 17px;
+  margin: 12px 0 8px;
+}
+
+.steps article p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.rules {
+  background: var(--white);
+  padding: 45px 8%;
+}
+
+.rules h2 {
+  margin-bottom: 20px;
+}
+
+.rules ul {
+  padding-left: 22px;
+}
+
+.rules li {
+  margin-bottom: 12px;
+}
+
+.disclaimer {
+  background: #fff5df;
+  border-left: 4px solid var(--gold);
+  padding: 15px;
+  margin-top: 22px;
+  font-size: 13px;
+  color: #685329;
+}
+
+.bottom-cta {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.bottom-cta p {
+  color: var(--muted);
+  margin: 10px 0 23px;
+}
+
+footer {
+  background: var(--dark-blue);
+  color: #dce6f3;
+  text-align: center;
+  padding: 23px;
+  font-size: 13px;
+}
+
+@media (max-width: 750px) {
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 55px 7%;
+  }
+
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .hero-card {
+    max-width: 450px;
+  }
+}
+
+@media (max-width: 450px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+  }
+
+  .topbar {
+    padding: 15px 5%;
+  }
+}
