@@ -36,6 +36,11 @@
             box-shadow: 0 8px 30px rgba(16,44,80,.2);
         }
 
+        .lbm-assistant-launcher { touch-action: none; user-select: none; cursor: grab; }
+        .lbm-assistant-launcher:active { cursor: grabbing; }
+        .lbm-assistant-launcher[hidden], .lbm-assistant-restore[hidden] { display: none !important; }
+        .lbm-assistant-restore { position: fixed; left: 12px; bottom: 16px; z-index: 99991; border: 1px solid #d4af37; border-radius: 22px; padding: 10px 14px; background: #080808; color: #d4af37; font-weight: 700; cursor: pointer; box-shadow: 0 5px 18px rgba(0,0,0,.25); }
+
         .lbm-assistant-panel {
             display: none;
             position: fixed;
@@ -952,25 +957,106 @@
         ></iframe>
     </div>
 
+    <button type="button" id="lbmAssistantRestore" class="lbm-assistant-restore" hidden aria-label="Show Technical Assistant">Show Assistant</button>
+
     <script>
         (function () {
             const launcher = document.getElementById("lbmAssistantLauncher");
             const panel = document.getElementById("lbmAssistantPanel");
             const closeButton = document.getElementById("lbmAssistantClose");
+            const restoreButton = document.getElementById("lbmAssistantRestore");
+            if (!launcher || !panel || !closeButton || !restoreButton) return;
 
-            if (!launcher || !panel || !closeButton) return;
+            const storageKey = "lbmAssistantWidgetPositionV2";
+            let drag = null;
+            let moved = false;
+            const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+            function applyPosition(left, top) {
+                const maxLeft = Math.max(8, window.innerWidth - launcher.offsetWidth - 8);
+                const maxTop = Math.max(8, window.innerHeight - launcher.offsetHeight - 8);
+                left = clamp(left, 8, maxLeft);
+                top = clamp(top, 8, maxTop);
+                launcher.style.left = left + "px";
+                launcher.style.top = top + "px";
+                launcher.style.right = "auto";
+                launcher.style.bottom = "auto";
+                panel.style.left = clamp(left - Math.max(0, 390 - launcher.offsetWidth), 8, Math.max(8, window.innerWidth - panel.offsetWidth - 8)) + "px";
+                panel.style.right = "auto";
+                panel.style.top = Math.max(8, top - panel.offsetHeight - 12) + "px";
+                panel.style.bottom = "auto";
+                try { localStorage.setItem(storageKey, JSON.stringify({left, top})); } catch (_) {}
+            }
+
+            function restorePosition() {
+                try {
+                    const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+                    if (saved && Number.isFinite(saved.left) && Number.isFinite(saved.top)) applyPosition(saved.left, saved.top);
+                } catch (_) {}
+            }
+
+            function hideLauncher() {
+                panel.classList.remove("open");
+                launcher.hidden = true;
+                restoreButton.hidden = false;
+                launcher.setAttribute("aria-expanded", "false");
+                try { localStorage.setItem("lbmAssistantWidgetHidden", "1"); } catch (_) {}
+            }
+
+            function showLauncher() {
+                launcher.hidden = false;
+                restoreButton.hidden = true;
+                try { localStorage.setItem("lbmAssistantWidgetHidden", "0"); } catch (_) {}
+                restorePosition();
+            }
 
             launcher.addEventListener("click", function () {
+                if (moved) { moved = false; return; }
                 panel.classList.toggle("open");
-
-                const isOpen = panel.classList.contains("open");
-                launcher.setAttribute("aria-expanded", String(isOpen));
+                launcher.setAttribute("aria-expanded", String(panel.classList.contains("open")));
             });
-
             closeButton.addEventListener("click", function () {
                 panel.classList.remove("open");
                 launcher.setAttribute("aria-expanded", "false");
             });
+            restoreButton.addEventListener("click", showLauncher);
+
+            launcher.addEventListener("pointerdown", function (event) {
+                if (event.button !== 0) return;
+                drag = {x:event.clientX, y:event.clientY, left:launcher.getBoundingClientRect().left, top:launcher.getBoundingClientRect().top, id:event.pointerId};
+                moved = false;
+                launcher.setPointerCapture(event.pointerId);
+            });
+            launcher.addEventListener("pointermove", function (event) {
+                if (!drag || drag.id !== event.pointerId) return;
+                const dx = event.clientX - drag.x, dy = event.clientY - drag.y;
+                if (Math.abs(dx) + Math.abs(dy) > 7) moved = true;
+                if (moved) {
+                    applyPosition(drag.left + dx, drag.top + dy);
+                    panel.classList.remove("open");
+                    launcher.setAttribute("aria-expanded", "false");
+                }
+            });
+            function finishDrag(event) {
+                if (!drag || drag.id !== event.pointerId) return;
+                const rect = launcher.getBoundingClientRect();
+                const outside = event.clientX < -18 || event.clientX > window.innerWidth + 18 || event.clientY < -18 || event.clientY > window.innerHeight + 18;
+                if (outside) hideLauncher();
+                else if (moved) applyPosition(rect.left, rect.top);
+                drag = null;
+                if (moved) setTimeout(() => { moved = false; }, 80);
+            }
+            launcher.addEventListener("pointerup", finishDrag);
+            launcher.addEventListener("pointercancel", finishDrag);
+            launcher.addEventListener("dblclick", function (event) { event.preventDefault(); hideLauncher(); });
+            window.addEventListener("resize", function () {
+                if (!launcher.hidden) {
+                    const rect = launcher.getBoundingClientRect();
+                    applyPosition(rect.left, rect.top);
+                }
+            });
+            restorePosition();
+            try { if (localStorage.getItem("lbmAssistantWidgetHidden") === "1") hideLauncher(); } catch (_) {}
         })();
     </script>
 
