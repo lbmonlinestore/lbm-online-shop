@@ -1,8 +1,7 @@
--- LBM Lay-Bay pricing and first-deposit policy
--- Apply only after reviewing this migration on the integration branch.
--- Lay-Bay prices are entered by an administrator and must exceed normal price.
--- The first submitted and approved deposit must be at least 50% of that price.
--- The 30-day period starts when the first qualifying deposit is approved.
+-- LBM Lay-Bay manual pricing and 50% initial deposit policy.
+-- Apply after the integration branch has been reviewed and approved.
+-- New plans remain pending_initial_deposit until a qualifying first payment
+-- is approved by an administrator. The 30-day countdown begins at approval.
 
 CREATE OR REPLACE FUNCTION public.create_lay_bay_plan(p_product_id bigint)
  RETURNS uuid
@@ -39,7 +38,7 @@ BEGIN
     FROM public.lay_bay_plans AS lp
     WHERE lp.user_id = v_user_id
       AND lp.product_id = p_product_id
-      AND lower(lp.plan_status) = 'active'
+      AND lower(lp.plan_status) IN ('active', 'pending_initial_deposit')
     ORDER BY
         EXISTS (
             SELECT 1
@@ -103,7 +102,8 @@ BEGIN
         product_name_snapshot,
         normal_price_snapshot,
         lay_bay_price_snapshot,
-        currency
+        currency,
+        plan_status
     )
     VALUES (
         v_user_id,
@@ -111,7 +111,8 @@ BEGIN
         v_product_name,
         v_normal_price,
         v_lay_bay_price,
-        'ZMW'
+        'ZMW',
+        'pending_initial_deposit'
     )
     RETURNING id INTO v_plan_id;
 
@@ -327,7 +328,7 @@ BEGIN
       AND lp.product_id = p_product_id
       AND lp.selected_size IS NOT DISTINCT FROM v_selected_size
       AND lp.selected_colour IS NOT DISTINCT FROM v_selected_colour
-      AND pg_catalog.lower(lp.plan_status) = 'active'
+      AND pg_catalog.lower(lp.plan_status) IN ('active', 'pending_initial_deposit')
     ORDER BY
         EXISTS (
             SELECT 1
@@ -356,7 +357,8 @@ BEGIN
         lay_bay_price_snapshot,
         currency,
         selected_size,
-        selected_colour
+        selected_colour,
+        plan_status
     )
     VALUES (
         v_user_id,
@@ -366,7 +368,8 @@ BEGIN
         v_lay_bay_price,
         'ZMW',
         v_selected_size,
-        v_selected_colour
+        v_selected_colour,
+        'pending_initial_deposit'
     )
     RETURNING id INTO v_plan_id;
 
@@ -427,8 +430,8 @@ BEGIN
         RAISE EXCEPTION 'Lay-Bay plan not found.';
     END IF;
 
-    IF v_plan.plan_status <> 'active' THEN
-        RAISE EXCEPTION 'Deposits can only be submitted for active plans.';
+    IF v_plan.plan_status NOT IN ('active', 'pending_initial_deposit') THEN
+        RAISE EXCEPTION 'Deposits can only be submitted for eligible Lay-Bay plans.';
     END IF;
 
     IF v_plan.expires_at IS NOT NULL
@@ -468,13 +471,11 @@ BEGIN
             'There is no remaining amount available for another deposit.';
     END IF;
 
-    -- Do not allow multiple pending first deposits to bypass the 50% rule.
     IF v_balance <= 0 AND v_pending > 0 THEN
         RAISE EXCEPTION
             'Your first deposit is awaiting verification. Please wait before submitting another deposit.';
     END IF;
 
-    -- The first deposit must be at least 50% of the locked Lay-Bay price.
     IF v_balance <= 0
        AND p_amount < pg_catalog.round(v_plan.lay_bay_price_snapshot * 0.50, 2) THEN
         RAISE EXCEPTION
@@ -614,8 +615,8 @@ BEGIN
         RETURN 'Deposit rejected successfully.';
     END IF;
 
-    IF v_plan.plan_status <> 'active' THEN
-        RAISE EXCEPTION 'This plan is not active.';
+    IF v_plan.plan_status NOT IN ('active', 'pending_initial_deposit') THEN
+        RAISE EXCEPTION 'This plan is not eligible for deposit approval.';
     END IF;
 
     SELECT COALESCE(
@@ -685,6 +686,8 @@ BEGIN
         plan_status = CASE
             WHEN v_balance >= lay_bay_price_snapshot
                 THEN 'completed'
+            WHEN first_deposit_at IS NULL
+                THEN 'active'
             ELSE plan_status
         END,
         completed_at = CASE
