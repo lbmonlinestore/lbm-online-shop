@@ -246,7 +246,7 @@
               Lay-Bay prices are automatically calculated at 22% above
               the normal shop price. Customers must pay at least 50% of
               the Lay-Bay price as their first deposit; the remaining
-              balance is due within 45 days after that first deposit is
+              balance is due within 30 days after that first deposit is
               approved. Disabling a product affects new plans only.
               Existing customer plans remain intact.
             </p>
