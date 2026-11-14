@@ -56,6 +56,15 @@ BEGIN
             rejection_reason = btrim(p_rejection_reason),
             updated_at = now()
         WHERE id = p_refund_id;
+
+        -- A rejected cancellation request returns the plan to active.
+        UPDATE public.lay_bay_plans
+        SET plan_status = CASE
+                WHEN plan_status = 'cancellation_requested' THEN 'active'
+                ELSE plan_status
+            END,
+            updated_at = now()
+        WHERE id = v_refund.plan_id;
     ELSE
         IF p_deduction_amount IS NULL OR p_deduction_amount < 0
            OR p_deduction_amount > v_refund.total_deposited THEN
