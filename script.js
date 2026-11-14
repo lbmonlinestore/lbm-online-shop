@@ -1547,12 +1547,11 @@ function createImagePreview() {
 
     document.getElementById("lbm-preview-thumbnails")
         .addEventListener("click", event => {
-            const previewButton = event.target.closest("[data-preview-index]");
-            if (!previewButton) return;
-
-            const imageIndex = Number(previewButton.dataset.previewIndex);
+            if (event.target.closest("[data-picture-select]")) return;
+            const thumbnail = event.target.closest("[data-preview-index]");
+            if (!thumbnail) return;
+            const imageIndex = Number(thumbnail.dataset.previewIndex);
             if (!Number.isInteger(imageIndex)) return;
-
             previewImageIndex = imageIndex;
             productImageIndices[previewProductId] = imageIndex;
             renderPreviewGallery();
@@ -1886,38 +1885,19 @@ function renderPreviewGallery() {
 
     thumbnails.innerHTML = hasMultiple
         ? images.map((url, index) => {
-
             const chosen = selected.has(index);
-
             return `
-
-                <button
-                    type="button"
-                    class="lbm-preview-thumbnail
-                        ${index === previewImageIndex ? "active" : ""}
-                        ${chosen ? "selected" : ""}"
+                <label
+                    class="lbm-preview-thumbnail ${index === previewImageIndex ? "active" : ""} ${chosen ? "selected" : ""}"
                     data-preview-index="${index}"
-                    aria-label="Picture ${index + 1}. ${
-                        chosen ? "Selected" : "Not selected"
-                    }."
-                    aria-pressed="${chosen}"
                 >
-
-                    <img
-                        src="${escapeHTML(url)}"
-                        alt=""
-                        draggable="false"
-                    >
-
-                    ${chosen ? `<span class="lbm-thumbnail-tick">✓</span>` : ""}
-
-                </button>
-
+                    <img src="${escapeHTML(url)}" alt="Preview picture ${index + 1}" draggable="false">
+                    <input type="checkbox" data-picture-select="${index}"
+                        aria-label="Select picture ${index + 1}" ${chosen ? "checked" : ""}>
+                </label>
             `;
-
         }).join("")
         : "";
-
     thumbnails.querySelectorAll("img").forEach(thumb => {
 
         thumb.addEventListener("error", function() {
