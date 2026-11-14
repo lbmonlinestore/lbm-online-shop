@@ -63,12 +63,16 @@ BEGIN
                 WHEN plan_status = 'cancellation_requested' THEN 'active'
                 ELSE plan_status
             END,
+            cancellation_requested_at = CASE
+                WHEN plan_status = 'cancellation_requested' THEN NULL
+                ELSE cancellation_requested_at
+            END,
             updated_at = now()
         WHERE id = v_refund.plan_id;
     ELSE
         IF p_deduction_amount IS NULL OR p_deduction_amount < 0
-           OR p_deduction_amount > v_refund.total_deposited THEN
-            RAISE EXCEPTION 'Deduction must be between zero and the verified balance.';
+           OR p_deduction_amount >= v_refund.total_deposited THEN
+            RAISE EXCEPTION 'Deduction must be zero or less than the verified balance so a positive refund remains payable.';
         END IF;
 
         IF p_deduction_amount > 0
@@ -94,6 +98,10 @@ BEGIN
         SET plan_status = CASE
                 WHEN plan_status = 'cancellation_requested' THEN 'cancelled'
                 ELSE plan_status
+            END,
+            cancelled_at = CASE
+                WHEN plan_status = 'cancellation_requested' THEN now()
+                ELSE cancelled_at
             END,
             updated_at = now()
         WHERE id = v_refund.plan_id;
