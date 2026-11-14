@@ -49,7 +49,7 @@ BEGIN
         )
     );
 
-    -- Reuse an existing active plan without changing its price.
+    -- Reuse an existing plan awaiting its first deposit or already active.
     SELECT lp.id
     INTO v_plan_id
     FROM public.lay_bay_plans AS lp
@@ -337,7 +337,7 @@ BEGIN
             'This product does not have selectable colours.';
     END IF;
 
-    -- Reuse only an active plan with the same product and variants.
+    -- Reuse a pending-initial-deposit or active plan with matching variants.
     SELECT lp.id
     INTO v_plan_id
     FROM public.lay_bay_plans AS lp
