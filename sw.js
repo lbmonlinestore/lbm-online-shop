@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "lbm-online-store-v3-laybay-gallery";
+const CACHE_NAME = "lbm-online-store-v4-gallery-tap-checkbox";
 
 const APP_FILES = [
   "./",
@@ -41,6 +41,9 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
 
   if (url.origin !== self.location.origin) return;
+
+  // Always fetch the product gallery script fresh; do not serve an old cached copy.
+  if (url.pathname.endsWith("/script.js")) return;
 
   // Do not intercept navigation to admin pages
   if (url.pathname.endsWith("/admin.html")) return;
