@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "lbm-online-store-v2";
+const CACHE_NAME = "lbm-online-store-v3-laybay-gallery";
 
 const APP_FILES = [
   "./",
