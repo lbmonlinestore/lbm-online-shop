@@ -2954,10 +2954,10 @@ let layBaySelectionCart = [];
         percent
       );
 
-      if (
-        ["expired", "cancelled"].includes(plan.plan_status) &&
-        current > 0
-      ) {
+      const isActivePlan = plan.plan_status === "active";
+      const isRefundEligibleStatus = ["expired", "cancelled"].includes(plan.plan_status);
+
+      if ((isActivePlan || isRefundEligibleStatus) && current > 0) {
         const existingRefund = refunds.find(refund =>
           String(refund.plan_id) === String(plan.id)
         );
@@ -2966,34 +2966,48 @@ let layBaySelectionCart = [];
           !existingRefund ||
           existingRefund.request_status === "rejected"
         ) {
-          const refundTitle = createElement("h4", "", "Request a refund");
+          const requestTitle = createElement(
+            "h4",
+            "",
+            isActivePlan ? "Request plan cancellation" : "Request a refund"
+          );
+
+          const requestNote = createElement(
+            "p",
+            "lb-muted",
+            isActivePlan
+              ? "Your plan will be placed on hold while LBM reviews your cancellation and refund request. It is not cancelled until the request is approved."
+              : "Submit a refund request for the remaining verified balance."
+          );
 
           const reason = createElement("textarea", "lb-refund-reason");
           reason.rows = 3;
           reason.maxLength = 1000;
-          reason.placeholder =
-            "Explain why you are requesting a refund...";
+          reason.placeholder = isActivePlan
+            ? "Explain why you want to cancel this plan..."
+            : "Explain why you are requesting a refund...";
 
-          const refundButton = createElement(
+          const requestButton = createElement(
             "button",
             "",
-            "Submit Refund Request"
+            isActivePlan ? "Submit Cancellation Request" : "Submit Refund Request"
           );
 
-          refundButton.type = "button";
+          requestButton.type = "button";
 
-          refundButton.addEventListener("click", () =>
-            requestRefund(plan.id, reason, refundButton)
+          requestButton.addEventListener("click", () =>
+            requestRefund(plan.id, reason, requestButton, isActivePlan)
           );
 
-          card.append(refundTitle, reason, refundButton);
+          card.append(requestTitle, requestNote, reason, requestButton);
 
         } else {
           card.appendChild(
             createElement(
               "p",
               "lb-muted",
-              "Refund request status: " + existingRefund.request_status
+              (isActivePlan ? "Cancellation request status: " : "Refund request status: ") +
+              existingRefund.request_status
             )
           );
         }
@@ -3401,7 +3415,7 @@ let layBaySelectionCart = [];
   // 20. SUBMIT A REFUND REQUEST
   // =======================================================
 
-  async function requestRefund(planId, reasonInput, button) {
+  async function requestRefund(planId, reasonInput, button, isCancellation = false) {
     const reason = reasonInput.value.trim();
 
     if (reason.length < 5) {
@@ -3413,9 +3427,11 @@ let layBaySelectionCart = [];
       return;
     }
 
-    if (!window.confirm(
-      "Submit a refund request for this Lay-Bay plan? LBM will review it."
-    )) return;
+    const confirmationText = isCancellation
+      ? "Submit a cancellation and refund request? The plan will be placed on hold while LBM reviews it. It will only be cancelled if LBM approves the request."
+      : "Submit a refund request for this Lay-Bay plan? LBM will review it.";
+
+    if (!window.confirm(confirmationText)) return;
 
     setButton(button, true, "Submitting request...");
 
@@ -3432,7 +3448,9 @@ let layBaySelectionCart = [];
 
       message(
         "refundsMessage",
-        "Your refund request has been submitted for review."
+        isCancellation
+          ? "Your cancellation and refund request has been submitted. Your plan is now awaiting LBM's decision."
+          : "Your refund request has been submitted for review."
       );
 
       await loadPlans();
@@ -3445,7 +3463,11 @@ let layBaySelectionCart = [];
       );
 
     } finally {
-      setButton(button, false, "Submit Refund Request");
+      setButton(
+        button,
+        false,
+        isCancellation ? "Submit Cancellation Request" : "Submit Refund Request"
+      );
     }
   }
 
