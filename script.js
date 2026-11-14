@@ -109,9 +109,6 @@ let productSearchTerm = "";
 const selectedPreviewImages = new Map();
 const selectedPictureOptions = new Map();
 
-let thumbnailPressTimer = null;
-let suppressThumbnailClickUntil = 0;
-let activeThumbnailButton = null;
 
 
 /* =====================================================
@@ -2034,16 +2031,6 @@ function changePreviewImage(direction) {
 
 function closeImagePreview() {
 
-    if (thumbnailPressTimer !== null) {
-
-        clearTimeout(thumbnailPressTimer);
-
-        thumbnailPressTimer = null;
-
-    }
-
-    activeThumbnailButton = null;
-
     const modal = document.getElementById("lbm-image-preview");
 
     if (modal) {
@@ -2246,19 +2233,23 @@ previewStyles.textContent = `
 }
 
 .lbm-preview-thumbnail {
-    width: 58px;
-    height: 58px;
-    padding: 2px;
+    width: 64px;
+    min-height: 76px;
+    padding: 4px;
     border: 2px solid #ddd;
     border-radius: 5px;
     background: white;
     cursor: pointer;
     position: relative;
     flex-shrink: 0;
-    touch-action: pan-y;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    touch-action: manipulation;
     -webkit-user-select: none;
     user-select: none;
-    -webkit-touch-callout: none;
 }
 
 .lbm-preview-thumbnail.active {
