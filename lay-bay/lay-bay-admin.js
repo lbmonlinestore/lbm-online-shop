@@ -15,6 +15,10 @@
 
   let layBayDeposits = [];
   let layBayProducts = [];
+  let layBayRefunds = [];
+  let layBayExtensions = [];
+  let layBayRequestsFilter = "pending";
+
   let layBayFilter = "pending";
   let layBayBusy = false;
   let customerOverviewBusy = false;
@@ -270,6 +274,21 @@
 
           ${customerOverviewHTML()}
 
+
+          <!-- REFUND AND EXTENSION MANAGEMENT -->
+          <div style="margin:20px 0;padding:16px;border:1px solid #ccc;border-radius:12px">
+            <h3>Refund Requests &amp; Plan Extensions</h3>
+            <p>Review customer requests. Refund processing requires the actual payment reference after approval.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0">
+              <button type="button" data-lb-request-filter="pending">Pending requests</button>
+              <button type="button" data-lb-request-filter="all">All requests</button>
+              <button type="button" id="lbRefreshRequests">Refresh requests</button>
+            </div>
+            <div id="lbRequestsMessage" role="status" aria-live="polite"></div>
+            <div id="lbRefundRequestList"></div>
+            <div id="lbExtensionRequestList"></div>
+          </div>
+
           <!-- DEPOSIT MANAGEMENT -->
 
           <div style="
@@ -360,6 +379,7 @@
         loadLayBayAdmin();
         loadLayBayProducts();
         loadLayBayCustomerOverview();
+        loadLayBayRequests();
       });
     }
 
@@ -407,6 +427,26 @@
         "click",
         loadLayBayAdmin
       );
+    }
+
+
+    // =====================================
+    // REFUND / EXTENSION REQUEST CONTROLS
+    // =====================================
+
+    panel.querySelectorAll("[data-lb-request-filter]").forEach(button => {
+      if (button.dataset.bound) return;
+      button.dataset.bound = "true";
+      button.addEventListener("click", function () {
+        layBayRequestsFilter = button.dataset.lbRequestFilter;
+        renderLayBayRequests();
+      });
+    });
+
+    const requestsRefresh = panel.querySelector("#lbRefreshRequests");
+    if (requestsRefresh && !requestsRefresh.dataset.bound) {
+      requestsRefresh.dataset.bound = "true";
+      requestsRefresh.addEventListener("click", loadLayBayRequests);
     }
 
     // =====================================
@@ -1192,6 +1232,251 @@
     }
   }
 
+
+  // =========================================
+  // 12. REFUND AND EXTENSION REQUESTS
+  // =========================================
+
+  async function loadLayBayRequests() {
+    const refundList = document.getElementById("lbRefundRequestList");
+    const extensionList = document.getElementById("lbExtensionRequestList");
+    const message = document.getElementById("lbRequestsMessage");
+    if (!refundList || !extensionList) return;
+
+    const db = getAdminDb();
+    if (!db || !getAdminUser()) {
+      refundList.textContent = "Administrator session not found.";
+      extensionList.textContent = "";
+      return;
+    }
+
+    refundList.textContent = "Loading refund requests...";
+    extensionList.textContent = "Loading extension requests...";
+    if (message) message.textContent = "";
+
+    try {
+      const [refundResult, extensionResult] = await Promise.all([
+        db.from("lay_bay_refunds").select("*").order("requested_at", { ascending: false }),
+        db.from("lay_bay_extension_requests").select("*").order("requested_at", { ascending: false })
+      ]);
+      if (refundResult.error) throw refundResult.error;
+      if (extensionResult.error) throw extensionResult.error;
+
+      const refunds = refundResult.data || [];
+      const extensions = extensionResult.data || [];
+      const planIds = [...new Set([
+        ...refunds.map(x => x.plan_id),
+        ...extensions.map(x => x.plan_id)
+      ].filter(Boolean))];
+      const userIds = [...new Set([
+        ...refunds.map(x => x.user_id),
+        ...extensions.map(x => x.user_id)
+      ].filter(Boolean))];
+
+      let plans = [];
+      let profiles = [];
+      if (planIds.length) {
+        const result = await db.from("lay_bay_plans")
+          .select("id,product_name_snapshot,lay_bay_price_snapshot,plan_status,expires_at,first_deposit_at")
+          .in("id", planIds);
+        if (result.error) throw result.error;
+        plans = result.data || [];
+      }
+      if (userIds.length) {
+        const result = await db.from("lay_bay_profiles")
+          .select("user_id,username")
+          .in("user_id", userIds);
+        if (result.error) throw result.error;
+        profiles = result.data || [];
+      }
+
+      const attach = row => ({
+        ...row,
+        plan: plans.find(p => String(p.id) === String(row.plan_id)) || {},
+        profile: profiles.find(p => p.user_id === row.user_id) || {}
+      });
+      layBayRefunds = refunds.map(attach);
+      layBayExtensions = extensions.map(attach);
+      renderLayBayRequests();
+    } catch (error) {
+      console.error("Lay-Bay requests loading error:", error);
+      refundList.textContent = "Could not load refund requests.";
+      extensionList.textContent = "Could not load extension requests.";
+      if (message) message.textContent = error.message || "Request loading failed.";
+    }
+  }
+
+  function renderLayBayRequests() {
+    const refundList = document.getElementById("lbRefundRequestList");
+    const extensionList = document.getElementById("lbExtensionRequestList");
+    if (!refundList || !extensionList) return;
+
+    const visible = status => layBayRequestsFilter === "all" || status === "pending" || status === "under_review";
+    const refunds = layBayRefunds.filter(x => visible(x.request_status));
+    const extensions = layBayExtensions.filter(x => visible(x.request_status));
+
+    refundList.innerHTML = "<h4>Refund requests</h4>";
+    if (!refunds.length) {
+      refundList.insertAdjacentHTML("beforeend", "<p>No refund requests in this category.</p>");
+    } else {
+      refunds.forEach(refund => {
+        const plan = refund.plan || {};
+        const username = refund.profile?.username || "Username not set";
+        const article = document.createElement("article");
+        article.style.cssText = "border:1px solid #ccc;border-radius:9px;padding:12px;margin:10px 0";
+        article.innerHTML = `
+          <h4>${lbEscape(username)} — ${lbEscape(plan.product_name_snapshot || "Lay-Bay plan")}</h4>
+          <p><strong>Requested:</strong> ${lbEscape(lbMoney(refund.refund_amount, refund.currency))}</p>
+          <p><strong>Total deposited:</strong> ${lbEscape(lbMoney(refund.total_deposited, refund.currency))}</p>
+          <p><strong>Reason:</strong> ${lbEscape(refund.cancellation_reason)}</p>
+          <p><strong>Status:</strong> ${lbEscape(refund.request_status)}</p>
+          ${refund.rejection_reason ? `<p><strong>Rejection reason:</strong> ${lbEscape(refund.rejection_reason)}</p>` : ""}
+          ${refund.refund_payment_reference ? `<p><strong>Payment reference:</strong> ${lbEscape(refund.refund_payment_reference)}</p>` : ""}
+          <p><strong>Submitted:</strong> ${lbEscape(lbDate(refund.requested_at))}</p>
+          <div data-refund-actions></div>
+        `;
+        const actions = article.querySelector("[data-refund-actions]");
+        if (refund.request_status === "pending" || refund.request_status === "under_review") {
+          const approve = document.createElement("button");
+          approve.type = "button";
+          approve.textContent = "Approve full refund";
+          approve.addEventListener("click", () => reviewLayBayRefund(refund.id, "approve"));
+          const reject = document.createElement("button");
+          reject.type = "button";
+          reject.textContent = "Reject request";
+          reject.style.marginLeft = "8px";
+          reject.addEventListener("click", () => reviewLayBayRefund(refund.id, "reject"));
+          actions.append(approve, reject);
+        } else if (refund.request_status === "approved" || refund.request_status === "processing") {
+          const process = document.createElement("button");
+          process.type = "button";
+          process.textContent = "Record refund payment";
+          process.addEventListener("click", () => processLayBayRefund(refund.id));
+          actions.append(process);
+        }
+        refundList.appendChild(article);
+      });
+    }
+
+    extensionList.innerHTML = "<h4>Plan extension requests</h4>";
+    if (!extensions.length) {
+      extensionList.insertAdjacentHTML("beforeend", "<p>No extension requests in this category.</p>");
+    } else {
+      extensions.forEach(request => {
+        const plan = request.plan || {};
+        const username = request.profile?.username || "Username not set";
+        const article = document.createElement("article");
+        article.style.cssText = "border:1px solid #ccc;border-radius:9px;padding:12px;margin:10px 0";
+        article.innerHTML = `
+          <h4>${lbEscape(username)} — ${lbEscape(plan.product_name_snapshot || "Lay-Bay plan")}</h4>
+          <p><strong>Requested extension:</strong> ${lbEscape(request.requested_days)} days</p>
+          <p><strong>Reason:</strong> ${lbEscape(request.reason)}</p>
+          <p><strong>Current deadline:</strong> ${lbEscape(lbDate(plan.expires_at))}</p>
+          <p><strong>Status:</strong> ${lbEscape(request.request_status)}</p>
+          ${request.rejection_reason ? `<p><strong>Rejection reason:</strong> ${lbEscape(request.rejection_reason)}</p>` : ""}
+          <div data-extension-actions></div>
+        `;
+        const actions = article.querySelector("[data-extension-actions]");
+        if (request.request_status === "pending") {
+          const approve = document.createElement("button");
+          approve.type = "button";
+          approve.textContent = "Approve extension";
+          approve.addEventListener("click", () => reviewLayBayExtension(request));
+          const reject = document.createElement("button");
+          reject.type = "button";
+          reject.textContent = "Reject request";
+          reject.style.marginLeft = "8px";
+          reject.addEventListener("click", () => reviewLayBayExtension(request, true));
+          actions.append(approve, reject);
+        }
+        extensionList.appendChild(article);
+      });
+    }
+  }
+
+  async function reviewLayBayRefund(refundId, decision) {
+    const db = getAdminDb();
+    if (!db) return alert("Supabase connection not found.");
+    let rejectionReason = null;
+    if (decision === "reject") {
+      rejectionReason = prompt("Enter the reason for rejecting this refund request:");
+      if (!rejectionReason || rejectionReason.trim().length < 5) {
+        return alert("Please enter a clear rejection reason.");
+      }
+    } else if (!confirm("Approve the full refund amount shown? No cancellation deduction will be applied.")) {
+      return;
+    }
+    try {
+      const { data, error } = await db.rpc("review_lay_bay_refund", {
+        p_refund_id: refundId,
+        p_decision: decision,
+        p_rejection_reason: rejectionReason
+      });
+      if (error) throw error;
+      alert(data || "Refund request reviewed.");
+      await loadLayBayRequests();
+    } catch (error) {
+      alert("Refund review failed: " + error.message);
+    }
+  }
+
+  async function processLayBayRefund(refundId) {
+    const db = getAdminDb();
+    if (!db) return alert("Supabase connection not found.");
+    const reference = prompt("Enter the actual mobile-money/bank refund payment reference:");
+    if (!reference || reference.trim().length < 3) {
+      return alert("A valid payment reference is required.");
+    }
+    if (!confirm("Confirm that the refund payment has actually been sent before recording it.")) return;
+    try {
+      const { data, error } = await db.rpc("process_lay_bay_refund", {
+        p_refund_id: refundId,
+        p_payment_reference: reference.trim()
+      });
+      if (error) throw error;
+      alert(data || "Refund payment recorded.");
+      await loadLayBayRequests();
+    } catch (error) {
+      alert("Refund processing record failed: " + error.message);
+    }
+  }
+
+  async function reviewLayBayExtension(request, reject = false) {
+    const db = getAdminDb();
+    if (!db) return alert("Supabase connection not found.");
+    let decision = "approve";
+    let approvedDays = null;
+    let rejectionReason = null;
+    if (reject) {
+      decision = "reject";
+      rejectionReason = prompt("Enter the reason for rejecting this extension request:");
+      if (!rejectionReason || rejectionReason.trim().length < 5) {
+        return alert("A clear rejection reason is required.");
+      }
+    } else {
+      const rawDays = prompt(`Approve how many days? Customer requested ${request.requested_days} days. The total plan period must not exceed 45 days.`, String(request.requested_days));
+      if (rawDays === null) return;
+      approvedDays = Number.parseInt(rawDays, 10);
+      if (!Number.isInteger(approvedDays) || approvedDays < 1 || approvedDays > Number(request.requested_days)) {
+        return alert("Enter a whole number between 1 and the requested number of days.");
+      }
+      if (!confirm("Approve this extension? The database must enforce the 45-day maximum.")) return;
+    }
+    try {
+      const { data, error } = await db.rpc("review_lay_bay_extension", {
+        p_request_id: request.id,
+        p_decision: decision,
+        p_approved_days: approvedDays,
+        p_rejection_reason: rejectionReason
+      });
+      if (error) throw error;
+      alert(data || "Extension request reviewed.");
+      await loadLayBayRequests();
+    } catch (error) {
+      alert("Extension review failed: " + error.message);
+    }
+  }
+
   // =========================================
   // 13. PUBLIC MODULE FUNCTIONS
   // =========================================
@@ -1199,6 +1484,7 @@
   window.loadLayBayAdmin = loadLayBayAdmin;
   window.loadLayBayProducts = loadLayBayProducts;
   window.loadLayBayCustomerOverview = loadLayBayCustomerOverview;
+  window.loadLayBayRequests = loadLayBayRequests;
 
   // =========================================
   // 14. INITIALISE MODULE
