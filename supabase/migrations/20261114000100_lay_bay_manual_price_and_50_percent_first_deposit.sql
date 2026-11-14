@@ -135,7 +135,7 @@ BEGIN
 
     RETURN v_plan_id;
 END;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.create_lay_bay_plan(p_product_id bigint, p_selected_size text, p_selected_colour text)
@@ -392,7 +392,7 @@ BEGIN
 
     RETURN v_plan_id;
 END;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.submit_lay_bay_deposit(p_plan_id uuid, p_amount numeric, p_payment_method text, p_payment_reference text, p_proof_url text DEFAULT NULL::text)
@@ -530,7 +530,7 @@ BEGIN
 
     RETURN v_deposit_id;
 END;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.review_lay_bay_deposit(p_deposit_id uuid, p_decision text, p_rejection_reason text DEFAULT NULL::text)
@@ -741,5 +741,4 @@ BEGIN
 
     RETURN 'Deposit approved and ledger credited successfully.';
 END;
-$function$
-
+$function$;
