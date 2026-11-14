@@ -1,10 +1,10 @@
 /* =========================================================
    LBM LAY-BAY — CUSTOMER DASHBOARD
    Integrated main-store catalogue
-   Automatic 22% Lay-Bay pricing
+   Administrator-configured Lay-Bay pricing
    Products | Savings | Deposits | Receipts | Refunds
    Customer Profile Pictures | Product Variants
-   TEST BUILD
+   LIVE INTEGRATION BUILD
 ========================================================= */
 
 (function () {
@@ -20,7 +20,6 @@
   const SUPABASE_KEY =
     "sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
 
-  const LAY_BAY_MARKUP = 1.22;
   const AVATAR_BUCKET = "customer-avatars";
   const AVATAR_MAX_SIZE = 5 * 1024 * 1024;
 
@@ -176,10 +175,16 @@ let layBaySelectionCart = [];
 
   function productPrice(product) {
     const normal = Number(product.price);
+    const layBay = Number(product.lay_bay_price);
 
-    if (!Number.isFinite(normal) || normal <= 0) return 0;
+    if (
+      !Number.isFinite(normal) ||
+      normal <= 0 ||
+      !Number.isFinite(layBay) ||
+      layBay <= normal
+    ) return 0;
 
-    return Number((normal * LAY_BAY_MARKUP).toFixed(2));
+    return Number(layBay.toFixed(2));
   }
 
   function productEnabled(product) {
@@ -223,7 +228,7 @@ let layBaySelectionCart = [];
   function productEligible(product) {
     return productEnabled(product) &&
       Number(product.stock) > 0 &&
-      Number(product.price) > 0;
+      productPrice(product) > Number(product.price);
   }
 
   function productAvailability(product) {
@@ -232,7 +237,11 @@ let layBaySelectionCart = [];
     }
 
     if (Number(product.price) <= 0) {
-      return { label: "Price unavailable", available: false };
+      return { label: "Normal price unavailable", available: false };
+    }
+
+    if (productPrice(product) <= Number(product.price)) {
+      return { label: "Lay-Bay price not configured", available: false };
     }
 
     if (!productEnabled(product)) {
@@ -2557,7 +2566,7 @@ let layBaySelectionCart = [];
       const layBay = createElement(
         "p",
         "",
-        "Lay-Bay price (+22%): " +
+        "Lay-Bay price: " +
         money(productPrice(product))
       );
 
@@ -3436,6 +3445,12 @@ let layBaySelectionCart = [];
 
     const planId = $("selectedPlan")?.value;
     const amount = Number($("depositAmount")?.value);
+    const selectedPlan = plans.find(plan => String(plan.id) === String(planId));
+    const selectedBalance = balanceFor(planId);
+    const alreadyPaid = Number(selectedBalance?.current_balance || 0);
+    const firstDepositMinimum = selectedPlan
+      ? Number((Number(selectedPlan.lay_bay_price_snapshot) * 0.5).toFixed(2))
+      : 0;
     const method = $("paymentMethod")?.value.trim();
     const reference = $("paymentReference")?.value.trim();
     const proof = $("paymentProof")?.value.trim();
@@ -3450,6 +3465,21 @@ let layBaySelectionCart = [];
       message(
         "depositMessage",
         "Complete all required deposit fields with a valid amount.",
+        false
+      );
+      return;
+    }
+
+    if (
+      selectedPlan &&
+      alreadyPaid <= 0 &&
+      amount < firstDepositMinimum
+    ) {
+      message(
+        "depositMessage",
+        "Your first deposit must be at least " +
+          money(firstDepositMinimum) +
+          " (50% of the Lay-Bay price).",
         false
       );
       return;
