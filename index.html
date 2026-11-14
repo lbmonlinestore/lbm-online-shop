@@ -898,13 +898,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=laybay-picture-checkbox-v1"></script>
     <script src="features.js"></script>
 
     <script>
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./sw.js")
+                navigator.serviceWorker.register("./sw.js?v=laybay-picture-checkbox-v1")
                     .then(registration => {
                         console.log(
                             "LBM App Service Worker registered:",
