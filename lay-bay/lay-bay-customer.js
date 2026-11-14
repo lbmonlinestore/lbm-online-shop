@@ -2976,8 +2976,8 @@ let layBaySelectionCart = [];
             "p",
             "lb-muted",
             isActivePlan
-              ? "Your plan will be placed on hold while LBM reviews your cancellation and refund request. It is not cancelled until the request is approved."
-              : "Submit a refund request for the remaining verified balance."
+              ? "Your plan will be placed on hold while LBM reviews your cancellation request. An administrator will assess any proposed deduction individually under the published cancellation policy. No automatic percentage penalty applies. Any deduction and its reason will be recorded before the refund is processed."
+              : "Submit a refund request for the remaining verified balance. Any applicable deduction will be assessed individually and explained to you."
           );
 
           const reason = createElement("textarea", "lb-refund-reason");
