@@ -1417,8 +1417,8 @@
       );
       if (rawDeduction === null) return;
       deductionAmount = Number(rawDeduction);
-      if (!Number.isFinite(deductionAmount) || deductionAmount < 0 || deductionAmount > total) {
-        return alert("Enter a valid deduction between K0 and the verified deposited balance.");
+      if (!Number.isFinite(deductionAmount) || deductionAmount < 0 || deductionAmount >= total) {
+        return alert("Enter K0 or a deduction smaller than the verified balance, so a positive refund remains payable.");
       }
       if (deductionAmount > 0) {
         deductionReason = prompt("Explain the specific, disclosed basis for this deduction. This explanation will be recorded and shown to the customer:");
