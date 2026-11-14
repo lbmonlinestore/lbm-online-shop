@@ -488,12 +488,12 @@ BEGIN
             'There is no remaining amount available for another deposit.';
     END IF;
 
-    IF v_balance <= 0 AND v_pending > 0 THEN
+    IF v_plan.first_deposit_at IS NULL AND v_pending > 0 THEN
         RAISE EXCEPTION
             'Your first deposit is awaiting verification. Please wait before submitting another deposit.';
     END IF;
 
-    IF v_balance <= 0
+    IF v_plan.first_deposit_at IS NULL
        AND p_amount < pg_catalog.round(v_plan.lay_bay_price_snapshot * 0.50, 2) THEN
         RAISE EXCEPTION
             'The first deposit must be at least 50%% of the Lay-Bay price (ZMW %).',
@@ -649,7 +649,7 @@ BEGIN
     FROM public.lay_bay_ledger
     WHERE plan_id = v_plan.id;
 
-    IF v_balance <= 0
+    IF v_plan.first_deposit_at IS NULL
        AND v_deposit.amount < pg_catalog.round(v_plan.lay_bay_price_snapshot * 0.50, 2) THEN
         RAISE EXCEPTION
             'The first approved deposit must be at least 50%% of the Lay-Bay price (ZMW %).',
