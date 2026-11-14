@@ -17,8 +17,39 @@ ALTER TABLE public.lay_bay_plans
 
 -- LBM Lay-Bay manual pricing and 50% initial deposit policy.
 -- Apply after the integration branch has been reviewed and approved.
+-- Keep the Lay-Bay price synchronized with the normal shop price.
+-- Existing product prices are recalculated at 22% above the normal price.
+CREATE OR REPLACE FUNCTION public.set_lay_bay_price_22_percent()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path TO ''
+AS $function$
+BEGIN
+    IF NEW.price IS NULL THEN
+        NEW.lay_bay_price := NULL;
+    ELSE
+        NEW.lay_bay_price := pg_catalog.round(NEW.price * 1.22, 2);
+    END IF;
+
+    RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS trg_products_lay_bay_price_22_percent
+ON public.products;
+
+CREATE TRIGGER trg_products_lay_bay_price_22_percent
+BEFORE INSERT OR UPDATE OF price
+ON public.products
+FOR EACH ROW
+EXECUTE FUNCTION public.set_lay_bay_price_22_percent();
+
+UPDATE public.products
+SET lay_bay_price = pg_catalog.round(price * 1.22, 2)
+WHERE price IS NOT NULL;
+
 -- New plans remain pending_initial_deposit until a qualifying first payment
--- is approved by an administrator. The 30-day countdown begins at approval.
+-- is approved by an administrator. The 45-day countdown begins at approval.
 
 CREATE OR REPLACE FUNCTION public.create_lay_bay_plan(p_product_id bigint)
  RETURNS uuid
@@ -698,7 +729,7 @@ BEGIN
         first_deposit_at = COALESCE(first_deposit_at, v_now),
         expires_at = COALESCE(
             expires_at,
-            v_now + INTERVAL '30 days'
+            v_now + INTERVAL '45 days'
         ),
         plan_status = CASE
             WHEN v_balance >= lay_bay_price_snapshot
