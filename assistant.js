@@ -46,7 +46,7 @@
     },
     bem: {
       welcome: "Mwaiseni ku LBM Online Shop! Kuti namyafwa shani? Ningamona ama product, ama price, ama size na ama colour.",
-      language: "Ululimi lwacinja. Mwacita bwino.",
+      language: "Ululimi lwacinja",
       loading: "Nalolesha mu ma product ya LBM…",
       found: "Naisanga ifi ma product:",
       none: "Nshaisanga iyi product. Yesheni ishina line kapena mututumine pa WhatsApp.",
