@@ -233,8 +233,8 @@ function getCardVariantSelection(productId) {
         colour: card?.querySelector('[data-variant="colour"]')?.value || ""
     };
 }
-function makeCartKey(productId, imageURL, size = "", colour = "") {
-    return String(productId) + "::" + encodeURIComponent(String(imageURL)) + "::" +
+function makeCartKey(productId, imageIndex, size = "", colour = "") {
+    return String(productId) + "::picture-" + String(imageIndex) + "::" +
         encodeURIComponent(String(size || "")) + "::" + encodeURIComponent(String(colour || ""));
 }
 
@@ -280,15 +280,16 @@ function getPictureOptionsMap(productId) {
 }
 
 
-function getPictureVariantOptions(product, imageURL) {
+function getPictureVariantOptions(product, imageIndex) {
 
     const options = getPictureOptionsMap(product.id);
+    const key = Number(imageIndex);
 
-    if (!options.has(imageURL)) {
+    if (!options.has(key)) {
 
         const cardSelection = getCardVariantSelection(product.id);
 
-        options.set(imageURL, {
+        options.set(key, {
             size: cardSelection.size || "",
             colour: cardSelection.colour || "",
             quantity: 1
@@ -296,7 +297,7 @@ function getPictureVariantOptions(product, imageURL) {
 
     }
 
-    return options.get(imageURL);
+    return options.get(key);
 
 }
 
@@ -1095,7 +1096,7 @@ function addImageVariantToCart(product, imageURL, imageIndex, selectedSize = "",
 
     if (!Number.isInteger(quantity) || quantity < 1) return false;
 
-    const cartKey = makeCartKey(productId, imageURL, selectedSize, selectedColour);
+    const cartKey = makeCartKey(productId, imageIndex, selectedSize, selectedColour);
 
     const existingItem = cart.find(
         item => item.cartKey === cartKey
@@ -1292,7 +1293,7 @@ function updateCart() {
             const validColours = getProductColours(currentProduct);
             const safeSize = validSizes.includes(selectedSize) ? selectedSize : "";
             const safeColour = validColours.includes(selectedColour) ? selectedColour : "";
-            const cartKey = makeCartKey(currentProduct.id, imageURL, safeSize, safeColour);
+            const cartKey = makeCartKey(currentProduct.id, imageIndex, safeSize, safeColour);
 
             return {
 
@@ -1810,14 +1811,14 @@ function createImagePreview() {
             const control = event.target.closest("[data-picture-option]");
             if (!control || !previewProductId) return;
 
-            const imageURL = control.dataset.imageUrl;
+            const imageIndex = Number(control.dataset.imageIndex);
             const optionName = control.dataset.pictureOption;
             const product = products.find(
                 item => String(item.id) === previewProductId
             );
-            if (!product || !imageURL) return;
+            if (!product || !Number.isInteger(imageIndex)) return;
 
-            const pictureOptions = getPictureVariantOptions(product, imageURL);
+            const pictureOptions = getPictureVariantOptions(product, imageIndex);
 
             if (optionName === "quantity") {
                 const quantity = Number(control.value);
@@ -1907,19 +1908,17 @@ function togglePictureSelection(imageIndex) {
 
     }
 
-    const imageURL = images[imageIndex];
-
     const selected = getSelectedImages(previewProductId);
 
-    if (selected.has(imageURL)) {
+    if (selected.has(imageIndex)) {
 
-        selected.delete(imageURL);
-        getPictureOptionsMap(previewProductId).delete(imageURL);
+        selected.delete(imageIndex);
+        getPictureOptionsMap(previewProductId).delete(imageIndex);
 
     } else {
 
-        selected.add(imageURL);
-        getPictureVariantOptions(product, imageURL);
+        selected.add(imageIndex);
+        getPictureVariantOptions(product, imageIndex);
 
     }
 
@@ -1946,9 +1945,9 @@ function addSelectedPicturesToCart() {
 
     const selected = getSelectedImages(previewProductId);
 
-    const selectedURLs = [...selected];
+    const selectedIndexes = [...selected];
 
-    if (selectedURLs.length === 0) {
+    if (selectedIndexes.length === 0) {
 
         alert("Please select at least one picture.");
 
@@ -1960,9 +1959,10 @@ function addSelectedPicturesToCart() {
     const colours = getProductColours(product);
     const pictureOptions = getPictureOptionsMap(product.id);
 
-    const preparedLines = selectedURLs.map(imageURL => ({
-        imageURL,
-        options: getPictureVariantOptions(product, imageURL)
+    const preparedLines = selectedIndexes.map(imageIndex => ({
+        imageIndex,
+        imageURL: images[imageIndex],
+        options: getPictureVariantOptions(product, imageIndex)
     }));
 
     for (const line of preparedLines) {
@@ -2121,7 +2121,7 @@ function renderPreviewGallery() {
     thumbnails.innerHTML = hasMultiple
         ? images.map((url, index) => {
 
-            const chosen = selected.has(url);
+            const chosen = selected.has(index);
 
             return `
 
@@ -2168,10 +2168,10 @@ function renderPreviewGallery() {
     const availableColours = getProductColours(product);
 
     variantOptionsContainer.innerHTML = selected.size
-        ? [...selected].map((imageURL, selectedIndex) => {
+        ? [...selected].map((imageIndex, selectedIndex) => {
 
-            const imageIndex = images.indexOf(imageURL);
-            const pictureOptions = getPictureVariantOptions(product, imageURL);
+            const imageURL = images[imageIndex];
+            const pictureOptions = getPictureVariantOptions(product, imageIndex);
             const safeURL = escapeHTML(imageURL);
 
             const sizeControl = availableSizes.length
@@ -2180,7 +2180,7 @@ function renderPreviewGallery() {
                         Size
                         <select class="lbm-picture-option-control"
                             data-picture-option="size"
-                            data-image-url="${safeURL}">
+                            data-image-index="${imageIndex}">
                             <option value="">Choose size</option>
                             ${availableSizes.map(size => `
                                 <option value="${escapeHTML(size)}"
@@ -2199,7 +2199,7 @@ function renderPreviewGallery() {
                         Colour
                         <select class="lbm-picture-option-control"
                             data-picture-option="colour"
-                            data-image-url="${safeURL}">
+                            data-image-index="${imageIndex}">
                             <option value="">Choose colour</option>
                             ${availableColours.map(colour => `
                                 <option value="${escapeHTML(colour)}"
@@ -2226,7 +2226,7 @@ function renderPreviewGallery() {
                             <input class="lbm-picture-option-control"
                                 type="number" min="1" step="1"
                                 data-picture-option="quantity"
-                                data-image-url="${safeURL}"
+                                data-image-index="${imageIndex}"
                                 value="${Math.max(1, Number(pictureOptions.quantity) || 1)}">
                         </label>
                     </div>
@@ -2864,6 +2864,23 @@ async function checkoutWhatsApp() {
         });
 
     }
+
+    const confirmationLines = orderItems.map(item =>
+        item.name + " — " + item.style +
+        (item.selected_size ? ", Size: " + item.selected_size : "") +
+        (item.selected_colour ? ", Colour: " + item.selected_colour : "") +
+        ", Qty: " + item.quantity +
+        ", Subtotal: " + formatPrice(item.subtotal)
+    );
+
+    const confirmed = window.confirm(
+        "PLEASE CONFIRM YOUR LBM ONLINE SHOP ORDER\\n\\n" +
+        confirmationLines.join("\\n") +
+        "\\n\\nTOTAL: " + formatPrice(total) +
+        "\\n\\nSubmit this order?"
+    );
+
+    if (!confirmed) return;
 
     const whatsappWindow = window.open(
         "about:blank",
