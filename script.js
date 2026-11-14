@@ -107,6 +107,7 @@ let previewImageIndex = 0;
 let productSearchTerm = "";
 
 const selectedPreviewImages = new Map();
+const selectedPictureOptions = new Map();
 
 let thumbnailPressTimer = null;
 let suppressThumbnailClickUntil = 0;
@@ -262,6 +263,40 @@ function getSelectedImages(productId) {
     }
 
     return selectedPreviewImages.get(id);
+
+}
+
+
+function getPictureOptionsMap(productId) {
+
+    const id = String(productId);
+
+    if (!selectedPictureOptions.has(id)) {
+        selectedPictureOptions.set(id, new Map());
+    }
+
+    return selectedPictureOptions.get(id);
+
+}
+
+
+function getPictureVariantOptions(product, imageURL) {
+
+    const options = getPictureOptionsMap(product.id);
+
+    if (!options.has(imageURL)) {
+
+        const cardSelection = getCardVariantSelection(product.id);
+
+        options.set(imageURL, {
+            size: cardSelection.size || "",
+            colour: cardSelection.colour || "",
+            quantity: 1
+        });
+
+    }
+
+    return options.get(imageURL);
 
 }
 
@@ -1039,7 +1074,7 @@ function changeProductImage(productId, direction) {
    15. ADD A SPECIFIC PICTURE TO CART
    ===================================================== */
 
-function addImageVariantToCart(product, imageURL, imageIndex, selectedSize = "", selectedColour = "") {
+function addImageVariantToCart(product, imageURL, imageIndex, selectedSize = "", selectedColour = "", requestedQuantity = 1) {
 
     const stock = getStock(product);
 
@@ -1056,6 +1091,10 @@ function addImageVariantToCart(product, imageURL, imageIndex, selectedSize = "",
         alert("Please select an available colour for " + product.name + ".");
         return false;
     }
+    const quantity = Number(requestedQuantity);
+
+    if (!Number.isInteger(quantity) || quantity < 1) return false;
+
     const cartKey = makeCartKey(productId, imageURL, selectedSize, selectedColour);
 
     const existingItem = cart.find(
@@ -1064,7 +1103,7 @@ function addImageVariantToCart(product, imageURL, imageIndex, selectedSize = "",
 
     const totalQuantity = getProductCartQuantity(productId);
 
-    if (totalQuantity >= stock) {
+    if (totalQuantity + quantity > stock) {
 
         return false;
 
@@ -1073,7 +1112,7 @@ function addImageVariantToCart(product, imageURL, imageIndex, selectedSize = "",
     if (existingItem) {
 
         existingItem.quantity =
-            Number(existingItem.quantity) + 1;
+            Number(existingItem.quantity) + quantity;
 
     } else {
 
@@ -1093,7 +1132,7 @@ function addImageVariantToCart(product, imageURL, imageIndex, selectedSize = "",
 
             style: "Picture " + (imageIndex + 1),
 
-            quantity: 1
+            quantity: quantity
 
         });
 
@@ -1498,6 +1537,8 @@ function createImagePreview() {
 
             <div id="lbm-preview-thumbnails"></div>
 
+            <div id="lbm-preview-variant-options"></div>
+
             <div class="lbm-preview-product-selection">
 
                 <h3>Select Your Pictures</h3>
@@ -1763,6 +1804,35 @@ function createImagePreview() {
     document.getElementById("lbm-preview-add-selected")
         .addEventListener("click", addSelectedPicturesToCart);
 
+    document.getElementById("lbm-preview-variant-options")
+        .addEventListener("change", event => {
+
+            const control = event.target.closest("[data-picture-option]");
+            if (!control || !previewProductId) return;
+
+            const imageURL = control.dataset.imageUrl;
+            const optionName = control.dataset.pictureOption;
+            const product = products.find(
+                item => String(item.id) === previewProductId
+            );
+            if (!product || !imageURL) return;
+
+            const pictureOptions = getPictureVariantOptions(product, imageURL);
+
+            if (optionName === "quantity") {
+                const quantity = Number(control.value);
+                pictureOptions.quantity =
+                    Number.isInteger(quantity) && quantity > 0 ? quantity : 1;
+            } else if (optionName === "size") {
+                pictureOptions.size = control.value;
+            } else if (optionName === "colour") {
+                pictureOptions.colour = control.value;
+            }
+
+            renderPreviewGallery();
+
+        });
+
     return modal;
 
 }
@@ -1844,10 +1914,12 @@ function togglePictureSelection(imageIndex) {
     if (selected.has(imageURL)) {
 
         selected.delete(imageURL);
+        getPictureOptionsMap(previewProductId).delete(imageURL);
 
     } else {
 
         selected.add(imageURL);
+        getPictureVariantOptions(product, imageURL);
 
     }
 
@@ -1884,29 +1956,47 @@ function addSelectedPicturesToCart() {
 
     }
 
-    const selection = getCardVariantSelection(product.id);
     const sizes = getProductSizes(product);
     const colours = getProductColours(product);
-    if (sizes.length && !sizes.includes(selection.size)) {
-        alert("Please choose a size on the product card before adding pictures.");
-        return;
+    const pictureOptions = getPictureOptionsMap(product.id);
+
+    const preparedLines = selectedURLs.map(imageURL => ({
+        imageURL,
+        options: getPictureVariantOptions(product, imageURL)
+    }));
+
+    for (const line of preparedLines) {
+
+        if (sizes.length && !sizes.includes(line.options.size)) {
+            alert("Please choose a size for every selected picture of " + product.name + ".");
+            return;
+        }
+
+        if (colours.length && !colours.includes(line.options.colour)) {
+            alert("Please choose a colour for every selected picture of " + product.name + ".");
+            return;
+        }
+
+        if (!Number.isInteger(Number(line.options.quantity)) || Number(line.options.quantity) < 1) {
+            alert("Please enter a valid quantity for every selected picture.");
+            return;
+        }
+
     }
-    if (colours.length && !colours.includes(selection.colour)) {
-        alert("Please choose a colour on the product card before adding pictures.");
-        return;
-    }
+
+    const requestedQuantity = preparedLines.reduce(
+        (total, line) => total + Number(line.options.quantity),
+        0
+    );
 
     const stock = getStock(product);
+    const currentQuantity = getProductCartQuantity(product.id);
 
-    const currentQuantity =
-        getProductCartQuantity(product.id);
-
-    if (currentQuantity + selectedURLs.length > stock) {
+    if (currentQuantity + requestedQuantity > stock) {
 
         alert(
-            "You selected " + selectedURLs.length +
-            " pictures, but only " +
-            Math.max(0, stock - currentQuantity) +
+            "Your selected picture quantities total " + requestedQuantity +
+            ", but only " + Math.max(0, stock - currentQuantity) +
             " additional units are available."
         );
 
@@ -1914,21 +2004,27 @@ function addSelectedPicturesToCart() {
 
     }
 
-    selectedURLs.forEach(imageURL => {
+    for (const line of preparedLines) {
 
-        const imageIndex = images.indexOf(imageURL);
-
-        addImageVariantToCart(
+        const imageIndex = images.indexOf(line.imageURL);
+        const added = addImageVariantToCart(
             product,
-            imageURL,
+            line.imageURL,
             imageIndex >= 0 ? imageIndex : 0,
-            selection.size,
-            selection.colour
+            line.options.size,
+            line.options.colour,
+            Number(line.options.quantity)
         );
 
-    });
+        if (!added) {
+            alert("We could not add one of the selected picture options. Please review your cart and try again.");
+            return;
+        }
+
+    }
 
     selected.clear();
+    pictureOptions.clear();
 
     saveCart();
 
@@ -1982,12 +2078,16 @@ function renderPreviewGallery() {
     const selectedCount =
         document.getElementById("lbm-preview-selected-count");
 
+    const variantOptionsContainer =
+        document.getElementById("lbm-preview-variant-options");
+
     if (
         !image ||
         !counter ||
         !thumbnails ||
         !addButton ||
-        !selectedCount
+        !selectedCount ||
+        !variantOptionsContainer
     ) return;
 
     const selected = getSelectedImages(previewProductId);
@@ -2064,6 +2164,77 @@ function renderPreviewGallery() {
     });
 
     const available = getStock(product) > 0;
+    const availableSizes = getProductSizes(product);
+    const availableColours = getProductColours(product);
+
+    variantOptionsContainer.innerHTML = selected.size
+        ? [...selected].map((imageURL, selectedIndex) => {
+
+            const imageIndex = images.indexOf(imageURL);
+            const pictureOptions = getPictureVariantOptions(product, imageURL);
+            const safeURL = escapeHTML(imageURL);
+
+            const sizeControl = availableSizes.length
+                ? `
+                    <label class="lbm-picture-option-label">
+                        Size
+                        <select class="lbm-picture-option-control"
+                            data-picture-option="size"
+                            data-image-url="${safeURL}">
+                            <option value="">Choose size</option>
+                            ${availableSizes.map(size => `
+                                <option value="${escapeHTML(size)}"
+                                    ${pictureOptions.size === size ? "selected" : ""}>
+                                    ${escapeHTML(size)}
+                                </option>
+                            `).join("")}
+                        </select>
+                    </label>
+                `
+                : "";
+
+            const colourControl = availableColours.length
+                ? `
+                    <label class="lbm-picture-option-label">
+                        Colour
+                        <select class="lbm-picture-option-control"
+                            data-picture-option="colour"
+                            data-image-url="${safeURL}">
+                            <option value="">Choose colour</option>
+                            ${availableColours.map(colour => `
+                                <option value="${escapeHTML(colour)}"
+                                    ${pictureOptions.colour === colour ? "selected" : ""}>
+                                    ${escapeHTML(colour)}
+                                </option>
+                            `).join("")}
+                        </select>
+                    </label>
+                `
+                : "";
+
+            return `
+                <div class="lbm-picture-variant-card">
+                    <div class="lbm-picture-variant-heading">
+                        <img src="${safeURL}" alt="">
+                        <strong>Picture ${imageIndex >= 0 ? imageIndex + 1 : selectedIndex + 1}</strong>
+                    </div>
+                    <div class="lbm-picture-variant-fields">
+                        ${sizeControl}
+                        ${colourControl}
+                        <label class="lbm-picture-option-label">
+                            Quantity
+                            <input class="lbm-picture-option-control"
+                                type="number" min="1" step="1"
+                                data-picture-option="quantity"
+                                data-image-url="${safeURL}"
+                                value="${Math.max(1, Number(pictureOptions.quantity) || 1)}">
+                        </label>
+                    </div>
+                </div>
+            `;
+
+        }).join("")
+        : "";
 
     selectedCount.textContent =
         selected.size + (
@@ -2426,6 +2597,57 @@ previewStyles.textContent = `
     background: #fff;
     color: #222;
     font-size: 14px;
+}
+
+.lbm-picture-variant-card {
+    margin: 10px 0;
+    padding: 11px;
+    border: 1px solid rgba(212,175,55,.55);
+    border-radius: 8px;
+    background: #222;
+    text-align: left;
+}
+.lbm-picture-variant-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 9px;
+    color: #e5c76b;
+}
+.lbm-picture-variant-heading img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+.lbm-picture-variant-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+}
+.lbm-picture-option-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #eee;
+    font-size: 12px;
+    font-weight: 700;
+}
+.lbm-picture-option-control {
+    width: 100%;
+    min-width: 0;
+    min-height: 38px;
+    padding: 7px;
+    border: 1px solid #c9a44c;
+    border-radius: 5px;
+    background: #fff;
+    color: #222;
+    font-size: 13px;
+}
+@media (max-width: 420px) {
+    .lbm-picture-variant-fields {
+        grid-template-columns: 1fr;
+    }
 }
 
 #lbm-preview-add-selected {
