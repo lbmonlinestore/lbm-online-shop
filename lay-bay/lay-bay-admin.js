@@ -1326,8 +1326,9 @@
         article.style.cssText = "border:1px solid #ccc;border-radius:9px;padding:12px;margin:10px 0";
         article.innerHTML = `
           <h4>${lbEscape(username)} — ${lbEscape(plan.product_name_snapshot || "Lay-Bay plan")}</h4>
-          <p><strong>Requested:</strong> ${lbEscape(lbMoney(refund.refund_amount, refund.currency))}</p>
-          <p><strong>Total deposited:</strong> ${lbEscape(lbMoney(refund.total_deposited, refund.currency))}</p>
+          <p><strong>Verified balance:</strong> ${lbEscape(lbMoney(refund.total_deposited, refund.currency))}</p>
+          <p><strong>Proposed refund:</strong> ${lbEscape(lbMoney(refund.refund_amount, refund.currency))}</p>
+          ${Number(refund.proposed_deduction || 0) > 0 ? `<p><strong>Recorded deduction:</strong> ${lbEscape(lbMoney(refund.proposed_deduction, refund.currency))}</p><p><strong>Deduction explanation:</strong> ${lbEscape(refund.deduction_reason || "Not recorded")}</p>` : ""}
           <p><strong>Reason:</strong> ${lbEscape(refund.cancellation_reason)}</p>
           <p><strong>Status:</strong> ${lbEscape(refund.request_status)}</p>
           ${refund.rejection_reason ? `<p><strong>Rejection reason:</strong> ${lbEscape(refund.rejection_reason)}</p>` : ""}
@@ -1339,7 +1340,7 @@
         if (refund.request_status === "pending" || refund.request_status === "under_review") {
           const approve = document.createElement("button");
           approve.type = "button";
-          approve.textContent = "Approve full refund";
+          approve.textContent = "Review & decide refund";
           approve.addEventListener("click", () => reviewLayBayRefund(refund.id, "approve"));
           const reject = document.createElement("button");
           reject.type = "button";
@@ -1397,23 +1398,54 @@
   async function reviewLayBayRefund(refundId, decision) {
     const db = getAdminDb();
     if (!db) return alert("Supabase connection not found.");
+    const refund = layBayRefunds.find(item => String(item.id) === String(refundId));
+    if (!refund) return alert("Refund request could not be found. Refresh and try again.");
     let rejectionReason = null;
+    let deductionAmount = 0;
+    let deductionReason = null;
+
     if (decision === "reject") {
-      rejectionReason = prompt("Enter the reason for rejecting this refund request:");
+      rejectionReason = prompt("Enter the reason for rejecting this cancellation/refund request:");
       if (!rejectionReason || rejectionReason.trim().length < 5) {
         return alert("Please enter a clear rejection reason.");
       }
-    } else if (!confirm("Approve the full refund amount shown? No cancellation deduction will be applied.")) {
-      return;
+    } else {
+      const total = Number(refund.total_deposited || 0);
+      const rawDeduction = prompt(
+        "Administrator review: enter the deduction amount in ZMW. Enter 0 for no deduction. The deduction must be individually justified; no automatic percentage is applied.",
+        "0"
+      );
+      if (rawDeduction === null) return;
+      deductionAmount = Number(rawDeduction);
+      if (!Number.isFinite(deductionAmount) || deductionAmount < 0 || deductionAmount > total) {
+        return alert("Enter a valid deduction between K0 and the verified deposited balance.");
+      }
+      if (deductionAmount > 0) {
+        deductionReason = prompt("Explain the specific, disclosed basis for this deduction. This explanation will be recorded and shown to the customer:");
+        if (!deductionReason || deductionReason.trim().length < 10) {
+          return alert("A clear deduction explanation of at least 10 characters is required.");
+        }
+      }
+      const refundAmount = total - deductionAmount;
+      if (!confirm(
+        "Confirm administrator decision:\nVerified balance: " + lbMoney(total, refund.currency) +
+        "\nDeduction: " + lbMoney(deductionAmount, refund.currency) +
+        (deductionReason ? "\nReason: " + deductionReason.trim() : "\nNo deduction") +
+        "\nRefund to be processed: " + lbMoney(refundAmount, refund.currency) +
+        "\n\nThis decision will be recorded for the customer."
+      )) return;
     }
+
     try {
       const { data, error } = await db.rpc("review_lay_bay_refund", {
         p_refund_id: refundId,
         p_decision: decision,
+        p_deduction_amount: deductionAmount,
+        p_deduction_reason: deductionReason,
         p_rejection_reason: rejectionReason
       });
       if (error) throw error;
-      alert(data || "Refund request reviewed.");
+      alert(data || "Cancellation/refund request reviewed.");
       await loadLayBayRequests();
     } catch (error) {
       alert("Refund review failed: " + error.message);
