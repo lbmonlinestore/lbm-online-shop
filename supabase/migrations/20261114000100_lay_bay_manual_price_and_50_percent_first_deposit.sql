@@ -15,38 +15,18 @@ ALTER TABLE public.lay_bay_plans
         'unavailable'::text
     ]));
 
--- LBM Lay-Bay automatic 22% pricing and 50% initial deposit policy.
--- Apply after the integration branch has been reviewed and approved.
--- Keep the Lay-Bay price synchronized with the normal shop price.
--- Existing product prices are recalculated at 22% above the normal price.
-CREATE OR REPLACE FUNCTION public.set_lay_bay_price_22_percent()
-RETURNS trigger
-LANGUAGE plpgsql
-SET search_path TO ''
-AS $function$
-BEGIN
-    IF NEW.price IS NULL THEN
-        NEW.lay_bay_price := NULL;
-    ELSE
-        NEW.lay_bay_price := pg_catalog.round(NEW.price * 1.22, 2);
-    END IF;
-
-    RETURN NEW;
-END;
-$function$;
-
-DROP TRIGGER IF EXISTS trg_products_lay_bay_price_22_percent
-ON public.products;
-
-CREATE TRIGGER trg_products_lay_bay_price_22_percent
-BEFORE INSERT OR UPDATE OF price
-ON public.products
-FOR EACH ROW
-EXECUTE FUNCTION public.set_lay_bay_price_22_percent();
-
+-- LBM Lay-Bay standard pricing remains 22% above normal shop price.
+-- Preserve administrator-approved exception prices and disabled products.
+-- The existing trg_set_lay_bay_product_price trigger maintains the 22% standard
+-- and approved exception price whenever product prices/settings are changed.
 UPDATE public.products
-SET lay_bay_price = pg_catalog.round(price * 1.22, 2)
-WHERE price IS NOT NULL;
+SET lay_bay_price = CASE
+    WHEN NOT COALESCE(lay_bay_enabled, false) THEN NULL
+    WHEN lay_bay_exception_price IS NOT NULL THEN lay_bay_exception_price
+    WHEN price IS NOT NULL THEN pg_catalog.round(price * 1.22, 2)
+    ELSE NULL
+END
+WHERE price IS NOT NULL OR NOT COALESCE(lay_bay_enabled, false);
 
 -- New plans remain pending_initial_deposit until a qualifying first payment
 -- is approved by an administrator. The 30-day countdown begins at approval.
