@@ -1474,107 +1474,57 @@ function updateCart() {
 
 /* =====================================================
    18. IMAGE PREVIEW MODAL
-   PC CLICK + MOBILE LONG-PRESS SELECTION
+   LAY-BAY STYLE TAP + CHECKBOX SELECTION
    ===================================================== */
 
 function createImagePreview() {
 
     let modal = document.getElementById("lbm-image-preview");
 
-    if (
-        modal &&
-        modal.dataset.version !== "pc-click-mobile-longpress-v3"
-    ) {
-
+    if (modal && modal.dataset.version !== "lay-bay-checkbox-v1") {
         modal.remove();
-
         modal = null;
-
     }
 
     if (modal) return modal;
 
     modal = document.createElement("div");
-
     modal.id = "lbm-image-preview";
-
-    modal.dataset.version = "pc-click-mobile-longpress-v3";
+    modal.dataset.version = "lay-bay-checkbox-v1";
 
     modal.innerHTML = `
 
         <div class="lbm-preview-content">
 
-            <button
-                type="button"
-                id="lbm-preview-close"
-                aria-label="Close gallery"
-            >×</button>
+            <button type="button" id="lbm-preview-close"
+                aria-label="Close gallery">×</button>
 
             <h3 id="lbm-preview-title"></h3>
-
             <p id="lbm-preview-price"></p>
 
             <div class="lbm-preview-image-area">
-
-                <button
-                    type="button"
-                    id="lbm-preview-prev"
-                    class="lbm-preview-arrow"
-                    aria-label="Previous picture"
-                >‹</button>
-
+                <button type="button" id="lbm-preview-prev"
+                    class="lbm-preview-arrow" aria-label="Previous picture">‹</button>
                 <img id="lbm-preview-image" alt="">
-
-                <button
-                    type="button"
-                    id="lbm-preview-next"
-                    class="lbm-preview-arrow"
-                    aria-label="Next picture"
-                >›</button>
-
+                <button type="button" id="lbm-preview-next"
+                    class="lbm-preview-arrow" aria-label="Next picture">›</button>
             </div>
 
             <p id="lbm-preview-counter"></p>
-
             <div id="lbm-preview-thumbnails"></div>
-
             <div id="lbm-preview-variant-options"></div>
 
             <div class="lbm-preview-product-selection">
-
                 <h3>Select Your Pictures</h3>
-
-                <p>
-                    <strong>On phones:</strong>
-                    Tap a picture to preview it.
-                    Press and hold to select or unselect it.
-                </p>
-
-                <p>
-                    <strong>On computers:</strong>
-                    Click a picture to select or unselect it.
-                </p>
-
+                <p>Tap a picture to preview it. Use its checkbox to select or unselect it, just like LBM Lay-Bay.</p>
                 <p class="lbm-preview-selection-hint">
-                    You can select several pictures, but only
-                    from this product.
+                    Select several pictures from this product. Each selected picture has its own size, colour and quantity.
                 </p>
-
-                <p
-                    id="lbm-preview-selected-count"
-                    class="lbm-preview-selected-count"
-                >
-                    0 pictures selected
-                </p>
-
-                <button
-                    type="button"
-                    id="lbm-preview-add-selected"
-                    disabled
-                >
+                <p id="lbm-preview-selected-count"
+                    class="lbm-preview-selected-count">0 pictures selected</p>
+                <button type="button" id="lbm-preview-add-selected" disabled>
                     ADD SELECTED PICTURES TO CART
                 </button>
-
             </div>
 
         </div>
@@ -1584,223 +1534,40 @@ function createImagePreview() {
     document.body.appendChild(modal);
 
     modal.addEventListener("click", event => {
-
-        if (
-            event.target === modal ||
-            event.target.id === "lbm-preview-close"
-        ) {
-
+        if (event.target === modal || event.target.id === "lbm-preview-close") {
             closeImagePreview();
-
         }
-
     });
 
     document.getElementById("lbm-preview-prev")
-        .addEventListener("click", () => {
-
-            changePreviewImage(-1);
-
-        });
+        .addEventListener("click", () => changePreviewImage(-1));
 
     document.getElementById("lbm-preview-next")
-        .addEventListener("click", () => {
+        .addEventListener("click", () => changePreviewImage(1));
 
-            changePreviewImage(1);
+    document.getElementById("lbm-preview-thumbnails")
+        .addEventListener("click", event => {
+            const previewButton = event.target.closest("[data-preview-index]");
+            if (!previewButton) return;
 
+            const imageIndex = Number(previewButton.dataset.previewIndex);
+            if (!Number.isInteger(imageIndex)) return;
+
+            previewImageIndex = imageIndex;
+            productImageIndices[previewProductId] = imageIndex;
+            renderPreviewGallery();
         });
 
+    document.getElementById("lbm-preview-thumbnails")
+        .addEventListener("change", event => {
+            const checkbox = event.target.closest("[data-picture-select]");
+            if (!checkbox) return;
 
-    const thumbnailContainer = document.getElementById(
-        "lbm-preview-thumbnails"
-    );
-
-
-    function clearThumbnailPress() {
-
-        if (thumbnailPressTimer !== null) {
-
-            clearTimeout(thumbnailPressTimer);
-
-            thumbnailPressTimer = null;
-
-        }
-
-        activeThumbnailButton = null;
-
-    }
-
-
-    /* ---------------------------------------------
-       RECORD POINTER TYPE AND START LONG-PRESS TIMER
-       --------------------------------------------- */
-
-    thumbnailContainer.addEventListener("pointerdown", event => {
-
-        const thumbnail = event.target.closest(
-            "[data-preview-index]"
-        );
-
-        if (!thumbnail) return;
-
-        if (event.pointerType === "mouse" && event.button !== 0) {
-            return;
-        }
-
-        // Remember whether the customer is using a
-        // mouse, touchscreen or pen.
-        thumbnailContainer.dataset.lastPointerType =
-            event.pointerType;
-
-        clearThumbnailPress();
-
-        activeThumbnailButton = thumbnail;
-
-        const pressedButton = thumbnail;
-
-        const pressedProductId = previewProductId;
-
-        const imageIndex = Number(
-            thumbnail.dataset.previewIndex
-        );
-
-        // Long-press selection is used on phones and
-        // other touch-based devices.
-        thumbnailPressTimer = setTimeout(() => {
-
-            thumbnailPressTimer = null;
-
-            if (
-                previewProductId !== pressedProductId ||
-                !pressedButton.isConnected
-            ) {
-
-                return;
-
-            }
-
-            suppressThumbnailClickUntil =
-                Date.now() + 800;
+            const imageIndex = Number(checkbox.dataset.pictureSelect);
+            if (!Number.isInteger(imageIndex)) return;
 
             togglePictureSelection(imageIndex);
-
-        }, 500);
-
-    });
-
-
-    /* ---------------------------------------------
-       STOP LONG-PRESS TIMER WHEN POINTER IS RELEASED
-       --------------------------------------------- */
-
-    thumbnailContainer.addEventListener("pointerup", () => {
-
-        clearThumbnailPress();
-
-    });
-
-
-    thumbnailContainer.addEventListener("pointercancel", () => {
-
-        clearThumbnailPress();
-
-    });
-
-
-    thumbnailContainer.addEventListener("pointerleave", () => {
-
-        clearThumbnailPress();
-
-    });
-
-
-    /* ---------------------------------------------
-       PREVENT RIGHT-CLICK CONTEXT MENU ON THUMBNAILS
-       --------------------------------------------- */
-
-    thumbnailContainer.addEventListener("contextmenu", event => {
-
-        if (event.target.closest("[data-preview-index]")) {
-
-            event.preventDefault();
-
-        }
-
-    });
-
-
-    /* ---------------------------------------------
-       THUMBNAIL CLICK BEHAVIOUR
-
-       COMPUTER:
-       Click = Select / Unselect
-
-       PHONE:
-       Tap = Preview
-
-       PHONE LONG-PRESS:
-       Select / Unselect
-       --------------------------------------------- */
-
-    thumbnailContainer.addEventListener("click", event => {
-
-        const thumbnail = event.target.closest(
-            "[data-preview-index]"
-        );
-
-        if (!thumbnail) return;
-
-
-        // Stop the click generated after a successful
-        // long-press from triggering a second action.
-        if (Date.now() < suppressThumbnailClickUntil) {
-
-            event.preventDefault();
-
-            event.stopPropagation();
-
-            return;
-
-        }
-
-
-        const imageIndex = Number(
-            thumbnail.dataset.previewIndex
-        );
-
-        const pointerType =
-            thumbnailContainer.dataset.lastPointerType;
-
-
-        // =========================================
-        // COMPUTER: CLICK TO SELECT / UNSELECT
-        // =========================================
-
-        if (
-            pointerType === "mouse" ||
-            event.detail === 0
-        ) {
-
-            togglePictureSelection(imageIndex);
-
-            return;
-
-        }
-
-
-        // =========================================
-        // PHONE: TAP TO PREVIEW
-        // =========================================
-
-        previewImageIndex = imageIndex;
-
-        productImageIndices[previewProductId] =
-            previewImageIndex;
-
-        renderPreviewGallery();
-
-    });
-
+        });
 
     document.getElementById("lbm-preview-add-selected")
         .addEventListener("click", addSelectedPicturesToCart);
@@ -1816,6 +1583,7 @@ function createImagePreview() {
             const product = products.find(
                 item => String(item.id) === previewProductId
             );
+
             if (!product || !Number.isInteger(imageIndex)) return;
 
             const pictureOptions = getPictureVariantOptions(product, imageIndex);
@@ -1831,11 +1599,9 @@ function createImagePreview() {
             }
 
             renderPreviewGallery();
-
         });
 
     return modal;
-
 }
 
 
