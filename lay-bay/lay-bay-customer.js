@@ -485,6 +485,187 @@ let layBaySelectionCart = [];
     avatar.src = avatarPlaceholder();
   }
 
+
+  // =======================================================
+  // 6. CUSTOMER-CONTROLLED ACCOUNT DELETION
+  // Email reauthentication + explicit confirmation
+  // =======================================================
+
+  function createAccountDeletionPanel() {
+    if ($("lbAccountDeletionPanel")) return;
+
+    const panel = createElement("section", "lb-profile-panel");
+    panel.id = "lbAccountDeletionPanel";
+    panel.style.display = "block";
+    panel.style.marginTop = "18px";
+    panel.style.padding = "18px";
+
+    const heading = createElement("h2", "", "Before you delete your account");
+    heading.style.color = "#D4AF37";
+
+    const explanation = createElement(
+      "p",
+      "",
+      "You may request permanent deletion of your Lay-Bay sign-in account when all your plans and payments are settled. Active plans, pending deposits, unresolved refunds or pending extension requests must be resolved first."
+    );
+
+    const recordsNote = createElement(
+      "p",
+      "lb-avatar-note",
+      "For accounting, legal and dispute-resolution purposes, LBM may retain transaction records that it is required to keep. Your sign-in account and eligible profile information will be deleted. Download any receipts you wish to keep before proceeding."
+    );
+
+    const sendCode = createElement("button", "", "Send email verification code");
+    sendCode.type = "button";
+
+    const otpArea = createElement("div");
+    otpArea.id = "lbDeletionOtpArea";
+    otpArea.style.display = "none";
+
+    const otpLabel = createElement("label", "", "Verification code sent to your account email");
+    otpLabel.style.display = "block";
+    otpLabel.style.margin = "12px 0 6px";
+
+    const otpInput = createElement("input");
+    otpInput.id = "lbDeletionOtp";
+    otpInput.type = "text";
+    otpInput.inputMode = "numeric";
+    otpInput.autocomplete = "one-time-code";
+    otpInput.maxLength = 10;
+    otpInput.placeholder = "Enter email verification code";
+    otpInput.style.cssText = "width:100%;box-sizing:border-box;padding:12px;border-radius:7px;margin-bottom:10px;";
+
+    const verifyCode = createElement("button", "", "Verify code");
+    verifyCode.type = "button";
+
+    const finalArea = createElement("div");
+    finalArea.id = "lbDeletionFinalArea";
+    finalArea.style.display = "none";
+    finalArea.style.marginTop = "14px";
+
+    const finalNote = createElement(
+      "p",
+      "",
+      "This action is permanent. Type DELETE MY ACCOUNT exactly below to confirm."
+    );
+
+    const phrase = createElement("input");
+    phrase.id = "lbDeletionPhrase";
+    phrase.type = "text";
+    phrase.autocomplete = "off";
+    phrase.placeholder = "DELETE MY ACCOUNT";
+    phrase.style.cssText = "width:100%;box-sizing:border-box;padding:12px;border-radius:7px;margin-bottom:10px;";
+
+    const deleteButton = createElement("button", "", "Permanently Delete My Account");
+    deleteButton.type = "button";
+    deleteButton.style.background = "#8b1e1e";
+    deleteButton.style.color = "#fff";
+
+    const status = createElement("p", "lb-avatar-note");
+    status.id = "lbDeletionMessage";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+
+    sendCode.addEventListener("click", async () => {
+      if (!currentUser || !currentUser.email) {
+        message("lbDeletionMessage", "We could not find an email address for this account. Please contact LBM support.", false);
+        return;
+      }
+
+      setButton(sendCode, true, "Sending code...");
+      try {
+        const { error } = await db.auth.reauthenticate();
+        if (error) throw error;
+        otpArea.style.display = "block";
+        message("lbDeletionMessage", "A verification code has been sent to your account email. Check your inbox and spam folder.");
+      } catch (error) {
+        message("lbDeletionMessage", error.message || "Could not send the verification code.", false);
+      } finally {
+        setButton(sendCode, false, "Resend verification code");
+      }
+    });
+
+    verifyCode.addEventListener("click", async () => {
+      const token = otpInput.value.trim();
+      if (!token) {
+        message("lbDeletionMessage", "Enter the verification code first.", false);
+        return;
+      }
+
+      setButton(verifyCode, true, "Verifying...");
+      try {
+        const { data, error } = await db.auth.verifyOtp({
+          email: currentUser.email,
+          token,
+          type: "reauthentication"
+        });
+        if (error) throw error;
+        if (data.user) currentUser = data.user;
+        finalArea.style.display = "block";
+        otpInput.disabled = true;
+        setButton(verifyCode, true, "Email verified");
+        message("lbDeletionMessage", "Email verification successful. You may now confirm account deletion.");
+      } catch (error) {
+        message("lbDeletionMessage", error.message || "The verification code is invalid or expired.", false);
+        setButton(verifyCode, false, "Verify code");
+      }
+    });
+
+    deleteButton.addEventListener("click", async () => {
+      if (phrase.value.trim() !== "DELETE MY ACCOUNT") {
+        message("lbDeletionMessage", "Type DELETE MY ACCOUNT exactly to confirm.", false);
+        return;
+      }
+
+      if (!window.confirm("This permanently deletes your Lay-Bay sign-in account. Transaction records required by LBM may be retained. Continue?")) {
+        return;
+      }
+
+      setButton(deleteButton, true, "Deleting account...");
+      try {
+        const { data, error } = await db.functions.invoke("delete-lay-bay-account", {
+          body: { confirmation: "DELETE MY ACCOUNT" }
+        });
+
+        if (error) {
+          let detail = error.message || "Account deletion could not be completed.";
+          try {
+            const response = error.context && await error.context.json();
+            if (response && response.error) detail = response.error;
+          } catch (_) {}
+          throw new Error(detail);
+        }
+
+        if (data && data.error) throw new Error(data.error);
+
+        message("lbDeletionMessage", "Your Lay-Bay account has been deleted. Signing out...");
+        await db.auth.signOut({ scope: "local" });
+        window.location.replace("index.html");
+      } catch (error) {
+        message("lbDeletionMessage", error.message || "Account deletion could not be completed. Please contact LBM support.", false);
+        setButton(deleteButton, false, "Permanently Delete My Account");
+      }
+    });
+
+    otpArea.append(otpLabel, otpInput, verifyCode);
+    finalArea.append(finalNote, phrase, deleteButton);
+    panel.append(heading, explanation, recordsNote, sendCode, otpArea, finalArea, status);
+
+    const mount = $("lbAccountDeletionContent");
+    if (mount) {
+      mount.innerHTML = "";
+      mount.appendChild(panel);
+    } else {
+      const profile = $("lbProfilePanel");
+      if (profile && profile.parentNode) {
+        profile.after(panel);
+      } else {
+        const main = document.querySelector("main");
+        if (main) main.appendChild(panel);
+      }
+    }
+  }
+
   function avatarPlaceholder() {
     return "data:image/svg+xml;charset=UTF-8," +
       encodeURIComponent(
@@ -1725,6 +1906,7 @@ let layBaySelectionCart = [];
     message("pageMessage", "Welcome. Your customer account is connected.");
 
     createProfilePanel();
+    createAccountDeletionPanel();
     await loadAvatar();
 
     return true;

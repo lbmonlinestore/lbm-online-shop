@@ -311,6 +311,15 @@
     <div id="depositHistory"></div>
   </section>
 
+  <details id="lbAccountDeletionMount" class="lb-panel">
+    <summary style="cursor:pointer;font-weight:bold;color:var(--gold);font-size:18px;outline-offset:5px;">
+      Delete Account
+    </summary>
+    <div id="lbAccountDeletionContent" style="margin-top:16px;">
+      <p class="lb-muted">Account deletion options will appear after your account loads.</p>
+    </div>
+  </details>
+
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -342,14 +351,14 @@
 
       const number = document.createElement("span");
       number.className = "receiving-number";
-      number.textContent = "Contact LBM administrator for verified receiving details";
+      number.textContent = "0975004041";
 
       const account = document.createElement("p");
-      account.textContent = "Do not send money until LBM confirms the official receiving account.";
+      account.textContent = "Before confirming the transfer, check that the recipient details displayed by Airtel Money are correct.";
 
       const steps = document.createElement("p");
       steps.textContent =
-        "Contact LBM through the official shop WhatsApp channel to obtain and verify the current receiving details before making payment.";
+        "Send your Lay-Bay payment to the LBM Airtel Money number shown above. Keep the transaction confirmation and enter its reference below.";
 
       const warning = document.createElement("p");
       warning.className = "payment-warning";
