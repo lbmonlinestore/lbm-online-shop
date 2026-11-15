@@ -823,7 +823,7 @@ th {
 ===================================================== */
 
 .topbar {
-    position: relative !important;
+    position: static !important;
     top: auto;
     z-index: 1000;
     width: 100%;
