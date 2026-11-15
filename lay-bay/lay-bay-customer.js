@@ -2518,6 +2518,8 @@ let layBaySelectionCart = [];
         "article",
         "lb-card lb-product"
       );
+      card.dataset.productId = String(product.id);
+      card.dataset.category = String(product.category || "");
 
       const images = productImages(product);
 
