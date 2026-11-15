@@ -1510,3 +1510,102 @@ th {
     object-position: center 30%;
   }
 }
+
+/* =====================================================
+   25. FULL-WIDTH IMAGE-FIRST FASHION HERO
+   Photograph stands alone; promotional copy follows below.
+===================================================== */
+.hero.hero-fresh {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  border-radius: 0 !important;
+  background: #ffffff !important;
+  box-shadow: none !important;
+}
+.hero.hero-fresh::before,
+.hero.hero-fresh::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+}
+.hero-fresh .hero-fashion-photo {
+  position: relative !important;
+  inset: auto !important;
+  display: block !important;
+  flex: none !important;
+  width: 100% !important;
+  height: clamp(260px, 43vw, 540px) !important;
+  min-height: 0 !important;
+  overflow: hidden;
+  background: #f2f0ec !important;
+}
+.hero-fresh .hero-fashion-photo img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 35% !important;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.hero-fresh .hero-fresh-content {
+  position: static !important;
+  z-index: auto !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100% !important;
+  max-width: 980px;
+  margin: 0 auto !important;
+  padding: 30px 20px 34px !important;
+  background: #ffffff !important;
+  color: #171717 !important;
+  text-align: center;
+  box-sizing: border-box;
+}
+.hero-fresh .hero-label {
+  color: #92721c !important;
+  margin: 0 0 10px !important;
+}
+.hero-fresh .hero-fresh-content h1 {
+  color: #111111 !important;
+  margin: 0 0 12px !important;
+}
+.hero-fresh .hero-fresh-content h1 span {
+  color: #b18b2e !important;
+}
+.hero-fresh .hero-description {
+  max-width: 650px;
+  color: #555555 !important;
+  margin: 0 auto 20px !important;
+}
+.hero-fresh .hero-actions {
+  justify-content: center !important;
+  flex-wrap: wrap;
+}
+.hero-fresh .hero-small-note {
+  color: #666666 !important;
+  margin: 14px 0 0 !important;
+}
+@media (max-width: 760px) {
+  .hero-fresh .hero-fashion-photo {
+    height: clamp(220px, 68vw, 330px) !important;
+  }
+  .hero-fresh .hero-fresh-content {
+    padding: 24px 16px 28px !important;
+  }
+  .hero-fresh .hero-fresh-content h1 {
+    font-size: clamp(28px, 8vw, 40px) !important;
+  }
+  .hero-fresh .hero-description {
+    font-size: 14px !important;
+    line-height: 1.55;
+  }
+}
