@@ -522,6 +522,10 @@
         </button>
 
         <div class="header-account-tools" aria-label="Customer tools">
+            <button class="header-icon-button" id="lbm-search-toggle" type="button" aria-label="Open product search" aria-controls="lbm-product-search" aria-expanded="false" title="Search products">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>
+            </button>
+
             <button class="header-icon-button" id="lbm-announcement-toggle"
                     type="button" aria-label="Open announcements"
                     aria-controls="lbm-announcements-dialog" aria-expanded="false">
@@ -1146,6 +1150,31 @@
             ticking = true;
         }
     }, { passive: true });
+})();
+</script>
+
+
+<script>
+(function () {
+  const stack = document.getElementById("site-header-stack");
+  const toggle = document.getElementById("lbm-search-toggle");
+  const input = document.getElementById("lbm-product-search");
+  if (!stack || !toggle || !input) return;
+
+  function setSearchOpen(open) {
+    stack.classList.toggle("search-open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? "Close product search" : "Open product search");
+    if (open) window.setTimeout(() => input.focus(), 40);
+  }
+
+  toggle.addEventListener("click", () => {
+    setSearchOpen(!stack.classList.contains("search-open"));
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape") setSearchOpen(false);
+  });
 })();
 </script>
 
