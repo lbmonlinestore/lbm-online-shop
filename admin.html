@@ -52,11 +52,29 @@ body.image-viewer-open{overflow:hidden}
 <div id="loginMessage" class="message hidden"></div></section>
 <main id="dashboard" class="hidden"><div id="mainMessage" class="message hidden"></div>
 <div class="tabs" id="mainTabs">
-<button class="active" data-tab="overview">Overview</button><button data-tab="products">Manage Products</button><button data-tab="orders">Manage Orders</button><button data-tab="reviews">Customer Reviews</button><button data-tab="announcements">Announcements</button><button data-tab="background">Manage Background</button><button data-tab="social">Manage Social Media</button>
+<button class="active" data-tab="overview">Overview</button><button data-tab="websiteAnalytics">Website Analytics</button><button data-tab="products">Manage Products</button><button data-tab="orders">Manage Orders</button><button data-tab="reviews">Customer Reviews</button><button data-tab="announcements">Announcements</button><button data-tab="background">Manage Background</button><button data-tab="social">Manage Social Media</button>
 </div>
 <section id="overviewTab" class="tab-content"><div class="panel"><h2>Shop Analytics</h2><div class="stats">
 <div class="stat"><p>Total Products</p><strong id="totalProducts">0</strong></div><div class="stat"><p>Total Orders</p><strong id="totalOrders">0</strong></div><div class="stat"><p>Total Sales</p><strong id="totalSales">K0.00</strong></div><div class="stat"><p>Pending Orders</p><strong id="pendingOrders">0</strong></div></div><br><button id="refreshAnalytics">Refresh Analytics</button></div>
 <div class="panel"><h3>Recent Orders</h3><div id="recentOrders" class="empty">Loading orders...</div></div></section>
+<section id="websiteAnalyticsTab" class="tab-content hidden">
+<div class="panel">
+<h2>Website Traffic Analytics</h2>
+<p class="small">Anonymous unique browsers counted once per day. Administrator browsing is excluded. Reporting uses Zambia local time.</p>
+<div class="stats" style="margin-top:16px">
+<div class="stat"><p>Visitors Today</p><strong id="lbmVisitorsToday">—</strong></div>
+<div class="stat"><p>Visitors Yesterday</p><strong id="lbmVisitorsYesterday">—</strong></div>
+<div class="stat"><p>All-Time Unique Browsers</p><strong id="lbmVisitorsAllTime">—</strong></div>
+<div class="stat"><p>Visitors — Last 30 Days</p><strong id="lbmVisitors30Days">—</strong></div>
+<div class="stat"><p>Daily Average — Last 30 Days</p><strong id="lbmVisitorsAverage">—</strong></div>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px">
+<h3 style="margin:0">Daily Visitors</h3><button type="button" id="refreshWebsiteAnalytics">Refresh Traffic</button>
+</div>
+<div id="lbmWebsiteAnalyticsMessage" class="message hidden" role="status" aria-live="polite"></div>
+<div id="lbmWebsiteAnalyticsChart" style="margin-top:15px"><p class="empty">Open Website Analytics to load visitor statistics.</p></div>
+<p class="small" style="margin-top:12px">A visitor is counted as a unique browser, not a verified individual person. The same browser is counted once per Zambia calendar day. Clearing browser storage or using another device/browser can create another count.</p>
+</div></section>
 <section id="productsTab" class="tab-content hidden"><div class="grid"><div class="panel"><h2 id="formHeading">Add New Product</h2>
 <form id="productForm"><input type="hidden" id="productId"><label>Product Name</label><input id="productName" required placeholder="e.g. Classic Men's Shirt"><label>Description</label><textarea id="productDescription" placeholder="Describe your product"></textarea>
 <label>Category</label><select id="productCategory" required><option value="">Select category</option><option>Men's Clothing</option><option>Women's Clothing</option><option>Men's Shoes</option><option>Women's Shoes</option><option>Shoes</option><option>Accessories</option><option>Other</option></select>
@@ -127,7 +145,7 @@ db.auth.onAuthStateChange(event=>{if(event==="SIGNED_OUT"){currentUser=null;dash
 restoreSession();
 
 /* SECTION 3 — TABS */
-function activateTab(name){document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));document.querySelectorAll(".tab-content").forEach(s=>s.classList.toggle("hidden",s.id!==name+"Tab"));if(name==="reviews")loadAdminReviews();if(name==="announcements")loadAdminAnnouncements();if(name==="returns")loadReturns();}
+function activateTab(name){document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===name));document.querySelectorAll(".tab-content").forEach(s=>s.classList.toggle("hidden",s.id!==name+"Tab"));if(name==="reviews")loadAdminReviews();if(name==="announcements")loadAdminAnnouncements();if(name==="returns")loadReturns();if(name==="websiteAnalytics"&&window.loadLbmWebsiteAnalytics)window.loadLbmWebsiteAnalytics();}
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>activateTab(b.dataset.tab)));
 
 /* SECTION 4 — PRODUCT IMAGE HELPERS */
@@ -386,6 +404,56 @@ $("refreshAnnouncements").addEventListener("click",loadAdminAnnouncements);
  $("returnsAdminFilter").addEventListener("change",function(){filter=this.value;render();});
  $("refreshReturnsAdmin").addEventListener("click",async function(){this.disabled=true;this.textContent="Refreshing...";try{await loadReturns();}finally{this.disabled=false;this.textContent="Refresh Requests";}});
  window.loadReturns=loadReturns;
+})();
+
+/* SECTION — WEBSITE TRAFFIC ANALYTICS */
+(function(){
+ "use strict";
+ const todayEl=$("lbmVisitorsToday"),yesterdayEl=$("lbmVisitorsYesterday"),totalEl=$("lbmVisitors30Days"),averageEl=$("lbmVisitorsAverage"),allTimeEl=$("lbmVisitorsAllTime");
+ const chart=$("lbmWebsiteAnalyticsChart"),message=$("lbmWebsiteAnalyticsMessage"),refresh=$("refreshWebsiteAnalytics");
+ if(!todayEl||!chart||!refresh)return;
+ const zDate=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Lusaka",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+ const prettyDate=s=>new Date(s+"T12:00:00+02:00").toLocaleDateString("en-ZM",{day:"numeric",month:"short"});
+ function show(text,error){message.textContent=text;message.className="message"+(error?" error":"");}
+ function hide(){message.textContent="";message.classList.add("hidden");}
+ function render(rows){
+  const counts=new Map(rows.map(r=>[r.visit_date,Number(r.unique_visitors)||0]));
+  const today=zDate(),yesterday=new Date(Date.now()-86400000).toLocaleDateString("en-CA",{timeZone:"Africa/Lusaka"});
+  const total=rows.reduce((n,r)=>n+(Number(r.unique_visitors)||0),0);
+  todayEl.textContent=String(counts.get(today)||0);
+  yesterdayEl.textContent=String(counts.get(yesterday)||0);
+  totalEl.textContent=String(total);
+  averageEl.textContent=(total/30).toFixed(1);
+  const max=Math.max(1,...rows.map(r=>Number(r.unique_visitors)||0));
+  chart.innerHTML="";
+  if(!rows.length){chart.innerHTML='<p class="empty">No visitor records yet. New visits will appear here.</p>';return;}
+  rows.forEach(r=>{
+   const count=Number(r.unique_visitors)||0;
+   const line=document.createElement("div");
+   line.style.cssText="display:grid;grid-template-columns:75px minmax(50px,1fr) 38px;gap:10px;align-items:center;margin:10px 0";
+   const date=document.createElement("span");date.className="small";date.textContent=prettyDate(r.visit_date);
+   const track=document.createElement("div");track.style.cssText="height:13px;background:#edf1f6;border-radius:20px;overflow:hidden";
+   const bar=document.createElement("div");bar.style.cssText="height:100%;width:"+Math.max(0,count/max*100)+"%;background:#d4af37;border-radius:20px;min-width:"+(count?"2px":"0");
+   track.append(bar);
+   const value=document.createElement("strong");value.textContent=String(count);value.style.cssText="font-size:13px;text-align:right;color:#173d70";
+   line.append(date,track,value);chart.append(line);
+  });
+ }
+ async function load(){
+  if(!currentUser){show("Please sign in as an administrator to view website traffic.",true);return;}
+  refresh.disabled=true;refresh.textContent="Loading...";
+  hide();chart.innerHTML='<p class="empty">Loading visitor statistics...</p>';
+  try{
+   const [daily,totalResult]=await Promise.all([db.rpc("get_lbm_website_analytics",{p_days:30}),db.rpc("get_lbm_website_visitor_total")]);
+   if(daily.error)throw daily.error;
+   if(totalResult.error)throw totalResult.error;
+   allTimeEl.textContent=String(totalResult.data||0);
+   render(daily.data||[]);
+  }catch(error){console.error("LBM website analytics:",error);chart.innerHTML="";show("Could not load website traffic: "+error.message,true);}
+  finally{refresh.disabled=false;refresh.textContent="Refresh Traffic";}
+ }
+ refresh.addEventListener("click",load);
+ window.loadLbmWebsiteAnalytics=load;
 })();
 
 /* END OF ADMIN DASHBOARD */
