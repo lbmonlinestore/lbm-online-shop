@@ -518,6 +518,14 @@
         <button class="cart-button" id="cart-button" type="button">
             Cart (<span id="cart-count">0</span>)
         </button>
+        <button class="header-icon-button lbm-search-toggle" id="lbm-search-toggle"
+                type="button" aria-label="Open product search"
+                aria-controls="lbm-search-panel" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                <path d="m16 16 5 5"></path>
+            </svg>
+        </button>
 
         <div class="header-account-tools" aria-label="Customer tools">
             <button class="header-icon-button" id="lbm-announcement-toggle"
@@ -539,64 +547,48 @@
 
     </header>
 
-    <div class="lbm-search-panel">
-
-                <label for="lbm-product-search">
-                    Find what you're looking for
-                </label>
-
-                <div class="lbm-search-box">
-
-                    <span class="lbm-search-icon" aria-hidden="true">
-                        ⌕
-                    </span>
-
-                    <input
-                        type="search"
-                        id="lbm-product-search"
-                        placeholder="Search products, brands or categories..."
-                        aria-label="Search products"
-                        autocomplete="off"
-                    >
-
-                    <button
-                        type="button"
-                        id="lbm-clear-search"
-                        aria-label="Clear search"
-                        hidden
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-                <p id="lbm-search-results" aria-live="polite">
-                    Browse our latest products
-                </p>
-
-            </div>
+    <div class="lbm-search-panel" id="lbm-search-panel" hidden>
+        <div class="lbm-search-box">
+            <span class="lbm-search-icon" aria-hidden="true">⌕</span>
+            <input type="search" id="lbm-product-search"
+                   placeholder="Search products..." aria-label="Search products"
+                   autocomplete="off">
+            <button type="button" id="lbm-clear-search"
+                    aria-label="Clear search" hidden>×</button>
+        </div>
+        <p id="lbm-search-results" aria-live="polite">Browse our latest products</p>
+    </div>
 
 
     </div>
 
     <main>
 
-        <section class="hero hero-fresh" id="home">
-            <div class="hero-sky-art" aria-hidden="true">
-                <div class="hero-sun"></div>
-                <div class="hero-person hero-person-man"><span class="hero-head"></span><span class="hero-body">LBM</span></div>
-                <div class="hero-person hero-person-woman"><span class="hero-head"></span><span class="hero-body">LBM</span></div>
-                <div class="hero-hill"></div>
-            </div>
-            <div class="hero-content hero-fresh-content">
-                <p class="hero-label">LBM ONLINE SHOP · STYLE FOR EVERY DAY</p>
-                <h1>Look Good.<br><span>Feel Great.</span></h1>
-                <p class="hero-description">Discover clothing, footwear and accessories selected to bring confidence to every look.</p>
-                <div class="hero-actions">
-                    <a href="#products" class="hero-primary-action">SHOP THE COLLECTION <span>→</span></a>
-                    <a href="lay-bay/index.html" class="hero-secondary-action">EXPLORE LBM LAY-BAY</a>
+        <section class="hero hero-fresh hero-separated" id="home">
+            <div class="hero-visual" role="img" aria-label="LBM fashion lifestyle illustration">
+                <div class="hero-sky-art" aria-hidden="true">
+                    <div class="hero-sun"></div>
+                    <div class="hero-person hero-person-man"><span class="hero-head"></span><span class="hero-body">LBM</span></div>
+                    <div class="hero-person hero-person-woman"><span class="hero-head"></span><span class="hero-body">LBM</span></div>
+                    <div class="hero-hill"></div>
                 </div>
-                <p class="hero-small-note">Shop today. Choose a payment option that works for you.</p>
+            </div>
+            <div class="hero-copy-row">
+                <div class="hero-content hero-fresh-content">
+                    <p class="hero-label">LBM ONLINE SHOP · STYLE FOR EVERY DAY</p>
+                    <h1>Look Good. <span>Feel Great.</span></h1>
+                    <p class="hero-description">Discover clothing, footwear and accessories selected to bring confidence to every look.</p>
+                    <div class="hero-actions">
+                        <a href="#products" class="hero-primary-action">SHOP THE COLLECTION <span>→</span></a>
+                        <a href="lay-bay/index.html" class="hero-secondary-action">EXPLORE LBM LAY-BAY</a>
+                    </div>
+                    <p class="hero-small-note">Shop today. Choose a payment option that works for you.</p>
+                </div>
+                <a class="hero-laybay-card" href="lay-bay/index.html">
+                    <span>SHOP SMARTER</span>
+                    <strong>LBM LAY-BAY</strong>
+                    <small>Your product. Your payment plan.</small>
+                </a>
             </div>
         </section>
 
@@ -953,6 +945,29 @@
 
     <script src="script.js?v=gallery-tap-checkbox-20261115-2"></script>
     <script src="features.js?v=announcement-bell-account-v1"></script>
+    <script>
+      (() => {
+        const toggle = document.getElementById("lbm-search-toggle");
+        const panel = document.getElementById("lbm-search-panel");
+        const input = document.getElementById("lbm-product-search");
+        if (!toggle || !panel) return;
+        toggle.addEventListener("click", () => {
+          const opening = panel.hidden;
+          panel.hidden = !opening;
+          toggle.setAttribute("aria-expanded", String(opening));
+          toggle.setAttribute("aria-label", opening ? "Close product search" : "Open product search");
+          if (opening && input) input.focus();
+        });
+        document.addEventListener("keydown", event => {
+          if (event.key === "Escape" && !panel.hidden) {
+            panel.hidden = true;
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.setAttribute("aria-label", "Open product search");
+            toggle.focus();
+          }
+        });
+      })();
+    </script>
 
     <script>
         if ("serviceWorker" in navigator) {
