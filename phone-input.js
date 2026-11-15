@@ -13,7 +13,30 @@
       autoPlaceholder: "off",
       loadUtils: utils
     });
-    input.placeholder = "Enter number without country code";
+
+    // Detect an explicitly supplied country prefix before the phone library
+    // normalises the field value.
+    input.dataset.lbmDuplicateDialCode = "0";
+    input.addEventListener("paste", event => {
+      const raw = (event.clipboardData || window.clipboardData)?.getData("text") || "";
+      const country = iti.getSelectedCountryData();
+      const digits = raw.replace(/\D/g, "");
+      if (raw.trim().startsWith("+") || raw.trim().startsWith("00") ||
+          (country.dialCode && digits.startsWith(country.dialCode) &&
+           digits.length > country.dialCode.length + 6)) {
+        input.dataset.lbmDuplicateDialCode = "1";
+      }
+    }, true);
+    input.addEventListener("beforeinput", event => {
+      if (event.data === "+") input.dataset.lbmDuplicateDialCode = "1";
+    }, true);
+    input.addEventListener("input", () => {
+      if (!input.value.trim()) input.dataset.lbmDuplicateDialCode = "0";
+    });
+    input.addEventListener("countrychange", () => {
+      input.dataset.lbmDuplicateDialCode = "0";
+    });
+    input.placeholder = "Enter national number only";
     input.dataset.lbmPhoneReady = "1";
     return iti;
   }
@@ -22,12 +45,23 @@
     await iti.promise;
     const digits = input.value.replace(/\D/g, "");
     const country = iti.getSelectedCountryData();
-    const zambiaFormatInvalid = country.iso2 === "zm" && (digits.length !== 9 || digits.startsWith("0"));
-    if (!input.value.trim() || zambiaFormatInvalid || !iti.isValidNumber()) {
-      input.setCustomValidity(country.iso2 === "zm" ? "For Zambia, enter the 9-digit number only, without +260 or the leading 0." : "Enter a complete phone number without the country calling code.");
+    const utils = window.intlTelInput.utils;
+    const example = utils?.getExampleNumber
+      ? utils.getExampleNumber(country.iso2, false, utils.numberType.MOBILE)
+      : "";
+    const expectedNationalLength = example ? example.replace(/\D/g, "").length : 0;
+    const duplicateDialCode = input.dataset.lbmDuplicateDialCode === "1" ||
+      (country.dialCode && expectedNationalLength &&
+       digits.startsWith(country.dialCode) && digits.length > expectedNationalLength);
+    if (!input.value.trim() || duplicateDialCode || !iti.isValidNumber()) {
+      input.setCustomValidity(duplicateDialCode
+        ? "The country calling code is already shown. Enter the national number only."
+        : "Enter a complete, valid national phone number for the selected country.");
       input.reportValidity();
       input.setCustomValidity("");
-      throw new Error("Please enter a complete, valid phone number.");
+      throw new Error(duplicateDialCode
+        ? "Remove the country code and enter the national number only."
+        : "Please enter a complete, valid phone number.");
     }
     return iti.getNumber();
   }
