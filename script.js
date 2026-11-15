@@ -441,8 +441,7 @@ function getProductImage(product) {
 
 async function loadBackground() {
 
-    // The homepage redesign uses a dedicated image element for the fashion banner.
-    // Apply the dashboard image to that element instead of the hero's CSS background.
+    // Keep the hero photograph hidden until the correct image is ready.
     const heroImage = document.querySelector(".hero-fashion-photo img");
 
     if (!heroImage) {
@@ -450,11 +449,21 @@ async function loadBackground() {
         return;
     }
 
-    // Keep the original fashion image as a fallback if the saved image cannot load.
-    const defaultImageURL = heroImage.getAttribute("src");
+    const defaultImageURL = heroImage.dataset.defaultSrc || "";
+    heroImage.style.visibility = "hidden";
+
+    function showDefaultImage() {
+        if (!defaultImageURL) return;
+        heroImage.onload = function () {
+            heroImage.style.visibility = "visible";
+        };
+        heroImage.onerror = function () {
+            console.error("The default LBM banner image could not be loaded.");
+        };
+        heroImage.src = defaultImageURL;
+    }
 
     try {
-
         const { data, error } = await supabaseClient
             .from("site_settings")
             .select("setting_value")
@@ -463,37 +472,41 @@ async function loadBackground() {
 
         if (error) throw error;
 
-        if (!data?.setting_value) {
-            console.log("No custom LBM banner image is saved; using the default image.");
+        const backgroundURL = data?.setting_value?.trim();
+
+        // No admin image saved: show the built-in photograph.
+        if (!backgroundURL || !isValidImageURL(backgroundURL)) {
+            showDefaultImage();
             return;
         }
 
-        const backgroundURL = data.setting_value.trim();
+        // Preload the admin-selected image off-screen. Only reveal it once ready,
+        // so the default photograph never flashes above or before it.
+        const preloadedImage = new Image();
 
-        if (!isValidImageURL(backgroundURL)) {
-            console.warn("Saved LBM banner image URL is invalid; using the default image.");
-            return;
-        }
-
-        // Restore the built-in image if the uploaded image URL fails to load.
-        heroImage.onerror = function () {
-            console.error("Saved LBM banner image could not be loaded; restoring the default image.");
-            heroImage.onerror = null;
-            if (defaultImageURL) heroImage.src = defaultImageURL;
+        preloadedImage.onload = function () {
+            heroImage.onload = null;
+            heroImage.onerror = function () {
+                console.error("Saved LBM banner image failed during display; using the default.");
+                showDefaultImage();
+            };
+            heroImage.src = backgroundURL;
+            heroImage.style.visibility = "visible";
+            console.log("Custom LBM banner image loaded from site settings.");
         };
 
-        heroImage.src = backgroundURL;
+        preloadedImage.onerror = function () {
+            console.error("Saved LBM banner image could not be preloaded; using the default.");
+            showDefaultImage();
+        };
 
-        console.log("Custom LBM banner image loaded from site settings.");
+        preloadedImage.src = backgroundURL;
 
     } catch (error) {
-
         console.error("Background loading error:", error);
-
+        showDefaultImage();
     }
-
 }
-
 
 /* =====================================================
    10A. LOAD SOCIAL MEDIA LINKS FROM SUPABASE
