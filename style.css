@@ -1413,3 +1413,34 @@ th {
   .hero-fresh .hero-fashion-photo img { object-position: center 30%; }
   .hero-fresh .hero-sky-art { display: none !important; }
 }
+
+
+/* 23. CLEAN PROMOTIONAL BANNER — no rays, gradients or glow */
+.hero-fresh,
+.hero-fresh::before,
+.hero-fresh::after {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.hero-fresh::before,
+.hero-fresh::after {
+  content: none !important;
+  display: none !important;
+}
+.hero-fresh {
+  background-color: #f7f7f4 !important;
+}
+.hero-fresh .hero-fashion-photo {
+  width: 58% !important;
+  background: transparent !important;
+}
+.hero-fresh .hero-fashion-photo img {
+  filter: none !important;
+  opacity: 1 !important;
+  object-fit: cover !important;
+}
+@media (max-width: 760px) {
+  .hero-fresh .hero-fashion-photo {
+    width: 58% !important;
+  }
+}
