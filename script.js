@@ -441,7 +441,7 @@ function getProductImage(product) {
 
 async function loadBackground() {
 
-    const hero = document.querySelector(".hero");
+    const hero = document.querySelector(".hero:not(.hero-fresh)");
 
     if (!hero) return;
 
