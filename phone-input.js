@@ -6,11 +6,21 @@
   let utilsPromise;
 
   function loadUtils() {
-    if (!utilsPromise) utilsPromise = import(utilsUrl).then(() => {
-      const utils = window.intlTelInput?.utils;
-      if (!utils) throw new Error("Phone validation could not be loaded. Please refresh.");
-      return utils;
-    });
+    if (!utilsPromise) {
+      utilsPromise = new Promise((resolve, reject) => {
+        const helper = document.createElement("input");
+        const instance = window.intlTelInput(helper, {
+          initialCountry: "zm",
+          loadUtils: () => import(utilsUrl)
+        });
+        instance.promise.then(() => {
+          const utils = window.intlTelInput?.utils;
+          if (!utils) reject(new Error("Phone validation could not be loaded. Please refresh."));
+          else resolve(utils);
+          instance.destroy();
+        }).catch(reject);
+      });
+    }
     return utilsPromise;
   }
 
