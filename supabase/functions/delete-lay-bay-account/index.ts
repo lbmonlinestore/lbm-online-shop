@@ -69,13 +69,33 @@ Deno.serve(async (req: Request) => {
   if (plansError) return respond(500, { error: "We could not check your Lay-Bay plans. Please try again." });
 
   const unsettledPlans = (plans || []).filter((plan: { plan_status: string }) =>
-    !["fulfilled", "cancelled", "unavailable"].includes(plan.plan_status)
+    !["fulfilled", "cancelled"].includes(plan.plan_status)
   );
 
   if (unsettledPlans.length) {
     return respond(409, {
       error: "Account deletion is unavailable while you have a plan that is not yet fulfilled or formally cancelled. Please complete collection or resolve the plan with LBM first."
     });
+  }
+
+  // Refuse deletion if any plan still has unspent customer funds.
+  // Credits and debits remain in the permanent financial ledger.
+  const { data: ledgerRows, error: ledgerError } = await admin
+    .from("lay_bay_ledger")
+    .select("plan_id, entry_type, amount")
+    .eq("user_id", user.id);
+
+  if (ledgerError) return respond(500, { error: "We could not verify your remaining Lay-Bay balances. Please try again." });
+
+  const remainingByPlan = new Map<string, number>();
+  for (const row of ledgerRows || []) {
+    const current = remainingByPlan.get(row.plan_id) || 0;
+    const amount = Number(row.amount) || 0;
+    remainingByPlan.set(row.plan_id, current + (row.entry_type === "credit" ? amount : -amount));
+  }
+  const hasOutstandingBalance = [...remainingByPlan.values()].some((balance) => balance > 0.009);
+  if (hasOutstandingBalance) {
+    return respond(409, { error: "Your Lay-Bay records show funds that have not yet been fully settled or refunded. Please contact LBM to resolve the balance before deleting your account." });
   }
 
   const { count: pendingDeposits, error: depositsError } = await admin
@@ -111,28 +131,28 @@ Deno.serve(async (req: Request) => {
     return respond(409, { error: "Please wait until pending extension requests have been reviewed before deleting your account." });
   }
 
-  // Remove objects owned by this user first; Supabase Auth refuses deletion while
-  // the user still owns Storage objects.
-  const storage = admin.schema("storage");
-  const { data: objects, error: storageListError } = await storage
-    .from("objects")
-    .select("bucket_id, name")
-    .or(`owner.eq.${user.id},owner_id.eq.${user.id}`);
+  // Remove customer profile images before deleting the Auth user.
+  // The Lay-Bay customer dashboard stores avatars in this private bucket,
+  // under a folder named with the authenticated user's UUID.
+  const avatarBucket = "customer-avatars";
+  const { data: avatarFiles, error: avatarListError } = await admin.storage
+    .from(avatarBucket)
+    .list(user.id, { limit: 1000 });
 
-  if (storageListError) {
-    return respond(500, { error: "We could not prepare your uploaded files for deletion. Please contact LBM support." });
+  if (avatarListError) {
+    return respond(500, { error: "We could not prepare your profile pictures for deletion. Please contact LBM support." });
   }
 
-  const grouped = new Map<string, string[]>();
-  for (const object of objects || []) {
-    if (!grouped.has(object.bucket_id)) grouped.set(object.bucket_id, []);
-    grouped.get(object.bucket_id)!.push(object.name);
-  }
+  const avatarPaths = (avatarFiles || [])
+    .filter((item: { name: string; id?: string | null }) => item.name && item.id)
+    .map((item: { name: string }) => `${user.id}/${item.name}`);
 
-  for (const [bucket, paths] of grouped.entries()) {
-    const { error: removeError } = await admin.storage.from(bucket).remove(paths);
-    if (removeError) {
-      return respond(500, { error: "We could not remove all personal uploads. Your account has not been deleted; please contact LBM support." });
+  if (avatarPaths.length) {
+    const { error: avatarRemoveError } = await admin.storage
+      .from(avatarBucket)
+      .remove(avatarPaths);
+    if (avatarRemoveError) {
+      return respond(500, { error: "We could not remove your profile pictures. Your account has not been deleted; please contact LBM support." });
     }
   }
 
