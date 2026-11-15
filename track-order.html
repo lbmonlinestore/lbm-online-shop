@@ -32,6 +32,7 @@
 "use strict";
 const client=window.supabase.createClient("https://toovotqrcsulhgdrcsmn.supabase.co","sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg");
 const form=document.getElementById("trackForm"),refInput=document.getElementById("orderRef"),phoneInput=document.getElementById("phone"),button=document.getElementById("trackButton"),message=document.getElementById("message"),result=document.getElementById("result");
+window.LBMPhone.attach(phoneInput);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const date=v=>{if(!v)return "Time not available";const d=new Date(v);return Number.isNaN(d.getTime())?"Time not available":d.toLocaleString("en-ZM",{dateStyle:"medium",timeStyle:"short"});};
 form.addEventListener("submit",async e=>{
