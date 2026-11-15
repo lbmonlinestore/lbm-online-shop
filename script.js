@@ -441,9 +441,17 @@ function getProductImage(product) {
 
 async function loadBackground() {
 
-    const hero = document.querySelector(".hero");
+    // The homepage redesign uses a dedicated image element for the fashion banner.
+    // Apply the dashboard image to that element instead of the hero's CSS background.
+    const heroImage = document.querySelector(".hero-fashion-photo img");
 
-    if (!hero) return;
+    if (!heroImage) {
+        console.warn("LBM hero image element was not found.");
+        return;
+    }
+
+    // Keep the original fashion image as a fallback if the saved image cannot load.
+    const defaultImageURL = heroImage.getAttribute("src");
 
     try {
 
@@ -455,20 +463,28 @@ async function loadBackground() {
 
         if (error) throw error;
 
-        if (!data?.setting_value) return;
+        if (!data?.setting_value) {
+            console.log("No custom LBM banner image is saved; using the default image.");
+            return;
+        }
 
         const backgroundURL = data.setting_value.trim();
 
-        if (!isValidImageURL(backgroundURL)) return;
+        if (!isValidImageURL(backgroundURL)) {
+            console.warn("Saved LBM banner image URL is invalid; using the default image.");
+            return;
+        }
 
-        hero.style.backgroundImage =
-            `linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("${backgroundURL.replace(/["\\]/g, "")}")`;
+        // Restore the built-in image if the uploaded image URL fails to load.
+        heroImage.onerror = function () {
+            console.error("Saved LBM banner image could not be loaded; restoring the default image.");
+            heroImage.onerror = null;
+            if (defaultImageURL) heroImage.src = defaultImageURL;
+        };
 
-        hero.style.backgroundSize = "cover";
-        hero.style.backgroundPosition = "center center";
-        hero.style.backgroundRepeat = "no-repeat";
+        heroImage.src = backgroundURL;
 
-        console.log("LBM background loaded.");
+        console.log("Custom LBM banner image loaded from site settings.");
 
     } catch (error) {
 
