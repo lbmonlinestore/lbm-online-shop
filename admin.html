@@ -62,7 +62,7 @@ body.image-viewer-open{overflow:hidden}
 <h2>Website Traffic Analytics</h2>
 <p class="small">Anonymous unique browsers counted once per day. Administrator browsing is excluded. Reporting uses Zambia local time.</p>
 <div class="stats" style="margin-top:16px">
-<div class="stat"><p>Visitors Today</p><strong id="lbmVisitorsToday">—</strong></div>
+<div class="stat"><p>Visitors Today</p><strong id="lbmVisitorsToday">—</strong></div><div class="stat"><p>All-Time Unique Browsers</p><strong id="lbmVisitorsAllTime">—</strong></div>
 <div class="stat"><p>Visitors Yesterday</p><strong id="lbmVisitorsYesterday">—</strong></div>
 <div class="stat"><p>Visitors — Last 30 Days</p><strong id="lbmVisitors30Days">—</strong></div>
 <div class="stat"><p>Daily Average — Last 30 Days</p><strong id="lbmVisitorsAverage">—</strong></div>
@@ -367,7 +367,7 @@ $("refreshAnnouncements").addEventListener("click",loadAdminAnnouncements);
 /* SECTION 22 — WEBSITE TRAFFIC ANALYTICS */
 (function(){
  "use strict";
- const todayEl=$("lbmVisitorsToday"),yesterdayEl=$("lbmVisitorsYesterday"),totalEl=$("lbmVisitors30Days"),averageEl=$("lbmVisitorsAverage");
+ const todayEl=$("lbmVisitorsToday"),yesterdayEl=$("lbmVisitorsYesterday"),totalEl=$("lbmVisitors30Days"),averageEl=$("lbmVisitorsAverage"),allTimeEl=$("lbmVisitorsAllTime");
  const chart=$("lbmWebsiteAnalyticsChart"),message=$("lbmWebsiteAnalyticsMessage"),refresh=$("refreshWebsiteAnalytics");
  if(!todayEl||!chart||!refresh)return;
  const zDate=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Lusaka",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
