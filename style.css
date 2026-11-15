@@ -125,22 +125,124 @@ header nav a:hover {
    3. HERO SECTION
 ========================= */
 
+.hero-image-section {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: #f5f5f5;
+    line-height: 0;
+}
+
+.hero-background-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+    object-position: center;
+}
+
 .hero {
-    min-height: 540px;
+    min-height: 0;
+    display: block;
+    padding: 48px 8% 58px;
+    background: none;
+    text-align: center;
+}
+
+.hero-content {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.hero-label {
+    color: var(--gold) !important;
+    font-size: 12px !important;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 12px !important;
+}
+
+.hero h1 {
+    color: var(--gold);
+    font-size: clamp(32px, 5vw, 55px);
+    margin-bottom: 16px;
+}
+
+.hero h1 span {
+    color: var(--white);
+}
+
+.hero p {
+    color: #EEEEEE;
+    font-size: 17px;
+    margin-bottom: 22px;
+}
+
+.hero-description {
+    max-width: 650px;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.hero-actions {
     display: flex;
+    justify-content: center;
     align-items: center;
-    padding: 70px 8%;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(0, 0, 0, 0.96),
-            rgba(0, 0, 0, 0.78),
-            rgba(0, 0, 0, 0.45)
-        ),
-        linear-gradient(135deg, #282116, #111111 65%);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.hero-text-link {
+    display: inline-block;
+    padding: 12px 20px;
+    border: 1px solid var(--gold);
+    border-radius: 5px;
+    color: var(--gold);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.hero-text-link:hover {
+    background: var(--gold);
+    color: #080808;
+    transform: translateY(-2px);
+}
+
+.laybay-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.laybay-sub-links {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: #BBBBBB;
+}
+
+.laybay-sub-links a:hover {
+    color: var(--gold);
+}
+
+@media (max-width: 600px) {
+    .hero {
+        padding: 36px 6% 44px;
+    }
+
+    .hero-actions {
+        gap: 10px;
+    }
+
+    .hero-text-link {
+        padding: 11px 14px;
+        font-size: 12px;
+    }
 }
 
 .hero-content {
