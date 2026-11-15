@@ -8,6 +8,9 @@
 <title>Returns & Exchanges | LBM Online Shop</title>
 <meta name="description" content="Submit and track your LBM Online Shop return or exchange request.">
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
+<script src="phone-input.js?v=international-phone-v1"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -204,7 +207,7 @@ footer a{color:#d4af37;text-decoration:none}
 
             <label for="phone">Checkout Phone Number</label>
             <input id="phone" type="tel" required
-                   autocomplete="tel" placeholder="e.g. 0969034955">
+                   autocomplete="tel" placeholder="Enter your phone number">
 
             <button class="full" id="verifyButton" type="submit">
                 VERIFY MY ORDER
@@ -271,7 +274,7 @@ footer a{color:#d4af37;text-decoration:none}
                    placeholder="Paste your tracking code">
 
             <label for="trackPhone">Checkout Phone Number</label>
-            <input id="trackPhone" type="tel" required
+            <input id="trackPhone" type="tel" required autocomplete="tel"
                    placeholder="Enter your checkout phone number">
 
             <button type="submit" class="full" id="trackButton">
@@ -330,6 +333,48 @@ const $ = id => document.getElementById(id);
 
 let verifiedOrder = null;
 let orderItems = [];
+let verifiedPhoneE164 = "";
+let draftToken = null;
+let draftSaveTimer = null;
+const DRAFT_TOKEN_KEY = "lbmReturnDraftTokenV1";
+try { draftToken = localStorage.getItem(DRAFT_TOKEN_KEY); } catch (_) {}
+function getDraftToken() {
+    if (!draftToken) {
+        draftToken = crypto.randomUUID();
+        try { localStorage.setItem(DRAFT_TOKEN_KEY, draftToken); } catch (_) {}
+    }
+    return draftToken;
+}
+function currentDraftData() {
+    return { item_index: Number($("selectedItem").value || 0), request_type: $("requestType").value,
+        quantity: Number($("quantity").value || 1), exchange_details: $("exchangeDetails").value,
+        reason: $("reason").value };
+}
+function scheduleDraftSave() {
+    if (!verifiedOrder || !verifiedPhoneE164 || $("requestForm").hidden) return;
+    clearTimeout(draftSaveTimer);
+    draftSaveTimer = setTimeout(async () => {
+        try {
+            await db.rpc("save_return_request_draft", { p_draft_token:getDraftToken(),
+                p_order_id:verifiedOrder.verified_order_id, p_phone:verifiedPhoneE164,
+                p_draft_data:currentDraftData() });
+        } catch (error) { console.warn("Return draft could not be saved:", error); }
+    }, 700);
+}
+function restoreDraft(data) {
+    if (!data || typeof data !== "object") return;
+    if (Number.isInteger(Number(data.item_index)) && orderItems[Number(data.item_index)]) $("selectedItem").value=String(data.item_index);
+    if (["Return","Exchange"].includes(data.request_type)) $("requestType").value=data.request_type;
+    updateQuantityLimit();
+    const max=getItemQuantity(orderItems[Number($("selectedItem").value)] || {});
+    const q=Number(data.quantity);
+    $("quantity").value=Number.isInteger(q)&&q>=1&&q<=max?q:1;
+    $("exchangeDetails").value=String(data.exchange_details || "");
+    $("reason").value=String(data.reason || "");
+    $("exchangeArea").hidden=$("requestType").value!=="Exchange";
+    $("exchangeDetails").required=$("requestType").value==="Exchange";
+    showMessage("requestMessage","We restored your saved draft. You can continue where you left off.","info");
+}
 
 
 /* =========================================
@@ -420,7 +465,10 @@ $("verifyForm").addEventListener("submit", async event => {
     orderItems = [];
 
     const orderId = Number($("orderId").value);
-    const phone = $("phone").value.trim();
+    let phone;
+    try { phone = await window.LBMPhone.getValidNumber($("phone")); }
+    catch (phoneError) { showMessage("verifyMessage", phoneError.message, "error"); return; }
+    verifiedPhoneE164 = phone;
 
     if (!Number.isSafeInteger(orderId) || orderId < 1) {
         showMessage("verifyMessage", "Please enter a valid order number.", "error");
@@ -481,6 +529,13 @@ $("verifyForm").addEventListener("submit", async event => {
         }
 
         $("requestArea").hidden = false;
+        try {
+            const {data: savedDraft, error: draftError} = await db.rpc("get_return_request_draft", {
+                p_draft_token:getDraftToken(), p_order_id:verifiedOrder.verified_order_id, p_phone:verifiedPhoneE164
+            });
+            if (draftError) throw draftError;
+            restoreDraft(savedDraft);
+        } catch (draftError) { console.warn("No saved return draft could be restored:", draftError); }
 
         showMessage(
             "verifyMessage",
@@ -639,7 +694,7 @@ $("requestForm").addEventListener("submit", async event => {
             "create_return_request",
             {
                 p_order_id: verifiedOrder.verified_order_id,
-                p_phone: $("phone").value.trim(),
+                p_phone: verifiedPhoneE164,
                 p_item_index: itemIndex,
                 p_request_type: type,
                 p_quantity: quantity,
@@ -658,6 +713,7 @@ $("requestForm").addEventListener("submit", async event => {
 
         const result = data[0];
 
+        try { await db.rpc("delete_return_request_draft", {p_draft_token:getDraftToken(), p_order_id:verifiedOrder.verified_order_id, p_phone:verifiedPhoneE164}); } catch (_) {}
         $("requestForm").reset();
         $("exchangeArea").hidden = true;
         $("exchangeDetails").required = false;
@@ -686,6 +742,15 @@ $("requestForm").addEventListener("submit", async event => {
 
 
 /* =========================================
+   AUTO-SAVE AND RESTORE DRAFT
+   ========================================= */
+["selectedItem","requestType","quantity","exchangeDetails","reason"].forEach(id => {
+    $(id).addEventListener("input", scheduleDraftSave);
+    $(id).addEventListener("change", scheduleDraftSave);
+});
+window.addEventListener("beforeunload", () => { if (verifiedOrder) scheduleDraftSave(); });
+
+/* =========================================
    TRACK REQUEST
    ========================================= */
 
@@ -696,7 +761,9 @@ $("trackForm").addEventListener("submit", async event => {
     $("trackResult").innerHTML = "";
 
     const code = $("trackingCode").value.trim();
-    const phone = $("trackPhone").value.trim();
+    let phone;
+    try { phone = await window.LBMPhone.getValidNumber($("trackPhone")); }
+    catch (phoneError) { showMessage("trackMessage", phoneError.message, "error"); return; }
 
     setButtonLoading("trackButton", true, "TRACK MY REQUEST");
 
