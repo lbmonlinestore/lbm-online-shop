@@ -402,9 +402,11 @@ $("refreshAnnouncements").addEventListener("click",loadAdminAnnouncements);
   refresh.disabled=true;refresh.textContent="Loading...";
   hide();chart.innerHTML='<p class="empty">Loading visitor statistics...</p>';
   try{
-   const {data,error}=await db.rpc("get_lbm_website_analytics",{p_days:30});
-   if(error)throw error;
-   render(data||[]);
+   const [daily,totalResult]=await Promise.all([db.rpc("get_lbm_website_analytics",{p_days:30}),db.rpc("get_lbm_website_visitor_total")]);
+   if(daily.error)throw daily.error;
+   if(totalResult.error)throw totalResult.error;
+   allTimeEl.textContent=String(totalResult.data||0);
+   render(daily.data||[]);
   }catch(error){console.error("LBM website analytics:",error);chart.innerHTML="";show("Could not load website traffic: "+error.message,true);}
   finally{refresh.disabled=false;refresh.textContent="Refresh Traffic";}
  }
