@@ -9,7 +9,7 @@
       initialCountry: "zm",
       nationalMode: true,
       separateDialCode: true,
-      formatOnDisplay: true,
+      formatOnDisplay: false,
       autoPlaceholder: "off",
       loadUtils: utils
     });
