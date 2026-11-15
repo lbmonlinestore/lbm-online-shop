@@ -449,7 +449,7 @@ async function loadBackground() {
         return;
     }
 
-    const defaultImageURL = heroImage.dataset.defaultSrc || "";
+    const defaultImageURL = heroImage.dataset.defaultSrc || heroImage.getAttribute("src") || FALLBACK_IMAGE;
     heroImage.style.visibility = "hidden";
 
     function showDefaultImage() {
