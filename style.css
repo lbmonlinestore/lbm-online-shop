@@ -1375,3 +1375,41 @@ th {
   .hero-fresh h1 { font-size: 25px; }
   .hero-primary-action, .hero-secondary-action { padding: 7px 6px; font-size: 7px; }
 }
+
+
+/* 22. EXPLICIT HERO PHOTO — overrides legacy illustrated hero layers */
+.hero-fresh {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+  background: #f5f6f4 !important;
+}
+.hero-fresh::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(90deg, rgba(248,249,246,.98) 0%, rgba(248,249,246,.91) 42%, rgba(248,249,246,.20) 76%, rgba(248,249,246,.04) 100%) !important;
+}
+.hero-fresh .hero-fashion-photo {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -1;
+  width: 64%;
+  height: 100%;
+  overflow: hidden;
+}
+.hero-fresh .hero-fashion-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+}
+.hero-fresh .hero-fresh-content { z-index: 2; }
+@media (max-width: 760px) {
+  .hero-fresh { height: 238px !important; min-height: 0 !important; }
+  .hero-fresh .hero-fashion-photo { width: 70%; }
+  .hero-fresh .hero-fashion-photo img { object-position: center 30%; }
+  .hero-fresh .hero-sky-art { display: none !important; }
+}
