@@ -823,8 +823,8 @@ th {
 ===================================================== */
 
 .topbar {
-    position: sticky !important;
-    top: 0;
+    position: relative !important;
+    top: auto;
     z-index: 1000;
     width: 100%;
     min-height: 76px;
