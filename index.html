@@ -468,10 +468,29 @@
             color: #d4af37;
             font-weight: 700;
         }
+ 
+        /* Customer account and announcement controls */
+        .header-account-tools{display:flex;align-items:center;gap:10px;margin-left:2px}
+        .header-icon-button{position:relative;display:inline-flex;align-items:center;justify-content:center;
+            width:42px;height:42px;border:1px solid #D4AF37;border-radius:50%;
+            background:transparent;color:#D4AF37;cursor:pointer;flex:0 0 42px}
+        .header-icon-button svg{width:22px;height:22px;fill:none;stroke:currentColor;
+            stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+        .header-icon-button:hover,.header-icon-button:focus-visible{background:#D4AF37;color:#080808;outline:none}
+        .announcement-count{position:absolute;top:-6px;right:-5px;min-width:19px;height:19px;
+            padding:0 5px;border-radius:20px;background:#e32636;color:#fff;font-size:11px;
+            line-height:19px;text-align:center;font-weight:800;border:2px solid #050505}
+        .announcement-count[hidden]{display:none}
+        @media(max-width:900px){.header-account-tools{margin-left:auto}}
+        @media(max-width:600px){.header-icon-button{width:38px;height:38px;flex-basis:38px}
+            .header-account-tools{gap:8px}}
+
     </style>
 </head>
 
 <body>
+
+    <div class="site-header-stack" id="site-header-stack">
 
     <header class="topbar">
 
@@ -496,80 +515,31 @@
             WhatsApp
         </a>
 
-        <button class="cart-button" id="cart-button">
+        <button class="cart-button" id="cart-button" type="button">
             Cart (<span id="cart-count">0</span>)
         </button>
 
+        <div class="header-account-tools" aria-label="Customer tools">
+            <button class="header-icon-button" id="lbm-announcement-toggle"
+                    type="button" aria-label="Open announcements"
+                    aria-controls="lbm-announcements-dialog" aria-expanded="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>
+                </svg>
+                <span class="announcement-count" id="lbm-announcement-count" hidden>1</span>
+            </button>
+            <a class="header-icon-button" href="lay-bay/login.html"
+               aria-label="Customer login and account" title="Customer account">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 21a8 8 0 0 1 16 0"/>
+                </svg>
+            </a>
+        </div>
+
     </header>
 
-    <main>
-
-        <section class="hero" id="home">
-
-            <div class="hero-content">
-
-                <p class="hero-label">
-                    STYLE • ELEGANCE • CONFIDENCE
-                </p>
-
-                <h1>
-                    Discover Your<br>
-                    <span>Perfect Style.</span>
-                </h1>
-
-                <p class="hero-description">
-                    Find fashionable clothing, footwear and accessories.
-                </p>
-
-                <div class="hero-actions">
-
-                    <a href="#products" class="hero-text-link">
-                        SHOP NOW →
-                    </a>
-
-                    <div class="laybay-links">
-
-                        <a href="lay-bay/index.html" class="hero-text-link">
-    SHOP WITH LAY-BAY →
-</a>
-
-                        <div class="laybay-sub-links">
-                            <a href="lay-bay/index.html">CATALOG</a>
-                            <a href="lay-bay/login.html">LOG IN</a>
-                        </div>
-
-                    </div>
-
-                    <a href="https://wa.me/260969034955"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="hero-text-link">
-                        CHAT WITH US →
-                    </a>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <section class="collection-heading" id="products">
-
-            <p class="section-label">
-                THE LBM COLLECTION
-            </p>
-
-            <h2>FEATURED PRODUCTS</h2>
-
-            <p>
-                Explore our latest fashion selections.
-            </p>
-
-        </section>
-
-        <section class="products">
-
-            <div class="lbm-search-panel">
+    <div class="lbm-search-panel">
 
                 <label for="lbm-product-search">
                     Find what you're looking for
@@ -606,6 +576,76 @@
 
             </div>
 
+
+    </div>
+
+    <main>
+
+        <section class="hero hero-fresh" id="home">
+            <div class="hero-sky-art" aria-hidden="true">
+                <div class="hero-sun"></div>
+                <div class="hero-person hero-person-man"><span class="hero-head"></span><span class="hero-body">LBM</span></div>
+                <div class="hero-person hero-person-woman"><span class="hero-head"></span><span class="hero-body">LBM</span></div>
+                <div class="hero-hill"></div>
+            </div>
+            <div class="hero-content hero-fresh-content">
+                <p class="hero-label">LBM ONLINE SHOP · STYLE FOR EVERY DAY</p>
+                <h1>Look Good.<br><span>Feel Great.</span></h1>
+                <p class="hero-description">Discover clothing, footwear and accessories selected to bring confidence to every look.</p>
+                <div class="hero-actions">
+                    <a href="#products" class="hero-primary-action">SHOP THE COLLECTION <span>→</span></a>
+                    <a href="lay-bay/index.html" class="hero-secondary-action">EXPLORE LBM LAY-BAY</a>
+                </div>
+                <p class="hero-small-note">Shop today. Choose a payment option that works for you.</p>
+            </div>
+        </section>
+
+        <section class="home-categories" aria-labelledby="category-title">
+            <div class="home-section-heading">
+                <p class="section-label">FIND YOUR LOOK</p>
+                <h2 id="category-title">SHOP BY CATEGORY</h2>
+                <p>Explore the LBM collection, all in one place.</p>
+            </div>
+            <div class="category-tiles">
+                <a class="category-tile category-fashion" href="#products"><span>01</span><strong>Clothing</strong><small>Everyday style, made simple</small></a>
+                <a class="category-tile category-footwear" href="#products"><span>02</span><strong>Footwear</strong><small>Step out with confidence</small></a>
+                <a class="category-tile category-accessories" href="#products"><span>03</span><strong>Accessories</strong><small>Complete your look</small></a>
+            </div>
+        </section>
+
+        <section class="benefits-strip" aria-label="Why shop with LBM">
+            <div><b>01</b><span><strong>SHOP WITH EASE</strong><small>Browse from anywhere in Zambia</small></span></div>
+            <div><b>02</b><span><strong>PAY YOUR WAY</strong><small>Mobile money and WhatsApp support</small></span></div>
+            <div><b>03</b><span><strong>LBM LAY-BAY</strong><small>Spread payments on eligible items</small></span></div>
+        </section>
+
+        <section class="laybay-promo">
+            <div class="laybay-promo-copy">
+                <p class="section-label">A SMARTER WAY TO SHOP</p>
+                <h2>Get what you love.<br><span>Pay over time.</span></h2>
+                <p>Choose an eligible product and follow its LBM Lay-Bay payment plan. Your selected product and plan details stay clear from the start.</p>
+                <a href="lay-bay/index.html" class="laybay-promo-button">SHOP WITH LAY-BAY <span>→</span></a>
+            </div>
+            <div class="laybay-promo-mark" aria-hidden="true"><span>LBM</span><strong>LAY-BAY</strong><small>YOUR PRODUCT. YOUR PLAN.</small></div>
+        </section>
+
+        <section class="collection-heading" id="products">
+
+            <p class="section-label">
+                THE LBM COLLECTION
+            </p>
+
+            <h2>FEATURED PRODUCTS</h2>
+
+            <p>
+                Explore our latest fashion selections.
+            </p>
+
+        </section>
+
+        <section class="products">
+
+            
             <div class="product-grid" id="product-list">
                 <p>Loading products...</p>
             </div>
@@ -643,6 +683,19 @@
 
             </div>
 
+        </section>
+
+        <section class="how-laybay-help" aria-label="Shopping help">
+            <div class="home-section-heading">
+                <p class="section-label">SIMPLE. CLEAR. CONVENIENT.</p>
+                <h2>YOUR LBM SHOPPING JOURNEY</h2>
+                <p>Everything you need to shop with confidence.</p>
+            </div>
+            <div class="journey-cards">
+                <article><span>01</span><h3>Explore the shop</h3><p>Browse the collection and choose the items you love.</p><a href="#products">Browse products →</a></article>
+                <article><span>02</span><h3>Choose how to pay</h3><p>Checkout through WhatsApp or explore eligible LBM Lay-Bay products.</p><a href="lay-bay/index.html">Discover Lay-Bay →</a></article>
+                <article><span>03</span><h3>We are here to help</h3><p>Get assistance with products, orders, returns and exchanges.</p><a href="technical-assistant.html">Visit the help assistant →</a></article>
+            </div>
         </section>
 
         <section class="about" id="about">
@@ -899,7 +952,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script src="script.js?v=gallery-tap-checkbox-20261115-2"></script>
-    <script src="features.js"></script>
+    <script src="features.js?v=announcement-bell-account-v1"></script>
 
     <script>
         if ("serviceWorker" in navigator) {
@@ -1059,6 +1112,38 @@
             try { if (localStorage.getItem("lbmAssistantWidgetHidden") === "1") hideLauncher(); } catch (_) {}
         })();
     </script>
+
+
+<script>
+/* LBM header: hide while scrolling down, reveal while scrolling up. */
+(function () {
+    const header = document.getElementById("site-header-stack");
+    if (!header) return;
+    let lastY = window.scrollY || 0;
+    let ticking = false;
+    function updateHeader() {
+        const currentY = window.scrollY || 0;
+        const delta = currentY - lastY;
+        if (currentY < 80) {
+            header.classList.remove("header-hidden");
+        } else if (Math.abs(delta) > 6) {
+            if (delta > 0 && !document.activeElement.closest?.("#site-header-stack")) {
+                header.classList.add("header-hidden");
+            } else if (delta < 0) {
+                header.classList.remove("header-hidden");
+            }
+        }
+        lastY = currentY;
+        ticking = false;
+    }
+    window.addEventListener("scroll", function () {
+        if (!ticking) {
+            window.requestAnimationFrame(updateHeader);
+            ticking = true;
+        }
+    }, { passive: true });
+})();
+</script>
 
 </body>
 </html>

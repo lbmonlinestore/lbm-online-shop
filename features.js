@@ -66,6 +66,19 @@
                 line-height: 1.7;
             }
 
+            #lbm-announcements-dialog[hidden]{display:none!important}
+            #lbm-announcements-dialog{position:fixed;inset:0;z-index:100100;
+                display:flex;align-items:flex-start;justify-content:flex-end;
+                padding:82px 22px 22px;background:rgba(0,0,0,.48)}
+            .lbm-announcement-panel{width:min(420px,100%);max-height:min(70vh,620px);
+                overflow:auto;background:#101010;color:#fff;border:1px solid #D4AF37;
+                border-radius:13px;padding:20px;box-shadow:0 18px 55px rgba(0,0,0,.4)}
+            .lbm-announcement-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+            .lbm-announcement-panel-head h2{margin:0;color:#D4AF37;text-align:left}
+            .lbm-announcement-close{border:1px solid #D4AF37;border-radius:7px;background:transparent;
+                color:#D4AF37;padding:7px 11px;font-weight:700}
+            @media(max-width:600px){#lbm-announcements-dialog{padding:70px 12px 12px}
+                .lbm-announcement-panel{max-height:75vh}}
             .lbm-announcement-card,
             .lbm-review-card {
                 background: #1b1b1b;
@@ -324,20 +337,18 @@
         wrapper.id = "lbm-new-store-features";
 
         wrapper.innerHTML = `
-            <section class="lbm-feature-section" id="lbm-announcements">
-
-                <h2>📢 Store Announcements</h2>
-
-                <p>
-                    Stay updated with the latest news, new arrivals
-                    and special offers from LBM Online Store.
-                </p>
-
-                <div id="lbm-announcements-list">
-                    <p>Loading announcements...</p>
-                </div>
-
-            </section>
+            <div id="lbm-announcements-dialog" hidden>
+                <section class="lbm-announcement-panel" role="dialog"
+                         aria-modal="true" aria-labelledby="lbm-announcement-title">
+                    <div class="lbm-announcement-panel-head">
+                        <h2 id="lbm-announcement-title">📢 Announcements</h2>
+                        <button type="button" class="lbm-announcement-close"
+                                id="lbm-announcement-close">Close ×</button>
+                    </div>
+                    <p style="color:#bbb;margin:8px 0 16px">The latest news and updates from LBM Online Store.</p>
+                    <div id="lbm-announcements-list"><p>Loading announcements...</p></div>
+                </section>
+            </div>
 
             <section class="lbm-feature-section" id="lbm-reviews">
 
@@ -439,11 +450,85 @@
        5. LOAD PUBLISHED ANNOUNCEMENTS
        ===================================================== */
 
-    async function loadAnnouncements() {
-        const container = document.getElementById(
-            "lbm-announcements-list"
-        );
+    const ANNOUNCEMENT_SEEN_KEY = "lbm-seen-announcements-v1";
+    let publishedAnnouncements = [];
 
+    async function getAnnouncementViewerKey() {
+        try {
+            const { data } = await db.auth.getUser();
+            return data?.user?.id
+                ? ANNOUNCEMENT_SEEN_KEY + ":user:" + data.user.id
+                : ANNOUNCEMENT_SEEN_KEY + ":guest";
+        } catch (error) {
+            return ANNOUNCEMENT_SEEN_KEY + ":guest";
+        }
+    }
+
+    function readSeenAnnouncementIds(key) {
+        try {
+            const saved = JSON.parse(localStorage.getItem(key) || "[]");
+            return new Set(Array.isArray(saved) ? saved.map(String) : []);
+        } catch (error) {
+            return new Set();
+        }
+    }
+
+    async function updateAnnouncementBadge() {
+        const badge = document.getElementById("lbm-announcement-count");
+        if (!badge) return;
+        const key = await getAnnouncementViewerKey();
+        const seen = readSeenAnnouncementIds(key);
+        const unread = publishedAnnouncements.filter(item => !seen.has(String(item.id))).length;
+        badge.textContent = unread > 99 ? "99+" : String(unread);
+        badge.hidden = unread === 0;
+        const toggle = document.getElementById("lbm-announcement-toggle");
+        if (toggle) toggle.setAttribute("aria-label",
+            unread ? "Open announcements, " + unread + " unread" : "Open announcements");
+    }
+
+    async function markAnnouncementsAsSeen() {
+        const key = await getAnnouncementViewerKey();
+        try {
+            localStorage.setItem(key, JSON.stringify(publishedAnnouncements.map(item => String(item.id))));
+        } catch (error) {
+            console.warn("Could not save announcement read status.");
+        }
+        updateAnnouncementBadge();
+    }
+
+    function installAnnouncementPanel() {
+        const dialog = document.getElementById("lbm-announcements-dialog");
+        const toggle = document.getElementById("lbm-announcement-toggle");
+        const close = document.getElementById("lbm-announcement-close");
+        if (!dialog || !toggle || toggle.dataset.installed === "true") return;
+        toggle.dataset.installed = "true";
+
+        async function openPanel() {
+            dialog.hidden = false;
+            toggle.setAttribute("aria-expanded", "true");
+            await markAnnouncementsAsSeen();
+            close?.focus();
+        }
+        function closePanel() {
+            dialog.hidden = true;
+            toggle.setAttribute("aria-expanded", "false");
+            toggle.focus();
+        }
+        toggle.addEventListener("click", () => {
+            if (dialog.hidden) openPanel();
+            else closePanel();
+        });
+        close?.addEventListener("click", closePanel);
+        dialog.addEventListener("click", event => {
+            if (event.target === dialog) closePanel();
+        });
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape" && !dialog.hidden) closePanel();
+        });
+    }
+
+    async function loadAnnouncements() {
+        const container = document.getElementById("lbm-announcements-list");
         if (!container) return;
 
         try {
@@ -454,35 +539,27 @@
                 .order("created_at", { ascending: false });
 
             if (error) throw error;
+            publishedAnnouncements = data || [];
 
-            if (!data || data.length === 0) {
-                container.innerHTML =
-                    "<p>There are currently no announcements. Please check back soon.</p>";
-                return;
+            if (publishedAnnouncements.length === 0) {
+                container.innerHTML = "<p>There are currently no announcements.</p>";
+            } else {
+                container.innerHTML = publishedAnnouncements.map(item => `
+                    <article class="lbm-announcement-card">
+                        <h3>${escapeHTML(item.title)}</h3>
+                        <p>${escapeHTML(item.message).replace(/\r?\n/g, "<br>")}</p>
+                        <div class="lbm-feature-date">
+                            ${escapeHTML(new Date(item.created_at).toLocaleDateString(
+                                "en-ZM", { timeZone: "Africa/Lusaka" }
+                            ))}
+                        </div>
+                    </article>
+                `).join("");
             }
-
-            container.innerHTML = data.map(item => `
-                <article class="lbm-announcement-card">
-                    <h3>${escapeHTML(item.title)}</h3>
-
-                    <p>${escapeHTML(item.message).replace(/\n/g, "<br>")}</p>
-
-                    <div class="lbm-feature-date">
-                        ${escapeHTML(
-                            new Date(item.created_at).toLocaleDateString(
-                                "en-ZM",
-                                { timeZone: "Africa/Lusaka" }
-                            )
-                        )}
-                    </div>
-                </article>
-            `).join("");
-
+            await updateAnnouncementBadge();
         } catch (error) {
             console.error("LBM announcements:", error);
-
-            container.innerHTML =
-                "<p>Announcements are temporarily unavailable.</p>";
+            container.innerHTML = "<p>Announcements are temporarily unavailable.</p>";
         }
     }
 
@@ -639,6 +716,7 @@
         installStyles();
         installGreeting();
         createFeatureSections();
+        installAnnouncementPanel();
         installReviewForm();
 
         await Promise.all([
