@@ -2472,11 +2472,9 @@ async function checkoutWhatsApp() {
 
     if (!customerName || !customerName.trim()) return;
 
-    const phone = prompt(
-        "Please enter your phone number:"
-    );
+    const phone = await window.LBMPhone.promptNumber();
 
-    if (!phone || !phone.trim()) return;
+    if (!phone) return;
 
     const address = prompt(
         "Enter your delivery address or pickup location:"
@@ -2644,7 +2642,7 @@ async function checkoutWhatsApp() {
 
                 p_customer_name: customerName.trim(),
 
-                p_phone: phone.trim(),
+                p_phone: phone,
 
                 p_address: address.trim(),
 
