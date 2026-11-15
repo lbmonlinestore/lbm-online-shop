@@ -490,6 +490,8 @@
 
 <body>
 
+    <div class="site-header-stack" id="site-header-stack">
+
     <header class="topbar">
 
         <a href="#home" class="brand">
@@ -536,6 +538,46 @@
         </div>
 
     </header>
+
+    <div class="lbm-search-panel">
+
+                <label for="lbm-product-search">
+                    Find what you're looking for
+                </label>
+
+                <div class="lbm-search-box">
+
+                    <span class="lbm-search-icon" aria-hidden="true">
+                        ⌕
+                    </span>
+
+                    <input
+                        type="search"
+                        id="lbm-product-search"
+                        placeholder="Search products, brands or categories..."
+                        aria-label="Search products"
+                        autocomplete="off"
+                    >
+
+                    <button
+                        type="button"
+                        id="lbm-clear-search"
+                        aria-label="Clear search"
+                        hidden
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+                <p id="lbm-search-results" aria-live="polite">
+                    Browse our latest products
+                </p>
+
+            </div>
+
+
+    </div>
 
     <main>
 
@@ -603,43 +645,7 @@
 
         <section class="products">
 
-            <div class="lbm-search-panel">
-
-                <label for="lbm-product-search">
-                    Find what you're looking for
-                </label>
-
-                <div class="lbm-search-box">
-
-                    <span class="lbm-search-icon" aria-hidden="true">
-                        ⌕
-                    </span>
-
-                    <input
-                        type="search"
-                        id="lbm-product-search"
-                        placeholder="Search products, brands or categories..."
-                        aria-label="Search products"
-                        autocomplete="off"
-                    >
-
-                    <button
-                        type="button"
-                        id="lbm-clear-search"
-                        aria-label="Clear search"
-                        hidden
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-                <p id="lbm-search-results" aria-live="polite">
-                    Browse our latest products
-                </p>
-
-            </div>
-
+            
             <div class="product-grid" id="product-list">
                 <p>Loading products...</p>
             </div>
@@ -1106,6 +1112,38 @@
             try { if (localStorage.getItem("lbmAssistantWidgetHidden") === "1") hideLauncher(); } catch (_) {}
         })();
     </script>
+
+
+<script>
+/* LBM header: hide while scrolling down, reveal while scrolling up. */
+(function () {
+    const header = document.getElementById("site-header-stack");
+    if (!header) return;
+    let lastY = window.scrollY || 0;
+    let ticking = false;
+    function updateHeader() {
+        const currentY = window.scrollY || 0;
+        const delta = currentY - lastY;
+        if (currentY < 80) {
+            header.classList.remove("header-hidden");
+        } else if (Math.abs(delta) > 6) {
+            if (delta > 0 && !document.activeElement.closest?.("#site-header-stack")) {
+                header.classList.add("header-hidden");
+            } else if (delta < 0) {
+                header.classList.remove("header-hidden");
+            }
+        }
+        lastY = currentY;
+        ticking = false;
+    }
+    window.addEventListener("scroll", function () {
+        if (!ticking) {
+            window.requestAnimationFrame(updateHeader);
+            ticking = true;
+        }
+    }, { passive: true });
+})();
+</script>
 
 </body>
 </html>
