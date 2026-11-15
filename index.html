@@ -500,9 +500,10 @@
 .site-header-stack #lbm-product-search::placeholder{color:#bcb6a7}
 .site-header-stack #lbm-clear-search{width:24px;height:24px;background:#24211a;color:#D4AF37;font-size:18px}
 .site-header-stack #lbm-search-results{position:absolute;z-index:20;margin:3px 0 0;color:#d6cda9;font-size:10px}
-.hero-fresh{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:center;gap:24px;min-height:360px;padding:38px 5%;background:linear-gradient(110deg,#eef7fc 0%,#c9e8f7 55%,#8fc8e4 100%);color:#111;overflow:hidden}
-.hero-fresh:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(255,255,255,.45),transparent 70%)}
-.hero-fresh-content{position:relative;z-index:2;max-width:520px}
+.hero-image-section{width:100%;margin:0;padding:0;background:#eef7fc;line-height:0;overflow:visible}
+.hero-model-photo{display:block;width:100%;height:auto;max-height:none;object-fit:contain;object-position:center;border:0;border-radius:0;mix-blend-mode:normal}
+.hero-fresh{display:block;min-height:0;padding:38px 5%;background:linear-gradient(110deg,#eef7fc 0%,#c9e8f7 55%,#8fc8e4 100%);color:#111;overflow:visible}
+.hero-fresh-content{position:relative;z-index:2;max-width:900px;margin:0 auto}
 .hero-fresh .hero-label{color:#a47b12;font-size:11px;font-weight:900;letter-spacing:1.6px}
 .hero-fresh h1{color:#111;font-family:Georgia,serif;font-size:clamp(38px,5vw,64px);font-weight:800;line-height:.98;letter-spacing:-1.5px}
 .hero-fresh h1 span{color:#111}
@@ -512,12 +513,11 @@
 .hero-primary-action{background:#f2c52f;color:#111;box-shadow:0 5px 14px #1112}
 .hero-secondary-action{border:1px solid #111;color:#111;background:#ffffff80}
 .hero-fresh .hero-small-note{font-size:11px;color:#4d6474;margin-top:12px}
-.hero-photo-wrap{position:relative;z-index:1;min-width:0;height:100%;min-height:280px;display:flex;align-items:center;justify-content:center}
-.hero-model-photo{display:block;width:100%;height:100%;max-height:350px;object-fit:contain;object-position:center bottom;border-radius:6px;mix-blend-mode:multiply}
-.hero-laybay-callout{position:absolute;right:0;top:8%;display:flex;flex-direction:column;gap:8px;width:145px;padding:17px 14px;border-radius:14px 14px 14px 4px;background:#f2c52f;color:#111;box-shadow:0 8px 24px #0002;font-size:11px;font-weight:700}
-.hero-laybay-callout strong{font-size:20px;line-height:1.02;margin-bottom:3px}
+
+.hero-laybay-callout{display:inline-flex;flex-direction:column;gap:7px;width:min(100%,260px);margin:18px 0 0;padding:15px;border-radius:10px;background:#f2c52f;color:#111;box-shadow:0 8px 24px #0002;font-size:12px;font-weight:700;text-decoration:none}
+.hero-laybay-callout strong{font-size:18px;line-height:1.1;margin-bottom:3px}
 .hero-laybay-callout span:before{content:"✓";font-weight:900;margin-right:6px}
-.hero-laybay-callout b{margin-top:4px;padding:10px 8px;background:#111;color:#f2c52f;border-radius:20px;text-align:center;font-size:9px}
+.hero-laybay-callout b{margin-top:4px;padding:10px 8px;background:#111;color:#f2c52f;border-radius:20px;text-align:center;font-size:10px}
 @media(max-width:900px){
  .site-header-stack .topbar{flex-wrap:wrap}
  .site-header-stack .topbar .navigation{order:4;flex:1 0 100%;justify-content:center;flex-wrap:wrap}
@@ -535,14 +535,10 @@
  .hero-fresh-content{max-width:100%}
  .hero-fresh h1{font-size:clamp(39px,10vw,52px)}
  .hero-fresh .hero-description{font-size:13px;max-width:340px}
- .hero-photo-wrap{min-height:210px;height:230px;margin-top:4px}
- .hero-model-photo{max-height:230px}
- .hero-laybay-callout{top:5%;right:0;width:112px;padding:11px 9px;gap:6px;font-size:9px}
- .hero-laybay-callout strong{font-size:16px}
+
 }
 @media(max-width:380px){
- .hero-laybay-callout{width:96px;padding:9px 7px}
- .hero-laybay-callout strong{font-size:14px}
+
  .hero-fresh .hero-actions{gap:7px}
  .hero-primary-action,.hero-secondary-action{font-size:9px;padding:11px}
 }
@@ -614,7 +610,13 @@
 
     <main>
 
-        <section class="hero hero-fresh" id="home">
+        <section class="hero-image-section" id="home" aria-label="LBM featured fashion photograph">
+            <img id="lbm-hero-image" class="hero-model-photo"
+                 src="assets/lbm-hero-lifestyle.jpg"
+                 alt="LBM fashion models wearing LBM Online Store T-shirts">
+        </section>
+
+        <section class="hero hero-fresh" aria-label="LBM welcome">
             <div class="hero-content hero-fresh-content">
                 <p class="hero-label">LBM ONLINE SHOP · STYLE FOR EVERY DAY</p>
                 <h1>Look Good.<br><span>Feel Great.</span></h1>
@@ -624,12 +626,8 @@
                     <a href="lay-bay/index.html" class="hero-secondary-action">EXPLORE LBM LAY-BAY</a>
                 </div>
                 <p class="hero-small-note">Shop today. Choose a payment option that works for you.</p>
-            </div>
-            <div class="hero-photo-wrap">
-                <img class="hero-model-photo" src="assets/lbm-hero-lifestyle.jpg"
-                     alt="LBM fashion models wearing LBM Online Store T-shirts">
                 <a class="hero-laybay-callout" href="lay-bay/index.html">
-                    <strong>Shop with<br>Lay-Bay</strong>
+                    <strong>Shop with Lay-Bay</strong>
                     <span>Pay in instalments</span>
                     <span>No interest</span>
                     <span>Easy approval</span>
@@ -989,6 +987,21 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+
+<script>
+/* LBM hero photograph: administrator-managed image setting */
+(function(){
+  const url="https://toovotqrcsulhgdrcsmn.supabase.co";
+  const key="sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
+  if(!window.supabase)return;
+  const client=window.supabase.createClient(url,key);
+  client.from("site_settings").select("setting_value").eq("setting_key","hero_image").maybeSingle()
+    .then(({data,error})=>{if(error){console.warn("LBM hero image setting could not load:",error.message);return;}
+      const image=document.getElementById("lbm-hero-image");
+      if(image&&data&&data.setting_value)image.src=data.setting_value;
+    }).catch(error=>console.warn("LBM hero image setting could not load:",error));
+})();
+</script>
     <script src="script.js?v=gallery-tap-checkbox-20261115-2"></script>
     <script src="features.js?v=announcement-bell-account-v1"></script>
 
