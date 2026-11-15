@@ -1171,3 +1171,13 @@ th {
  .hero-fresh h1{font-size:40px}.hero-fresh{padding-bottom:205px}
  .hero-primary-action,.hero-secondary-action{font-size:10px;padding:13px}
 }
+
+.how-laybay-help{padding:62px 6%;background:#f7f8fa;color:#202a32}
+.how-laybay-help .home-section-heading h2{color:#172b3d}
+.journey-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;max-width:1180px;margin:auto}
+.journey-cards article{padding:25px;background:#fff;border:1px solid #e4e8ec;border-radius:9px;box-shadow:0 7px 22px #152b3d0b}
+.journey-cards article>span{color:#b28b2b;font-weight:900;font-size:13px}
+.journey-cards h3{color:#172b3d;font-size:19px;margin:12px 0 8px}
+.journey-cards p{color:#64717d;font-size:13px;line-height:1.7;min-height:48px}
+.journey-cards a{display:inline-block;margin-top:14px;color:#173d70;font-size:12px;font-weight:900}
+@media(max-width:700px){.journey-cards{grid-template-columns:1fr}.journey-cards p{min-height:0}}
