@@ -1212,3 +1212,62 @@ th {
  .site-header-stack #lbm-product-search{height:41px;font-size:14px}
 }
 @media(prefers-reduced-motion:reduce){.site-header-stack{transition:none}}
+
+
+/* =====================================================
+   LBM HOMEPAGE CORRECTION — SEPARATE VISUAL, COPY & SEARCH
+===================================================== */
+.lbm-search-toggle{margin-left:2px}
+.lbm-search-toggle svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round}
+.lbm-search-panel[hidden]{display:none!important}
+.site-header-stack .lbm-search-panel{
+  display:block;width:100%;max-width:none;margin:0;padding:12px 5%;
+  background:#080808;border-top:1px solid rgba(212,175,55,.2)
+}
+.site-header-stack .lbm-search-box{
+  max-width:520px;min-height:44px;margin:0 auto;padding:0 12px;
+  border:1px solid #D4AF37;border-radius:6px
+}
+.site-header-stack #lbm-product-search{height:42px;font-size:14px}
+.site-header-stack #lbm-search-results{max-width:520px;margin:5px auto 0}
+.hero-separated{display:block;min-height:0;padding:0;background:#e7f5ff;color:#102b43}
+.hero-separated .hero-visual{
+  position:relative;width:min(100%,1120px);height:clamp(230px,34vw,390px);
+  margin:0 auto;overflow:hidden;background:linear-gradient(120deg,#e9f7ff,#bfe8ff 55%,#72c6f1)
+}
+.hero-separated .hero-sky-art{
+  right:0;left:0;bottom:0;width:100%;height:100%;margin:auto
+}
+.hero-separated .hero-sun{right:20%;top:8%}
+.hero-separated .hero-person{height:88%;width:27%}
+.hero-separated .hero-person-man{left:27%}
+.hero-separated .hero-person-woman{right:25%;height:91%}
+.hero-separated .hero-copy-row{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,300px);
+  align-items:center;gap:28px;max-width:1120px;margin:0 auto;padding:30px 5% 36px
+}
+.hero-separated .hero-fresh-content{max-width:100%;position:static}
+.hero-separated .hero-label{margin:0 0 8px}
+.hero-separated h1{font-size:clamp(32px,4vw,48px);margin:0 0 10px}
+.hero-separated .hero-description{max-width:620px;margin:0 0 16px}
+.hero-separated .hero-small-note{margin-bottom:0}
+.hero-laybay-card{
+  display:flex;flex-direction:column;gap:10px;justify-content:center;min-height:150px;
+  padding:24px;background:#e7bd36;color:#111;text-decoration:none;border-radius:8px
+}
+.hero-laybay-card span{font-size:11px;font-weight:800;letter-spacing:1.5px}
+.hero-laybay-card strong{font-size:clamp(22px,3vw,30px);font-weight:900}
+.hero-laybay-card small{font-size:13px}
+@media(max-width:760px){
+ .site-header-stack .lbm-search-panel{padding:9px 4% 10px}
+ .site-header-stack .lbm-search-box{max-width:100%;min-height:42px}
+ .site-header-stack #lbm-product-search{height:40px}
+ .hero-separated .hero-visual{height:250px}
+ .hero-separated .hero-sun{width:75px;height:75px}
+ .hero-separated .hero-person{width:34%;height:84%}
+ .hero-separated .hero-person-man{left:15%}
+ .hero-separated .hero-person-woman{right:15%;height:88%}
+ .hero-separated .hero-copy-row{grid-template-columns:1fr;gap:18px;padding:25px 6% 30px}
+ .hero-separated h1{font-size:36px}
+ .hero-laybay-card{min-height:110px;padding:18px}
+}
