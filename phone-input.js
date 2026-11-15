@@ -10,17 +10,21 @@
       nationalMode: true,
       separateDialCode: true,
       formatOnDisplay: true,
-      autoPlaceholder: "polite",
+      autoPlaceholder: "off",
       loadUtils: utils
     });
+    input.placeholder = "Enter number without country code";
     input.dataset.lbmPhoneReady = "1";
     return iti;
   }
   async function getValidNumber(input) {
     const iti = attach(input);
     await iti.promise;
-    if (!input.value.trim() || !iti.isValidNumber()) {
-      input.setCustomValidity("Enter a complete, valid phone number for the selected country.");
+    const digits = input.value.replace(/\D/g, "");
+    const country = iti.getSelectedCountryData();
+    const zambiaFormatInvalid = country.iso2 === "zm" && (digits.length !== 9 || digits.startsWith("0"));
+    if (!input.value.trim() || zambiaFormatInvalid || !iti.isValidNumber()) {
+      input.setCustomValidity(country.iso2 === "zm" ? "For Zambia, enter the 9-digit number only, without +260 or the leading 0." : "Enter a complete phone number without the country calling code.");
       input.reportValidity();
       input.setCustomValidity("");
       throw new Error("Please enter a complete, valid phone number.");
