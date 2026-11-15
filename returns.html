@@ -337,11 +337,14 @@ let verifiedPhoneE164 = "";
 let draftToken = null;
 let draftSaveTimer = null;
 const DRAFT_TOKEN_KEY = "lbmReturnDraftTokenV1";
-try { draftToken = localStorage.getItem(DRAFT_TOKEN_KEY); } catch (_) {}
+let draftStorageKey = DRAFT_TOKEN_KEY;
 function getDraftToken() {
     if (!draftToken) {
+        try { draftToken = localStorage.getItem(draftStorageKey); } catch (_) {}
+    }
+    if (!draftToken) {
         draftToken = crypto.randomUUID();
-        try { localStorage.setItem(DRAFT_TOKEN_KEY, draftToken); } catch (_) {}
+        try { localStorage.setItem(draftStorageKey, draftToken); } catch (_) {}
     }
     return draftToken;
 }
@@ -469,6 +472,8 @@ $("verifyForm").addEventListener("submit", async event => {
     try { phone = await window.LBMPhone.getValidNumber($("phone")); }
     catch (phoneError) { showMessage("verifyMessage", phoneError.message, "error"); return; }
     verifiedPhoneE164 = phone;
+    draftStorageKey = DRAFT_TOKEN_KEY + ":" + orderId;
+    draftToken = null;
 
     if (!Number.isSafeInteger(orderId) || orderId < 1) {
         showMessage("verifyMessage", "Please enter a valid order number.", "error");
