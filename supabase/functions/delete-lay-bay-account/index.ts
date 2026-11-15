@@ -157,7 +157,7 @@ Deno.serve(async (req: Request) => {
   }
 
   // Revoke refresh tokens for all devices before removing the Auth user.
-  const { error: signOutError } = await userClient.auth.signOut({ scope: "global" });
+  const { error: signOutError } = await admin.auth.admin.signOut(token, "global");
   if (signOutError) {
     return respond(500, { error: "We could not safely close your active sessions. Your account has not been deleted; please try again." });
   }
@@ -166,6 +166,13 @@ Deno.serve(async (req: Request) => {
   if (deleteAuthError) {
     return respond(500, { error: "Your sign-in account could not be deleted. Please contact LBM support." });
   }
+
+  // Preserve audit events but remove the direct customer actor link.
+  await admin
+    .from("lay_bay_audit_logs")
+    .update({ actor_user_id: null })
+    .eq("actor_user_id", user.id)
+    .eq("actor_role", "customer");
 
   // Keep payment, receipt, ledger and audit records for legitimate business
   // recordkeeping. Remove the customer-facing profile record and its identifiers.
