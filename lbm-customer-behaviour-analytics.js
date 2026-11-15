@@ -3,7 +3,7 @@
 "use strict";if(window.__lbmBehaviourAnalyticsStarted)return;window.__lbmBehaviourAnalyticsStarted=true;
 const SUPABASE_URL="https://toovotqrcsulhgdrcsmn.supabase.co",SUPABASE_KEY="sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg",TOKEN_KEY="lbm_analytics_visitor_v1";
 let db=null,token=null,admin=false,ready=false;
-function visitor(){try{let t=localStorage.getItem(TOKEN_KEY);if(!t||!/^[0-9a-f-]{36}$/i.test(t)){t=crypto.randomUUID();localStorage.setItem(TOKEN_KEY,t);}return t;}catch(e){return null;}}
+function visitor(){try{let t=localStorage.getItem(TOKEN_KEY);if(!t||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(t)){t=crypto.randomUUID();localStorage.setItem(TOKEN_KEY,t);}return t;}catch(e){return null;}}
 function section(){let p=location.pathname.toLowerCase();return p.includes("lay-bay")?"Lay-Bay":p.includes("technical-assistant")?"Technical Assistant":p.includes("returns")?"Returns & Exchanges":location.hash==="#products"?"Catalogue":"Homepage";}
 function device(){let w=Math.min(screen.width||innerWidth,innerWidth);return w<600?"mobile":w<1024?"tablet":"desktop";}
 function source(){try{let tag=new URLSearchParams(location.search).get("utm_source");if(tag)return tag.slice(0,80);if(!document.referrer)return"Direct / unknown";let h=new window.URL(document.referrer).hostname.replace(/^www\./,"");return /facebook|instagram|tiktok|whatsapp/i.test(h)?h:/google|bing|yahoo|duckduckgo/i.test(h)?"Search engine":h;}catch(e){return"Direct / unknown";}}
