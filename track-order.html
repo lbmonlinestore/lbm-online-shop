@@ -8,6 +8,7 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f5f5f5;color:#171717;font-family:Arial,sans-serif}.top{background:#080808;color:#D4AF37;padding:18px 16px}.top a{color:#D4AF37;text-decoration:none;font-weight:bold}.wrap{max-width:680px;margin:28px auto;padding:0 15px}.panel{background:#fff;border-radius:13px;padding:22px;box-shadow:0 5px 22px #0000000d}h1{font-size:25px;margin:0 0 8px}.muted{color:#687080;line-height:1.5;font-size:14px}label{display:block;font-weight:bold;font-size:14px;margin:16px 0 7px}input{width:100%;padding:13px;border:1px solid #ccd2da;border-radius:8px;font-size:16px}button{width:100%;padding:14px;border:0;border-radius:8px;background:#080808;color:#D4AF37;font-weight:bold;font-size:15px;margin-top:18px}button:disabled{opacity:.6}.msg{padding:12px;border-radius:8px;margin-top:14px;background:#fff0f0;color:#9d2020;font-size:14px}.result{margin-top:22px}.current{border:1px solid #e7d28a;background:#fffaf0;padding:16px;border-radius:10px}.current strong{font-size:20px}.timeline{margin:18px 0 0;padding:0;list-style:none}.timeline li{position:relative;padding:0 0 20px 30px;border-left:2px solid #d9dce2;margin-left:8px}.timeline li:last-child{border-left-color:transparent;padding-bottom:0}.dot{position:absolute;left:-8px;top:1px;width:14px;height:14px;border-radius:50%;background:#D4AF37;border:2px solid #fff;box-shadow:0 0 0 1px #D4AF37}.timeline b{display:block}.timeline small{display:block;color:#707784;margin-top:5px}.ref{font-weight:bold;color:#8c6a00}.hidden{display:none!important}
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
 </head>
 <body>
 <header class="top"><a href="index.html">LBM ONLINE SHOP</a></header>
@@ -24,21 +25,24 @@
 <div id="message" class="msg hidden" role="alert"></div>
 <div id="result" class="result hidden" aria-live="polite"></div>
 </section></main>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
+<script src="phone-input-v5.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 "use strict";
 const client=window.supabase.createClient("https://toovotqrcsulhgdrcsmn.supabase.co","sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg");
 const form=document.getElementById("trackForm"),refInput=document.getElementById("orderRef"),phoneInput=document.getElementById("phone"),button=document.getElementById("trackButton"),message=document.getElementById("message"),result=document.getElementById("result");
+window.LBMPhone.attach(phoneInput);
 const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const date=v=>{if(!v)return "Time not available";const d=new Date(v);return Number.isNaN(d.getTime())?"Time not available":d.toLocaleString("en-ZM",{dateStyle:"medium",timeStyle:"short"});};
 form.addEventListener("submit",async e=>{
  e.preventDefault();message.classList.add("hidden");result.classList.add("hidden");
  const ref=refInput.value.trim().toUpperCase().replace(/^LBM-/,"");
  if(!/^\d+$/.test(ref)){message.textContent="Enter a valid reference, for example LBM-10.";message.classList.remove("hidden");return;}
- if(phoneInput.value.trim().length<8){message.textContent="Enter the phone number used when placing the order.";message.classList.remove("hidden");return;}
+ let phone;try{phone=await window.LBMPhone.getValidNumber(phoneInput);}catch(err){message.textContent=err.message;message.classList.remove("hidden");return;}
  button.disabled=true;button.textContent="CHECKING...";
  try{
-  const {data,error}=await client.rpc("track_lbm_order",{p_order_id:Number(ref),p_phone:phoneInput.value.trim()});
+  const {data,error}=await client.rpc("track_lbm_order",{p_order_id:Number(ref),p_phone:phone});
   if(error)throw error;
   if(!data||data.found!==true){message.textContent="We could not find an order matching that reference and phone number. Please check both details.";message.classList.remove("hidden");return;}
   const history=Array.isArray(data.history)?data.history:[];
