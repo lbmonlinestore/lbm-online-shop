@@ -1444,3 +1444,69 @@ th {
     width: 58% !important;
   }
 }
+
+/* =====================================================
+   24. ADMIN-CONTROLLED FASHION BANNER IMAGE + READABLE TEXT
+   The banner image is set by loadBackground() from site_settings.
+   Keep a soft text-side shade so uploaded photos do not reduce contrast.
+===================================================== */
+.hero-fresh {
+  position: relative !important;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #f7f7f4 !important;
+}
+.hero-fresh::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(247,247,244,.99) 0%,
+    rgba(247,247,244,.96) 34%,
+    rgba(247,247,244,.82) 49%,
+    rgba(247,247,244,.30) 68%,
+    rgba(247,247,244,.04) 100%
+  ) !important;
+}
+.hero-fresh .hero-fashion-photo {
+  position: absolute;
+  inset: 0 0 0 auto;
+  z-index: -1;
+  width: 58%;
+  height: 100%;
+  overflow: hidden;
+}
+.hero-fresh .hero-fashion-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+  object-position: center 35%;
+  opacity: 1 !important;
+  filter: none !important;
+}
+.hero-fresh .hero-fresh-content {
+  position: relative;
+  z-index: 2;
+}
+@media (max-width: 760px) {
+  .hero-fresh::before {
+    background: linear-gradient(
+      90deg,
+      rgba(247,247,244,.99) 0%,
+      rgba(247,247,244,.95) 45%,
+      rgba(247,247,244,.72) 63%,
+      rgba(247,247,244,.12) 100%
+    ) !important;
+  }
+  .hero-fresh .hero-fashion-photo {
+    width: 58%;
+  }
+  .hero-fresh .hero-fashion-photo img {
+    object-position: center 30%;
+  }
+}
