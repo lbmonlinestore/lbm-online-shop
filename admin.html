@@ -474,7 +474,7 @@ async function load(){if(!currentUser){message("Administrator login required.",t
 table("lbmBSections",["Section","Visits","Visitors"],(d.sections||[]).map(x=>[x.section,num(x.visits),num(x.visitors)]));
 table("lbmBSearchTerms",["Search term","Searches","No results"],(d.searches||[]).map(x=>[x.term,num(x.count),num(x.noResults)]));
 table("lbmBProducts",["Product","Views","Clicks","Cart adds","Completed orders"],(d.products||[]).map(x=>[x.name,num(x.views),num(x.clicks),num(x.cartAdds),num(x.orders)]));
-table("lbmBFunnel",["Stage","Events"],[["Product views",num(f.productViews)],["Add to cart",num(f.cartAdds)],["Checkout starts",num(f.checkoutStarts)]]);
+table("lbmBFunnel",["Stage","Events"],[["Product views",num(f.productViews)],["Add to cart",num(f.cartAdds)],["Checkout starts",num(f.checkoutStarts)],["Completed purchases",num(f.completedPurchases)]]);
 table("lbmBLaybay",["Measure","Count"],[["Unique visitors",num(lb.visitors)],["Lay-Bay page visits",num(lb.pageViews)],["Lay-Bay product views",num(lb.productViews)],["Signup page views",num(lb.signupPageViews)],["Registered accounts",num(lb.registeredAccounts)],["Plans created",num(lb.plansCreated)],["Deposits submitted",num(lb.depositsSubmitted)]]);
 table("lbmBSources",["Source / device","Visits"],(d.sources||[]).map(x=>[x.source,num(x.visits)]).concat((d.devices||[]).map(x=>["Device: "+x.device,num(x.visits)])));
 table("lbmBExits",["Last page seen","Visitors"],(d.exitPages||[]).map(x=>[x.page||"Unknown",num(x.exits)]));
