@@ -219,6 +219,7 @@ footer a{color:#d4af37;text-decoration:none}
         <div id="requestArea" hidden>
 
             <div class="policy" id="eligibilityMessage"></div>
+            <p class="muted" id="draftSaveStatus" aria-live="polite">Your return or exchange progress will save automatically after you start filling in the form.</p>
 
             <h3 style="margin-top:25px">Products in your order</h3>
             <div id="orderProducts"></div>
@@ -359,12 +360,14 @@ function currentDraftData() {
 function scheduleDraftSave() {
     if (!verifiedOrder || !verifiedPhoneE164 || $("requestForm").hidden) return;
     clearTimeout(draftSaveTimer);
+    $("draftSaveStatus").textContent = "Saving your progress...";
     draftSaveTimer = setTimeout(async () => {
         try {
             await db.rpc("save_return_request_draft", { p_draft_token:getDraftToken(),
                 p_order_id:verifiedOrder.verified_order_id, p_phone:verifiedPhoneE164,
                 p_draft_data:currentDraftData() });
-        } catch (error) { console.warn("Return draft could not be saved:", error); }
+            $("draftSaveStatus").textContent = "Your progress is saved. You can return later and continue after verifying this order again.";
+        } catch (error) { $("draftSaveStatus").textContent = "We could not save your draft just now. Please keep this page open and try again."; console.warn("Return draft could not be saved:", error); }
     }, 700);
 }
 function restoreDraft(data) {
@@ -379,6 +382,7 @@ function restoreDraft(data) {
     $("reason").value=String(data.reason || "");
     $("exchangeArea").hidden=$("requestType").value!=="Exchange";
     $("exchangeDetails").required=$("requestType").value==="Exchange";
+    $("draftSaveStatus").textContent = "Your saved progress has been restored. You can continue where you left off.";
     showMessage("requestMessage","We restored your saved draft. You can continue where you left off.","info");
 }
 
