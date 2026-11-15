@@ -441,9 +441,9 @@ function getProductImage(product) {
 
 async function loadBackground() {
 
-    const hero = document.querySelector(".hero");
+    const heroImage = document.getElementById("hero-background-image");
 
-    if (!hero) return;
+    if (!heroImage) return;
 
     try {
 
@@ -461,23 +461,17 @@ async function loadBackground() {
 
         if (!isValidImageURL(backgroundURL)) return;
 
-        hero.style.backgroundImage =
-            `linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45)), url("${backgroundURL.replace(/["\\]/g, "")}")`;
+        heroImage.src = backgroundURL;
 
-        hero.style.backgroundSize = "cover";
-        hero.style.backgroundPosition = "center center";
-        hero.style.backgroundRepeat = "no-repeat";
-
-        console.log("LBM background loaded.");
+        console.log("LBM homepage photograph loaded from Manage Background.");
 
     } catch (error) {
 
-        console.error("Background loading error:", error);
+        console.error("Background loading error. Keeping the preloaded LBM photograph.", error);
 
     }
 
 }
-
 
 /* =====================================================
    10A. LOAD SOCIAL MEDIA LINKS FROM SUPABASE
