@@ -1181,3 +1181,34 @@ th {
 .journey-cards p{color:#64717d;font-size:13px;line-height:1.7;min-height:48px}
 .journey-cards a{display:inline-block;margin-top:14px;color:#173d70;font-size:12px;font-weight:900}
 @media(max-width:700px){.journey-cards{grid-template-columns:1fr}.journey-cards p{min-height:0}}
+
+
+/* =====================================================
+   20. LBM TOP SEARCH + SCROLL-AWARE HEADER
+   Header and search move out of view on downward scroll
+   and return on upward scroll.
+===================================================== */
+.site-header-stack{
+  position:sticky;top:0;z-index:1000;width:100%;
+  background:#080808;
+  transform:translateY(0);
+  transition:transform .24s ease;
+  will-change:transform;
+}
+.site-header-stack.header-hidden{transform:translateY(-110%)}
+.site-header-stack .topbar{position:relative !important;top:auto;z-index:auto}
+.site-header-stack .lbm-search-panel{
+  max-width:none;width:100%;margin:0;padding:10px 5% 12px;
+  background:#080808;border-top:1px solid rgba(212,175,55,.16);
+}
+.site-header-stack .lbm-search-panel label{max-width:1100px;margin:0 auto 7px;color:#D4AF37;font-size:12px;letter-spacing:.4px}
+.site-header-stack .lbm-search-box{max-width:1100px;margin:0 auto;min-height:46px;border-radius:5px;border-color:#D4AF37}
+.site-header-stack #lbm-product-search{height:44px}
+.site-header-stack #lbm-search-results{max-width:1100px;margin:5px auto 0;color:#c8c3b5;font-size:11px}
+@media(max-width:650px){
+ .site-header-stack .lbm-search-panel{padding:9px 4% 10px}
+ .site-header-stack .lbm-search-panel label{font-size:11px}
+ .site-header-stack .lbm-search-box{min-height:43px}
+ .site-header-stack #lbm-product-search{height:41px;font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){.site-header-stack{transition:none}}
