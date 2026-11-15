@@ -500,7 +500,7 @@ let layBaySelectionCart = [];
     panel.style.marginTop = "18px";
     panel.style.padding = "18px";
 
-    const heading = createElement("h2", "", "Delete My Lay-Bay Account");
+    const heading = createElement("h2", "", "Before you delete your account");
     heading.style.color = "#D4AF37";
 
     const explanation = createElement(
