@@ -547,7 +547,7 @@
                 container.innerHTML = publishedAnnouncements.map(item => `
                     <article class="lbm-announcement-card">
                         <h3>${escapeHTML(item.title)}</h3>
-                        <p>${escapeHTML(item.message).replace(/\\n/g, "<br>")}</p>
+                        <p>${escapeHTML(item.message).replace(/\r?\n/g, "<br>")}</p>
                         <div class="lbm-feature-date">
                             ${escapeHTML(new Date(item.created_at).toLocaleDateString(
                                 "en-ZM", { timeZone: "Africa/Lusaka" }
