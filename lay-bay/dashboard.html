@@ -197,6 +197,14 @@
     </p>
   </section>
 
+  <section id="lbAccountDeletionMount" class="lb-panel" aria-labelledby="lbAccountPrivacyHeading">
+    <h2 id="lbAccountPrivacyHeading">Account &amp; Privacy</h2>
+    <p class="lb-muted">You are in control of your LBM Lay-Bay account. If you have finished your business with LBM and settled all outstanding matters, you may request account deletion below.</p>
+    <div id="lbAccountDeletionContent">
+      <p class="lb-muted">Account deletion options will appear after your account loads.</p>
+    </div>
+  </section>
+
   <section class="lb-stats">
     <article class="lb-stat">
       Total verified savings
@@ -342,14 +350,14 @@
 
       const number = document.createElement("span");
       number.className = "receiving-number";
-      number.textContent = "Contact LBM administrator for verified receiving details";
+      number.textContent = "0975004041";
 
       const account = document.createElement("p");
-      account.textContent = "Do not send money until LBM confirms the official receiving account.";
+      account.textContent = "Before confirming the transfer, check that the recipient details displayed by Airtel Money are correct.";
 
       const steps = document.createElement("p");
       steps.textContent =
-        "Contact LBM through the official shop WhatsApp channel to obtain and verify the current receiving details before making payment.";
+        "Send your Lay-Bay payment to the LBM Airtel Money number shown above. Keep the transaction confirmation and enter its reference below.";
 
       const warning = document.createElement("p");
       warning.className = "payment-warning";
