@@ -77,7 +77,7 @@ body.image-viewer-open{overflow:hidden}
 <label style="display:flex;align-items:center;gap:9px;margin:8px 0 15px"><input type="checkbox" id="announcementPublish" style="width:auto;margin:0">Publish immediately</label><button type="submit" id="saveAnnouncement" style="width:100%">Save Announcement</button><button type="button" id="cancelAnnouncementEdit" class="secondary hidden" style="width:100%;margin-top:8px">Cancel Editing</button></form><div id="announcementMessageBox" class="message hidden"></div></div>
 <div class="panel"><h2>Announcement Instructions</h2><p style="line-height:1.8;font-size:14px">1. Enter a title and message.<br><br>2. Select Publish immediately to show it to customers.<br><br>3. Unpublished announcements remain in the admin dashboard.<br><br>4. Edit, publish, unpublish or delete announcements at any time.</p></div></div>
 <div class="panel"><h2>All Announcements</h2><button id="refreshAnnouncements" class="secondary">Refresh Announcements</button><div id="announcementsAdminList" class="empty">Announcements will appear here.</div></div></section>
-<section id="backgroundTab" class="tab-content hidden"><div class="panel"><h2>Manage Shop Background</h2><p class="small">Upload a background photograph for your online shop.</p><br><label>Choose Background Photo</label><input type="file" id="backgroundImageFile" accept="image/jpeg,image/png,image/webp"><p class="upload-note">JPG, PNG or WEBP. Maximum 5 MB.</p><h3>Background Preview</h3><img id="backgroundPreview" class="preview" alt="Background preview"><div id="backgroundMessage" class="message hidden"></div><button id="saveBackground" class="success" style="width:100%">Save Background</button><button id="resetBackground" class="secondary" style="width:100%;margin-top:8px">Remove Background</button></div></section>
+<section id="backgroundTab" class="tab-content hidden"><div class="panel"><h2>Manage Homepage Hero Photo</h2><p class="small">Change the large photograph displayed immediately below the homepage header. The photo keeps its natural proportions and is not cropped.</p><br><label>Choose Homepage Hero Photo</label><input type="file" id="heroImageFile" accept="image/jpeg,image/png,image/webp"><p class="upload-note">JPG, PNG or WEBP. Maximum 5 MB.</p><h3>Hero Photo Preview</h3><img id="heroImagePreview" class="preview" alt="Homepage hero photo preview"><div id="heroImageMessage" class="message hidden"></div><button id="saveHeroImage" class="success" style="width:100%">Save Homepage Hero Photo</button><button id="resetHeroImage" class="secondary" style="width:100%;margin-top:8px">Restore Default Hero Photo</button></div><div class="panel"><h2>Manage Shop Background</h2><p class="small">Upload a background photograph for your online shop.</p><br><label>Choose Background Photo</label><input type="file" id="backgroundImageFile" accept="image/jpeg,image/png,image/webp"><p class="upload-note">JPG, PNG or WEBP. Maximum 5 MB.</p><h3>Background Preview</h3><img id="backgroundPreview" class="preview" alt="Background preview"><div id="backgroundMessage" class="message hidden"></div><button id="saveBackground" class="success" style="width:100%">Save Background</button><button id="resetBackground" class="secondary" style="width:100%;margin-top:8px">Remove Background</button></div></section>
 <section id="socialTab" class="tab-content hidden"><div class="panel"><h2>Manage Social Media</h2><p class="small">Add or update the official LBM Online Shop links.</p><br><label>Facebook Page URL</label><input type="url" id="facebookUrl" placeholder="https://www.facebook.com/yourpage"><label>Instagram Page URL</label><input type="url" id="instagramUrl" placeholder="https://www.instagram.com/yourpage"><label>WhatsApp Link</label><input type="url" id="whatsappUrl" placeholder="https://wa.me/260..."><div id="socialMessage" class="message hidden"></div><button id="saveSocial" class="success" style="width:100%">Save Social Media Links</button></div></section>
 </main></div>
 <div id="imageViewer" class="image-viewer" role="dialog" aria-modal="true" aria-label="Product image preview"><div class="image-viewer-content"><button type="button" id="closeImageViewer" class="image-viewer-close" aria-label="Close">×</button><img id="imageViewerPhoto" src="" alt="Ordered product enlarged preview"><div id="imageViewerCaption" class="image-viewer-caption"></div></div></div>
@@ -115,7 +115,7 @@ async function enterDashboard(user){
  try{await checkAdmin(user);}
  catch(error){currentUser=null;dashboard.classList.add("hidden");loginSection.classList.remove("hidden");$("logoutButton").classList.add("hidden");await db.auth.signOut();showMessage(loginMessage,error.message,"error");return;}
  currentUser=user;loginSection.classList.add("hidden");dashboard.classList.remove("hidden");$("logoutButton").classList.remove("hidden");hideMessage(loginMessage);
- const tasks=[["products",loadProducts],["orders",loadOrders],["background",loadBackground],["social links",loadSocialLinks]];
+ const tasks=[["products",loadProducts],["orders",loadOrders],["background",loadBackground],["homepage hero photo",loadHeroImage],["social links",loadSocialLinks]];
  const results=await Promise.allSettled(tasks.map(([,fn])=>fn()));
  const failed=results.map((r,i)=>r.status==="rejected"?tasks[i][0]+": "+(r.reason?.message||r.reason):null).filter(Boolean);
  if(failed.length)showMessage(mainMessage,"You are signed in, but some dashboard information could not load: "+failed.join(" | "),"error");
@@ -259,6 +259,47 @@ async function loadOrders(){
 /* SECTION 16 — REFRESH */
 async function refreshAll(){if(!currentUser)return;const results=await Promise.allSettled([loadProducts(),loadOrders()]);const errors=results.filter(x=>x.status==="rejected");if(errors.length)showMessage(mainMessage,"Some dashboard data could not be refreshed. Check the relevant panel for details.","error");}
 $("refreshProducts").addEventListener("click",loadProducts);$("refreshOrders").addEventListener("click",loadOrders);$("refreshAnalytics").addEventListener("click",refreshAll);
+
+/* SECTION 17A — HOMEPAGE HERO PHOTO */
+const heroImageInput=$("heroImageFile"),heroImagePreview=$("heroImagePreview"),heroImageMessage=$("heroImageMessage");
+const DEFAULT_HERO_IMAGE="assets/lbm-hero-lifestyle.jpg";
+let currentHeroImageUrl="";
+async function loadHeroImage(){
+ const {data,error}=await db.from("site_settings").select("setting_value").eq("setting_key","hero_image").maybeSingle();
+ if(error){showMessage(heroImageMessage,error.message,"error");throw error;}
+ currentHeroImageUrl=data?.setting_value||DEFAULT_HERO_IMAGE;
+ heroImagePreview.src=currentHeroImageUrl;
+}
+heroImageInput.addEventListener("change",function(){
+ const file=this.files[0];if(!file)return;
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)){showMessage(heroImageMessage,"Choose JPG, PNG or WEBP.","error");this.value="";return;}
+ if(file.size>5*1024*1024){showMessage(heroImageMessage,"Image must not exceed 5 MB.","error");this.value="";return;}
+ heroImagePreview.src=URL.createObjectURL(file);hideMessage(heroImageMessage);
+});
+$("saveHeroImage").addEventListener("click",async function(){
+ if(!currentUser){showMessage(heroImageMessage,"Please log in again.","error");return;}
+ const file=heroImageInput.files[0];if(!file){showMessage(heroImageMessage,"Choose a new homepage hero photo first.","error");return;}
+ this.disabled=true;this.textContent="Saving...";
+ try{
+  const url=await uploadProductImage(file);
+  const {error}=await db.from("site_settings").upsert({setting_key:"hero_image",setting_value:url},{onConflict:"setting_key"});
+  if(error)throw error;
+  currentHeroImageUrl=url;heroImageInput.value="";
+  showMessage(heroImageMessage,"Homepage hero photo saved successfully!","success");
+ }catch(e){showMessage(heroImageMessage,e.message,"error");}
+ finally{this.disabled=false;this.textContent="Save Homepage Hero Photo";}
+});
+$("resetHeroImage").addEventListener("click",async function(){
+ if(!confirm("Restore the original homepage hero photo?"))return;
+ this.disabled=true;
+ try{
+  const {error}=await db.from("site_settings").delete().eq("setting_key","hero_image");
+  if(error)throw error;
+  currentHeroImageUrl=DEFAULT_HERO_IMAGE;heroImageInput.value="";heroImagePreview.src=DEFAULT_HERO_IMAGE;
+  showMessage(heroImageMessage,"Default homepage hero photo restored.","success");
+ }catch(e){showMessage(heroImageMessage,e.message,"error");}
+ finally{this.disabled=false;}
+});
 
 /* SECTION 17 — SHOP BACKGROUND */
 const backgroundInput=$("backgroundImageFile"),backgroundPreview=$("backgroundPreview"),backgroundMessage=$("backgroundMessage");
