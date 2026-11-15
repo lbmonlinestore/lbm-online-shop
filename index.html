@@ -486,6 +486,66 @@
             .header-account-tools{gap:8px}}
 
     </style>
+<style>
+/* Homepage corrections: match approved Fresh & Bright reference */
+.site-header-stack{position:relative;top:auto;transform:none!important;will-change:auto}
+.site-header-stack .topbar{position:relative!important;top:auto;display:flex;align-items:center;flex-wrap:nowrap;gap:clamp(8px,1.5vw,20px);padding:12px 3.5%;min-height:76px}
+.site-header-stack .topbar .navigation{flex:1;gap:clamp(10px,1.8vw,25px);min-width:0}
+.site-header-stack .topbar .navigation a{white-space:nowrap;font-size:clamp(10px,.9vw,12px)}
+.site-header-stack .lbm-search-panel{flex:0 1 190px;width:190px;min-width:125px;margin:0;padding:0;background:transparent;border:0}
+.site-header-stack .lbm-search-panel .search-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.site-header-stack .lbm-search-box{min-height:38px;height:38px;padding:0 9px;border:1px solid #D4AF37;border-radius:22px;background:#080808;box-shadow:none}
+.site-header-stack .lbm-search-icon{font-size:21px;margin-right:6px;color:#D4AF37}
+.site-header-stack #lbm-product-search{height:36px;font-size:12px;color:#fff}
+.site-header-stack #lbm-product-search::placeholder{color:#bcb6a7}
+.site-header-stack #lbm-clear-search{width:24px;height:24px;background:#24211a;color:#D4AF37;font-size:18px}
+.site-header-stack #lbm-search-results{position:absolute;z-index:20;margin:3px 0 0;color:#d6cda9;font-size:10px}
+.hero-image-section{width:100%;margin:0;padding:0;background:#eef7fc;line-height:0;overflow:visible}
+/* Keep the former illustrated hero artwork from appearing alongside the standalone photo. */
+.hero-sky-art{display:none!important}
+.hero-model-photo{display:block;width:100%;height:auto;max-height:none;object-fit:contain;object-position:center;border:0;border-radius:0;mix-blend-mode:normal}
+.hero-fresh{display:block;min-height:0;padding:38px 5%;background:#fff;color:#111;overflow:visible}
+.hero-fresh:before{display:none!important;content:none!important}
+.hero-fresh-content{position:relative;z-index:2;max-width:900px;margin:0 auto}
+.hero-fresh .hero-label{color:#a47b12;font-size:11px;font-weight:900;letter-spacing:1.6px}
+.hero-fresh h1{color:#111;font-family:Georgia,serif;font-size:clamp(38px,5vw,64px);font-weight:800;line-height:.98;letter-spacing:-1.5px}
+.hero-fresh h1 span{color:#111}
+.hero-fresh .hero-description{max-width:420px;color:#263c4b;font-size:15px;line-height:1.6}
+.hero-fresh .hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hero-primary-action,.hero-secondary-action{display:inline-flex;align-items:center;gap:9px;padding:13px 17px;border-radius:5px;font-size:11px;font-weight:900;letter-spacing:.4px}
+.hero-primary-action{background:#f2c52f;color:#111;box-shadow:0 5px 14px #1112}
+.hero-secondary-action{border:1px solid #111;color:#111;background:#ffffff80}
+.hero-fresh .hero-small-note{font-size:11px;color:#4d6474;margin-top:12px}
+
+.hero-laybay-callout{display:inline-flex;flex-direction:column;gap:7px;width:min(100%,260px);margin:18px 0 0;padding:15px;border-radius:10px;background:#f2c52f;color:#111;box-shadow:0 8px 24px #0002;font-size:12px;font-weight:700;text-decoration:none}
+.hero-laybay-callout strong{font-size:18px;line-height:1.1;margin-bottom:3px}
+.hero-laybay-callout span:before{content:"✓";font-weight:900;margin-right:6px}
+.hero-laybay-callout b{margin-top:4px;padding:10px 8px;background:#111;color:#f2c52f;border-radius:20px;text-align:center;font-size:10px}
+@media(max-width:900px){
+ .site-header-stack .topbar{flex-wrap:wrap}
+ .site-header-stack .topbar .navigation{order:4;flex:1 0 100%;justify-content:center;flex-wrap:wrap}
+ .site-header-stack .lbm-search-panel{flex:1 1 150px;width:auto;max-width:220px}
+}
+@media(max-width:650px){
+ .site-header-stack .topbar{gap:9px;padding:10px 4%}
+ .site-header-stack .topbar .navigation{gap:14px;padding-top:8px}
+ .site-header-stack .topbar .navigation a{font-size:10px}
+ .site-header-stack .lbm-search-panel{order:3;flex:1 1 100%;max-width:none}
+ .site-header-stack .lbm-search-box{max-width:none;height:39px;min-height:39px}
+ .site-header-stack #lbm-product-search{height:37px;font-size:13px}
+ .site-header-stack #lbm-search-results{display:none}
+ .hero-fresh{grid-template-columns:1fr;gap:0;min-height:0;padding:34px 6% 0}
+ .hero-fresh-content{max-width:100%}
+ .hero-fresh h1{font-size:clamp(39px,10vw,52px)}
+ .hero-fresh .hero-description{font-size:13px;max-width:340px}
+
+}
+@media(max-width:380px){
+
+ .hero-fresh .hero-actions{gap:7px}
+ .hero-primary-action,.hero-secondary-action{font-size:9px;padding:11px}
+}
+</style>
 </head>
 
 <body>
@@ -537,57 +597,29 @@
             </a>
         </div>
 
-    </header>
-
-    <div class="lbm-search-panel">
-
-                <label for="lbm-product-search">
-                    Find what you're looking for
-                </label>
-
-                <div class="lbm-search-box">
-
-                    <span class="lbm-search-icon" aria-hidden="true">
-                        ⌕
-                    </span>
-
-                    <input
-                        type="search"
-                        id="lbm-product-search"
-                        placeholder="Search products, brands or categories..."
-                        aria-label="Search products"
-                        autocomplete="off"
-                    >
-
-                    <button
-                        type="button"
-                        id="lbm-clear-search"
-                        aria-label="Clear search"
-                        hidden
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-                <p id="lbm-search-results" aria-live="polite">
-                    Browse our latest products
-                </p>
-
+        <div class="lbm-search-panel" role="search">
+            <label class="search-label" for="lbm-product-search">Search LBM products</label>
+            <div class="lbm-search-box">
+                <span class="lbm-search-icon" aria-hidden="true">⌕</span>
+                <input type="search" id="lbm-product-search"
+                       placeholder="Search..." aria-label="Search products"
+                       autocomplete="off">
+                <button type="button" id="lbm-clear-search"
+                        aria-label="Clear search" hidden>×</button>
             </div>
-
-
-    </div>
+            <p id="lbm-search-results" aria-live="polite">Browse our latest products</p>
+        </div>
+    </header>
 
     <main>
 
-        <section class="hero hero-fresh" id="home">
-            <div class="hero-sky-art" aria-hidden="true">
-                <div class="hero-sun"></div>
-                <div class="hero-person hero-person-man"><span class="hero-head"></span><span class="hero-body">LBM</span></div>
-                <div class="hero-person hero-person-woman"><span class="hero-head"></span><span class="hero-body">LBM</span></div>
-                <div class="hero-hill"></div>
-            </div>
+        <section class="hero-image-section" id="home" aria-label="LBM featured fashion photograph">
+            <img id="lbm-hero-image" class="hero-model-photo"
+                 src="assets/lbm-hero-lifestyle.jpg"
+                 alt="LBM fashion models wearing LBM Online Store T-shirts">
+        </section>
+
+        <section class="hero hero-fresh" aria-label="LBM welcome">
             <div class="hero-content hero-fresh-content">
                 <p class="hero-label">LBM ONLINE SHOP · STYLE FOR EVERY DAY</p>
                 <h1>Look Good.<br><span>Feel Great.</span></h1>
@@ -597,6 +629,13 @@
                     <a href="lay-bay/index.html" class="hero-secondary-action">EXPLORE LBM LAY-BAY</a>
                 </div>
                 <p class="hero-small-note">Shop today. Choose a payment option that works for you.</p>
+                <a class="hero-laybay-callout" href="lay-bay/index.html">
+                    <strong>Shop with Lay-Bay</strong>
+                    <span>Pay in instalments</span>
+                    <span>No interest</span>
+                    <span>Easy approval</span>
+                    <b>LEARN MORE →</b>
+                </a>
             </div>
         </section>
 
@@ -951,7 +990,22 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <script src="script.js?v=gallery-tap-checkbox-20261115-2"></script>
+
+<script>
+/* LBM hero photograph: administrator-managed image setting */
+(function(){
+  const url="https://toovotqrcsulhgdrcsmn.supabase.co";
+  const key="sb_publishable_aNXeSFItUW9hhq2iJ19tug_fvrvoXbg";
+  if(!window.supabase)return;
+  const client=window.supabase.createClient(url,key);
+  client.from("site_settings").select("setting_value").eq("setting_key","hero_image").maybeSingle()
+    .then(({data,error})=>{if(error){console.warn("LBM hero image setting could not load:",error.message);return;}
+      const image=document.getElementById("lbm-hero-image");
+      if(image&&data&&data.setting_value)image.src=data.setting_value;
+    }).catch(error=>console.warn("LBM hero image setting could not load:",error));
+})();
+</script>
+    <script src="script.js?v=hero-background-fix-33525da"></script>
     <script src="features.js?v=announcement-bell-account-v1"></script>
 
     <script>
