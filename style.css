@@ -1609,3 +1609,128 @@ th {
     line-height: 1.55;
   }
 }
+
+
+/* =====================================================
+   26. STRICT PHOTO-ONLY HERO + SEPARATE PROMOTIONAL SECTION
+   The image section contains only the uploaded photograph.
+===================================================== */
+html body .hero.hero-fresh {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+html body .hero.hero-fresh::before,
+html body .hero.hero-fresh::after,
+html body .hero.hero-fresh .hero-fashion-photo::before,
+html body .hero.hero-fresh .hero-fashion-photo::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  opacity: 0 !important;
+}
+html body .hero.hero-fresh .hero-fashion-photo {
+  position: relative !important;
+  inset: auto !important;
+  display: block !important;
+  width: 100% !important;
+  height: clamp(250px, 44vw, 560px) !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #f2f2f2 !important;
+  z-index: auto !important;
+}
+html body .hero.hero-fresh .hero-fashion-photo img {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  opacity: 1 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+}
+html body .hero-promo-section {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+html body .hero-promo-section::before,
+html body .hero-promo-section::after {
+  content: none !important;
+  display: none !important;
+}
+html body .hero-promo-section .hero-fresh-content {
+  position: static !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 980px !important;
+  margin: 0 auto !important;
+  padding: 30px 20px 36px !important;
+  background: #ffffff !important;
+  color: #171717 !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  z-index: auto !important;
+}
+html body .hero-promo-section .hero-label {
+  color: #92721c !important;
+}
+html body .hero-promo-section h1 {
+  color: #111111 !important;
+}
+html body .hero-promo-section h1 span {
+  color: #b18b2e !important;
+}
+html body .hero-promo-section .hero-description {
+  max-width: 650px !important;
+  color: #555555 !important;
+}
+html body .hero-promo-section .hero-actions {
+  justify-content: center !important;
+}
+html body .hero-promo-section .hero-small-note {
+  color: #666666 !important;
+}
+@media (max-width: 760px) {
+  html body .hero.hero-fresh .hero-fashion-photo {
+    height: clamp(220px, 68vw, 340px) !important;
+  }
+  html body .hero-promo-section .hero-fresh-content {
+    padding: 24px 16px 28px !important;
+  }
+  html body .hero-promo-section h1 {
+    font-size: clamp(28px, 8vw, 40px) !important;
+  }
+  html body .hero-promo-section .hero-description {
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+  }
+}
