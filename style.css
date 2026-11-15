@@ -1212,3 +1212,141 @@ th {
  .site-header-stack #lbm-product-search{height:41px;font-size:14px}
 }
 @media(prefers-reduced-motion:reduce){.site-header-stack{transition:none}}
+
+
+/* =====================================================
+   21. COMPACT HOMEPAGE PREVIEW — MOBILE FIRST
+   Keeps the existing product, cart and search behaviour.
+===================================================== */
+@media (max-width: 760px) {
+  .site-header-stack .topbar {
+    min-height: 0;
+    padding: 8px 12px 7px;
+    gap: 7px 9px;
+    align-items: center;
+  }
+  .topbar .brand {
+    font-size: 21px;
+    line-height: 1;
+    margin: 0;
+  }
+  .topbar .brand span {
+    margin-top: 3px;
+    font-size: 8px;
+    letter-spacing: 1.8px;
+  }
+  .topbar .navigation {
+    order: 10;
+    flex: 0 0 100%;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 19px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 2px 0 1px;
+    scrollbar-width: none;
+  }
+  .topbar .navigation::-webkit-scrollbar { display: none; }
+  .topbar .navigation a {
+    flex: 0 0 auto;
+    padding: 3px 0 5px;
+    font-size: 10px;
+    letter-spacing: .35px;
+  }
+  .topbar .header-whatsapp {
+    padding: 7px 9px;
+    font-size: 10px;
+    border-radius: 4px;
+  }
+  .topbar .cart-button {
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+  .header-account-tools { gap: 6px !important; margin-left: 0 !important; }
+  .header-icon-button {
+    width: 34px !important;
+    height: 34px !important;
+    flex-basis: 34px !important;
+  }
+  .header-icon-button svg { width: 18px; height: 18px; }
+
+  /* Search is a compact icon until the customer opens it. */
+  .site-header-stack .lbm-search-panel {
+    display: none;
+    padding: 9px 12px 10px;
+    border-top: 1px solid rgba(212,175,55,.18);
+  }
+  .site-header-stack.search-open .lbm-search-panel { display: block; }
+  .site-header-stack .lbm-search-panel label { display: none; }
+  .site-header-stack .lbm-search-box {
+    min-height: 39px;
+    padding: 0 10px;
+    border-radius: 6px;
+  }
+  .site-header-stack #lbm-product-search { height: 37px; font-size: 13px; }
+  .site-header-stack #lbm-search-results { margin-top: 4px; }
+
+  /* Compact promotional hero; keep both calls to action available. */
+  .hero-fresh {
+    min-height: 0;
+    height: 245px;
+    padding: 20px 5% 18px;
+    align-items: center;
+  }
+  .hero-fresh-content { max-width: 64%; }
+  .hero-fresh .hero-label { font-size: 8px; letter-spacing: 1px; margin-bottom: 7px; }
+  .hero-fresh h1 {
+    font-size: clamp(25px, 7vw, 34px);
+    line-height: 1.02;
+    letter-spacing: -1px;
+    margin: 0 0 8px;
+  }
+  .hero-fresh .hero-description {
+    max-width: 100%;
+    font-size: 11px;
+    line-height: 1.35;
+    margin: 0 0 10px;
+  }
+  .hero-fresh .hero-actions { gap: 6px; }
+  .hero-primary-action, .hero-secondary-action {
+    padding: 8px 9px;
+    font-size: 8px;
+    letter-spacing: .2px;
+    gap: 5px;
+  }
+  .hero-fresh .hero-small-note { display: none; }
+  .hero-sky-art { width: 43%; height: 90%; right: -1%; }
+  .hero-sun { width: 52px; height: 52px; right: 18%; top: 8%; box-shadow: 0 0 0 12px #ffffff30; }
+  .hero-person { height: 66%; width: 38%; }
+  .hero-person-woman { height: 72%; }
+  .hero-head { width: 29%; }
+  .hero-body { font-size: 14px; letter-spacing: 1px; }
+  .hero-hill { height: 25%; bottom: -13%; }
+
+  /* Put products directly after the hero on small screens. */
+  main { display: flex; flex-direction: column; }
+  main > .hero { order: 1; }
+  main > .collection-heading { order: 2; padding: 17px 12px 10px; }
+  main > .collection-heading .section-label { font-size: 9px; margin-bottom: 3px; }
+  main > .collection-heading h2 { font-size: 19px; margin: 2px 0 4px; }
+  main > .collection-heading > p:last-child { font-size: 11px; margin-bottom: 0; }
+  main > .products { order: 3; padding-top: 7px; }
+  main > .cart-section { order: 4; }
+  main > .home-categories { order: 5; padding: 27px 14px; }
+  main > .benefits-strip { order: 6; }
+  main > .laybay-promo { order: 7; }
+  main > .how-laybay-help { order: 8; }
+  main > .about { order: 9; }
+  main > .payment-section { order: 10; }
+
+  .product-grid { gap: 10px; }
+}
+
+@media (max-width: 390px) {
+  .hero-fresh { height: 228px; }
+  .hero-fresh-content { max-width: 66%; }
+  .hero-fresh h1 { font-size: 25px; }
+  .hero-primary-action, .hero-secondary-action { padding: 7px 6px; font-size: 7px; }
+  .topbar .brand { font-size: 19px; }
+  .topbar .header-whatsapp { padding: 6px 7px; }
+}
