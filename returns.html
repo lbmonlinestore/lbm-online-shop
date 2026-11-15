@@ -331,6 +331,9 @@ const db = window.supabase.createClient(
 
 const $ = id => document.getElementById(id);
 
+window.LBMPhone.attach($("phone"));
+window.LBMPhone.attach($("trackPhone"));
+
 let verifiedOrder = null;
 let orderItems = [];
 let verifiedPhoneE164 = "";
