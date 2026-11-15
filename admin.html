@@ -74,6 +74,13 @@ body.image-viewer-open{overflow:hidden}
 <div id="lbmWebsiteAnalyticsMessage" class="message hidden" role="status" aria-live="polite"></div>
 <div id="lbmWebsiteAnalyticsChart" style="margin-top:15px"><p class="empty">Open Website Analytics to load visitor statistics.</p></div>
 <p class="small" style="margin-top:12px">A visitor is counted as a unique browser, not a verified individual person. The same browser is counted once per Zambia calendar day. Clearing browser storage or using another device/browser can create another count.</p>
+<div class="panel" id="lbmBehaviourPanel" style="margin-top:18px">
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0">Customer Behaviour & Product Intelligence</h2><p class="small">Anonymous browsing signals. Choose a reporting period.</p></div><select id="lbmBehaviourDays" aria-label="Analytics period" style="max-width:150px"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select></div>
+ <div class="stats" style="margin-top:16px"><div class="stat"><p>Page Views</p><strong id="lbmBPageViews">—</strong></div><div class="stat"><p>Product Views</p><strong id="lbmBProductViews">—</strong></div><div class="stat"><p>Searches</p><strong id="lbmBSearches">—</strong></div><div class="stat"><p>Add to Cart</p><strong id="lbmBCartAdds">—</strong></div><div class="stat"><p>Checkout Starts</p><strong id="lbmBCheckout">—</strong></div><div class="stat"><p>Lay-Bay Visitors</p><strong id="lbmBLayVisitors">—</strong></div></div>
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:20px 0 8px"><h3 style="margin:0">Customer Behaviour Details</h3><button type="button" id="refreshLbmBehaviour">Refresh Behaviour</button></div><div id="lbmBehaviourMessage" class="message hidden" role="status"></div>
+ <div class="grid"><div class="panel"><h3>Website Sections</h3><div id="lbmBSections" class="empty">Loading...</div></div><div class="panel"><h3>Most Searched Terms</h3><div id="lbmBSearchTerms" class="empty">Loading...</div></div><div class="panel"><h3>Top Products</h3><div id="lbmBProducts" class="empty">Loading...</div></div><div class="panel"><h3>Shopping Journey</h3><div id="lbmBFunnel" class="empty">Loading...</div></div><div class="panel"><h3>LBM Lay-Bay Activity</h3><div id="lbmBLaybay" class="empty">Loading...</div></div><div class="panel"><h3>Traffic Sources & Devices</h3><div id="lbmBSources" class="empty">Loading...</div></div><div class="panel"><h3>Last Page Seen (Exit Proxy)</h3><div id="lbmBExits" class="empty">Loading...</div></div><div class="panel"><h3>Daily Behaviour</h3><div id="lbmBDaily" class="empty">Loading...</div></div></div>
+ <p class="small">Product views and searches indicate interest, not guaranteed demand. Use cart additions and confirmed orders alongside this report before changing stock. Traffic sources and exit pages are estimates from browser referrer and last page seen.</p>
+</div>
 </div></section>
 <section id="productsTab" class="tab-content hidden"><div class="grid"><div class="panel"><h2 id="formHeading">Add New Product</h2>
 <form id="productForm"><input type="hidden" id="productId"><label>Product Name</label><input id="productName" required placeholder="e.g. Classic Men's Shirt"><label>Description</label><textarea id="productDescription" placeholder="Describe your product"></textarea>
@@ -454,6 +461,26 @@ $("refreshAnnouncements").addEventListener("click",loadAdminAnnouncements);
  }
  refresh.addEventListener("click",load);
  window.loadLbmWebsiteAnalytics=load;
+})();
+
+
+/* SECTION — LBM CUSTOMER BEHAVIOUR ANALYTICS */
+(function(){
+"use strict";const $=id=>document.getElementById(id),period=$("lbmBehaviourDays"),refresh=$("refreshLbmBehaviour"),msg=$("lbmBehaviourMessage");if(!period||!refresh)return;
+const num=n=>(Number(n)||0).toLocaleString("en-ZM");
+function message(t,err){msg.textContent=t;msg.className="message"+(err?" error":"");}
+function table(id,heads,rows){const box=$(id);box.innerHTML="";if(!rows||!rows.length){box.textContent="No recorded activity yet.";box.className="empty";return;}box.className="";const t=document.createElement("table");t.style.cssText="width:100%;border-collapse:collapse;font-size:13px";const h=document.createElement("tr");heads.forEach(x=>{const c=document.createElement("th");c.textContent=x;c.style.cssText="text-align:left;padding:7px;border-bottom:1px solid #ddd";h.append(c)});const thead=document.createElement("thead");thead.append(h);t.append(thead);const b=document.createElement("tbody");rows.forEach(row=>{const tr=document.createElement("tr");row.forEach(x=>{const td=document.createElement("td");td.textContent=String(x??"—");td.style.cssText="padding:7px;border-bottom:1px solid #eee";tr.append(td)});b.append(tr)});t.append(b);box.append(t)}
+async function load(){if(!currentUser){message("Administrator login required.",true);return;}refresh.disabled=true;refresh.textContent="Loading...";try{const{data,error}=await db.rpc("get_lbm_website_behaviour_analytics",{p_days:Number(period.value)});if(error)throw error;const d=data||{},s=d.summary||{},lb=d.layBay||{},f=d.funnel||{};$("lbmBPageViews").textContent=num(s.pageViews);$("lbmBProductViews").textContent=num(s.productViews);$("lbmBSearches").textContent=num(s.searches);$("lbmBCartAdds").textContent=num(s.cartAdds);$("lbmBCheckout").textContent=num(s.checkoutStarts);$("lbmBLayVisitors").textContent=num(lb.visitors);
+table("lbmBSections",["Section","Visits","Visitors"],(d.sections||[]).map(x=>[x.section,num(x.visits),num(x.visitors)]));
+table("lbmBSearchTerms",["Search term","Searches","No results"],(d.searches||[]).map(x=>[x.term,num(x.count),num(x.noResults)]));
+table("lbmBProducts",["Product","Views","Clicks","Cart adds"],(d.products||[]).map(x=>[x.name,num(x.views),num(x.clicks),num(x.cartAdds)]));
+table("lbmBFunnel",["Stage","Events"],[["Product views",num(f.productViews)],["Add to cart",num(f.cartAdds)],["Checkout starts",num(f.checkoutStarts)]]);
+table("lbmBLaybay",["Measure","Count"],[["Unique visitors",num(lb.visitors)],["Lay-Bay page visits",num(lb.pageViews)],["Lay-Bay product views",num(lb.productViews)],["Signup page views",num(lb.signupPageViews)],["Registered accounts",num(lb.registeredAccounts)],["Plans created",num(lb.plansCreated)],["Deposits submitted",num(lb.depositsSubmitted)]]);
+table("lbmBSources",["Source / device","Visits"],(d.sources||[]).map(x=>[x.source,num(x.visits)]).concat((d.devices||[]).map(x=>["Device: "+x.device,num(x.visits)])));
+table("lbmBExits",["Last page seen","Visitors"],(d.exitPages||[]).map(x=>[x.page||"Unknown",num(x.exits)]));
+table("lbmBDaily",["Date","Visitors","Page views"],(d.daily||[]).map(x=>[x.date,num(x.visitors),num(x.pageViews)]));message("Customer behaviour analytics updated.",false);
+}catch(e){console.error("LBM behaviour analytics:",e);message("Could not load behaviour analytics: "+e.message,true);}finally{refresh.disabled=false;refresh.textContent="Refresh Behaviour";}}
+refresh.addEventListener("click",load);period.addEventListener("change",load);window.loadLbmBehaviourAnalytics=load;const old=window.loadLbmWebsiteAnalytics;window.loadLbmWebsiteAnalytics=async function(){if(old)await old();await load();};
 })();
 
 /* END OF ADMIN DASHBOARD */
