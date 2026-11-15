@@ -651,12 +651,18 @@ let layBaySelectionCart = [];
     finalArea.append(finalNote, phrase, deleteButton);
     panel.append(heading, explanation, recordsNote, sendCode, otpArea, finalArea, status);
 
-    const profile = $("lbProfilePanel");
-    if (profile && profile.parentNode) {
-      profile.after(panel);
+    const mount = $("lbAccountDeletionContent");
+    if (mount) {
+      mount.innerHTML = "";
+      mount.appendChild(panel);
     } else {
-      const main = document.querySelector("main");
-      if (main) main.appendChild(panel);
+      const profile = $("lbProfilePanel");
+      if (profile && profile.parentNode) {
+        profile.after(panel);
+      } else {
+        const main = document.querySelector("main");
+        if (main) main.appendChild(panel);
+      }
     }
   }
 
