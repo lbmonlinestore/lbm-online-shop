@@ -333,6 +333,52 @@ textarea::placeholder {
     max-width: 1000px;
 }
 
+/* LBM CART CONVENIENCE DRAWER — additive; existing cart markup and logic remain */
+.cart-section.open {
+    position: fixed;
+    z-index: 99980;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(520px, 100vw);
+    max-width: none;
+    max-height: 100vh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 22px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--gold);
+    border-radius: 12px 0 0 12px;
+    box-shadow: 0 0 0 100vmax rgba(0,0,0,.62), -12px 0 38px rgba(0,0,0,.28);
+}
+
+.cart-status {
+    margin: 12px 0 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--gold);
+    border-radius: 7px;
+    background: rgba(212,175,55,.10);
+    color: var(--gold);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+    .cart-section.open {
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-height: min(82vh, 82dvh);
+        border-radius: 16px 16px 0 0;
+        border-bottom: 0;
+        padding: 18px 14px calc(18px + env(safe-area-inset-bottom));
+        box-shadow: 0 -10px 36px rgba(0,0,0,.35), 0 0 0 100vmax rgba(0,0,0,.62);
+    }
+}
+
 .cart-section h2,
 .cart-section h3 {
     color: var(--gold);
