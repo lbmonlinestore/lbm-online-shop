@@ -1164,10 +1164,16 @@ function addToCart(productId) {
 
     updateCart();
 
+    const cartStatus = document.getElementById("cart-status");
+    if (cartStatus) {
+        cartStatus.textContent =
+            "Product added to your cart! Your item has been saved. You're not finished ordering yet.";
+    }
+
     if (cartSection) {
-
         cartSection.classList.add("open");
-
+        cartSection.setAttribute("aria-label", "Shopping cart. Product added successfully.");
+        cartSection.scrollTop = 0;
     }
 
 }
@@ -3165,6 +3171,7 @@ if (cartButton && cartSection) {
     cartButton.addEventListener("click", function() {
 
         cartSection.classList.toggle("open");
+        cartButton.setAttribute("aria-expanded", String(cartSection.classList.contains("open")));
 
     });
 
@@ -3176,6 +3183,7 @@ if (closeCartButton && cartSection) {
     closeCartButton.addEventListener("click", function() {
 
         cartSection.classList.remove("open");
+        cartButton?.setAttribute("aria-expanded", "false");
 
     });
 
