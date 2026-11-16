@@ -888,9 +888,6 @@ function displayProducts(productArray = products) {
         const stock = getStock(product);
 
         const available = stock > 0;
-        const sizes = getProductSizes(product);
-        const colours = getProductColours(product);
-
         const id = String(product.id);
 
         productImageIndices[id] = 0;
@@ -900,7 +897,6 @@ function displayProducts(productArray = products) {
             <article class="product-card">
 
                 <div class="product-image-container">
-
                     <img
                         src="${escapeHTML(image)}"
                         alt="${escapeHTML(product.name)}"
@@ -908,82 +904,24 @@ function displayProducts(productArray = products) {
                         loading="lazy"
                         data-action="preview-image"
                         data-id="${escapeHTML(id)}"
+                        aria-label="Open ${escapeHTML(product.name)} gallery"
                     >
-
-                    ${
-                        images.length > 1
-                        ? `
-
-                            <button
-                                type="button"
-                                class="lbm-gallery-arrow lbm-gallery-prev"
-                                data-action="gallery-prev"
-                                data-id="${escapeHTML(id)}"
-                                aria-label="Previous picture"
-                            >‹</button>
-
-                            <button
-                                type="button"
-                                class="lbm-gallery-arrow lbm-gallery-next"
-                                data-action="gallery-next"
-                                data-id="${escapeHTML(id)}"
-                                aria-label="Next picture"
-                            >›</button>
-
-                            <span class="lbm-image-counter">
-                                1 / ${images.length}
-                            </span>
-
-                        `
-                        : ""
-                    }
-
                 </div>
 
                 <div class="product-info">
+                    <h3
+                        class="product-card-title"
+                        data-action="preview-image"
+                        data-id="${escapeHTML(id)}"
+                        role="button"
+                        tabindex="0"
+                    >${escapeHTML(product.name)}</h3>
 
-                    <h3>${escapeHTML(product.name)}</h3>
-
-                    <p class="product-description">
-                        ${escapeHTML(product.description || "")}
-                    </p>
-
-                    <p class="product-category">
-                        ${escapeHTML(product.category || "")}
-                    </p>
-
-                    <p class="product-price">
-                        ${formatPrice(product.price)}
-                    </p>
+                    <p class="product-price">${formatPrice(product.price)}</p>
 
                     <p class="stock-label">
                         ${available ? stock + " in stock" : "Out of stock"}
                     </p>
-
-                    ${sizes.length ? `
-                        <label class="lbm-variant-label" for="lbm-size-${escapeHTML(id)}">Select size</label>
-                        <select class="lbm-variant-select" id="lbm-size-${escapeHTML(id)}" data-variant="size">
-                            <option value="">Choose size</option>
-                            ${sizes.map(option => `<option value="${escapeHTML(option)}">${escapeHTML(option)}</option>`).join("")}
-                        </select>` : ""}
-
-                    ${colours.length ? `
-                        <label class="lbm-variant-label" for="lbm-colour-${escapeHTML(id)}">Select colour</label>
-                        <select class="lbm-variant-select" id="lbm-colour-${escapeHTML(id)}" data-variant="colour">
-                            <option value="">Choose colour</option>
-                            ${colours.map(option => `<option value="${escapeHTML(option)}">${escapeHTML(option)}</option>`).join("")}
-                        </select>` : ""}
-
-                    <button
-                        type="button"
-                        class="add-button"
-                        data-action="add"
-                        data-id="${escapeHTML(id)}"
-                        ${available ? "" : "disabled"}
-                    >
-                        ${available ? "Add to Cart" : "Out of Stock"}
-                    </button>
-
                 </div>
 
             </article>
@@ -1505,6 +1443,7 @@ function createImagePreview() {
 
             <h3 id="lbm-preview-title"></h3>
             <p id="lbm-preview-price"></p>
+            <p id="lbm-preview-description" class="lbm-preview-description"></p>
 
             <div class="lbm-preview-image-area">
                 <button type="button" id="lbm-preview-prev"
@@ -1632,6 +1571,9 @@ function previewProductImage(productId) {
 
     document.getElementById("lbm-preview-price").textContent =
         formatPrice(product.price);
+
+    document.getElementById("lbm-preview-description").textContent =
+        product.description || "More product details will be provided by LBM Online Shop.";
 
     renderPreviewGallery();
 
