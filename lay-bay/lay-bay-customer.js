@@ -2083,6 +2083,8 @@ let layBaySelectionCart = [];
         font-size: 19px;
         font-weight: bold;
       }
+      .lb-basket-launcher { position:fixed; left:14px; bottom:14px; z-index:99980; display:none; padding:12px 16px; border:1px solid #080808; border-radius:28px; background:#D4AF37; color:#080808; font-weight:800; box-shadow:0 5px 20px rgba(0,0,0,.45); }
+      .lb-basket-launcher.visible { display:block; }
       .lb-basket-backdrop { position:fixed; inset:0; z-index:99990; background:rgba(0,0,0,.72); display:none; }
       .lb-basket-backdrop.open { display:block; }
       #layBaySelectionBasket.lb-basket-drawer { position:fixed; z-index:99991; right:12px; bottom:12px; width:min(620px,calc(100vw - 24px)); max-height:min(86vh,820px); overflow-y:auto; margin:0; padding:18px; background:#151515; border:1px solid #D4AF37; border-radius:14px; box-shadow:0 16px 55px rgba(0,0,0,.65); display:none; }
@@ -2501,6 +2503,12 @@ let layBaySelectionCart = [];
     backdrop.addEventListener("click", closeSelectionBasket);
     document.body.appendChild(backdrop);
 
+    const launcher = createElement("button", "lb-basket-launcher", "Lay-Bay Basket");
+    launcher.id = "layBayBasketLauncher";
+    launcher.type = "button";
+    launcher.addEventListener("click", openSelectionBasket);
+    document.body.appendChild(launcher);
+
     const drawerHead = createElement("div", "lb-basket-drawer-head");
     const heading = createElement("h2", "", "My Lay-Bay Basket");
     const closeButton = createElement("button", "", "×");
@@ -2581,6 +2589,15 @@ let layBaySelectionCart = [];
     if (!list || !totalElement) return;
 
     list.innerHTML = "";
+
+    const launcher = $("layBayBasketLauncher");
+    const itemCount = layBaySelectionCart.reduce(
+      (sum, item) => sum + Number(item.quantity || 0), 0
+    );
+    if (launcher) {
+      launcher.textContent = "Lay-Bay Basket (" + itemCount + ")";
+      launcher.classList.toggle("visible", itemCount > 0);
+    }
 
     if (!layBaySelectionCart.length) {
       list.textContent =
