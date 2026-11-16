@@ -1832,10 +1832,7 @@ let layBaySelectionCart = [];
       configuredItems.length +
       " picture(s) added successfully. Each picture has its own options.";
 
-    $("layBaySelectionBasket")?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest"
-    });
+    openSelectionBasket();
   }
 
   // -------------------------------------------------------
@@ -2086,6 +2083,16 @@ let layBaySelectionCart = [];
         font-size: 19px;
         font-weight: bold;
       }
+      .lb-basket-backdrop { position:fixed; inset:0; z-index:99990; background:rgba(0,0,0,.72); display:none; }
+      .lb-basket-backdrop.open { display:block; }
+      #layBaySelectionBasket.lb-basket-drawer { position:fixed; z-index:99991; right:12px; bottom:12px; width:min(620px,calc(100vw - 24px)); max-height:min(86vh,820px); overflow-y:auto; margin:0; padding:18px; background:#151515; border:1px solid #D4AF37; border-radius:14px; box-shadow:0 16px 55px rgba(0,0,0,.65); display:none; }
+      #layBaySelectionBasket.lb-basket-drawer.open { display:block; }
+      .lb-basket-drawer-head { position:sticky; top:-18px; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0 12px; background:#151515; border-bottom:1px solid #51451f; }
+      .lb-basket-drawer-head h2 { margin:4px 0; }
+      .lb-basket-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+      .lb-basket-actions button { flex:1 1 180px; }
+      .lb-basket-plan-note { padding:12px; margin:12px 0; border:1px solid #665522; border-radius:9px; background:#201c10; line-height:1.5; }
+      @media(max-width:600px) { #layBaySelectionBasket.lb-basket-drawer { right:0; bottom:0; width:100%; max-height:88vh; border-radius:16px 16px 0 0; padding:14px; } .lb-basket-drawer-head { top:-14px; } }
 
       @media(max-width: 420px) {
         .lb-combination,
@@ -2458,10 +2465,7 @@ let layBaySelectionCart = [];
       selectionMessage.textContent =
         added + " selected combination(s) added to your Lay-Bay basket.";
 
-      $("layBaySelectionBasket")?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest"
-      });
+      openSelectionBasket();
     });
 
     planButton.addEventListener("click", () => {
@@ -2504,16 +2508,22 @@ let layBaySelectionCart = [];
     section = createElement("section", "lb-panel");
     section.id = "layBaySelectionBasket";
 
-    const heading = createElement(
-      "h2",
-      "",
-      "My Lay-Bay Selection Basket"
-    );
+    section.classList.add("lb-basket-drawer");
+    const backdrop = createElement("div", "lb-basket-backdrop");
+    backdrop.id = "layBayBasketBackdrop";
+    backdrop.addEventListener("click", closeSelectionBasket);
+    document.body.appendChild(backdrop);
 
-    const note = createElement(
-      "p",
-      "lb-muted",
-      "Review your selected products, exact variants and quantities. Adding items here does not create a savings plan or submit a payment."
+    const drawerHead = createElement("div", "lb-basket-drawer-head");
+    const heading = createElement("h2", "", "My Lay-Bay Basket");
+    const closeButton = createElement("button", "", "×");
+    closeButton.type = "button";
+    closeButton.setAttribute("aria-label", "Close Lay-Bay basket");
+    closeButton.addEventListener("click", closeSelectionBasket);
+    drawerHead.append(heading, closeButton);
+
+    const note = createElement("p", "lb-muted",
+      "Your selections stay in this basket while you continue. Adding items does not create a savings plan or submit a payment."
     );
 
     const list = createElement("div");
@@ -2523,12 +2533,14 @@ let layBaySelectionCart = [];
     total.id = "layBaySelectionBasketTotal";
     total.className = "lb-basket-total";
 
-    const clearButton = createElement(
-      "button",
-      "",
-      "Clear Selection Basket"
+    const planNote = createElement("div", "lb-basket-plan-note",
+      "Payment plan preview: your first deposit must be at least 50% of the Lay-Bay price. The remaining balance is due within 30 days after LBM approves the first deposit. No plan or payment is created just by adding items."
     );
+    const continueButton = createElement("button", "", "Continue Selecting Products");
+    continueButton.type = "button";
+    continueButton.addEventListener("click", closeSelectionBasket);
 
+    const clearButton = createElement("button", "", "Clear Selection Basket");
     clearButton.type = "button";
 
     clearButton.addEventListener("click", () => {
@@ -2542,13 +2554,9 @@ let layBaySelectionCart = [];
       renderSelectionBasket();
     });
 
-    section.append(
-      heading,
-      note,
-      list,
-      total,
-      clearButton
-    );
+    const actions = createElement("div", "lb-basket-actions");
+    actions.append(continueButton, clearButton);
+    section.append(drawerHead, note, list, total, planNote, actions);
 
     const productsSection = $("productsSection");
 
@@ -2559,6 +2567,22 @@ let layBaySelectionCart = [];
     }
 
     return section;
+  }
+
+  function openSelectionBasket() {
+    const section = ensureSelectionBasket();
+    section.classList.add("open");
+    $("layBayBasketBackdrop")?.classList.add("open");
+    document.body.style.overflow = "hidden";
+    section.setAttribute("role", "dialog");
+    section.setAttribute("aria-modal", "true");
+    section.setAttribute("aria-label", "LBM Lay-Bay selection basket");
+  }
+
+  function closeSelectionBasket() {
+    $("layBaySelectionBasket")?.classList.remove("open");
+    $("layBayBasketBackdrop")?.classList.remove("open");
+    document.body.style.overflow = "";
   }
 
   function renderSelectionBasket() {
