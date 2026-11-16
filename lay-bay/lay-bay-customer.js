@@ -423,6 +423,12 @@ let layBaySelectionCart = [];
       }
     `;
 
+    style.textContent += `
+      .lb-profile-editor { width:100%; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid #51451f; }
+      .lb-profile-editor label { display:block; margin:9px 0 5px; color:#ddd; }
+      .lb-profile-editor input { width:100%; box-sizing:border-box; padding:11px; background:#080808; color:#fff; border:1px solid #777; border-radius:7px; }
+      .lb-profile-editor button { margin-top:9px; }
+    `;
     document.head.appendChild(style);
   }
 
@@ -441,6 +447,24 @@ let layBaySelectionCart = [];
     const details = createElement("div", "lb-avatar-actions");
 
     const heading = createElement("strong", "", "My Profile Picture");
+
+    const profileEditor = createElement("div", "lb-profile-editor");
+    const profileHeading = createElement("strong", "", "Edit Profile");
+    const nameLabel = createElement("label", "", "Full name");
+    nameLabel.htmlFor = "lbProfileName";
+    const nameInput = createElement("input");
+    nameInput.type = "text";
+    nameInput.id = "lbProfileName";
+    nameInput.autocomplete = "name";
+    nameInput.maxLength = 80;
+    nameInput.placeholder = "Enter your full name";
+    const saveProfile = createElement("button", "", "Save Profile");
+    saveProfile.type = "button";
+    const profileStatus = createElement("div", "lb-avatar-note");
+    profileStatus.id = "lbProfileMessage";
+    profileEditor.append(profileHeading, nameLabel, nameInput, saveProfile, profileStatus);
+
+    saveProfile.addEventListener("click", saveCustomerProfile);
 
     const file = createElement("input");
     file.type = "file";
@@ -470,7 +494,7 @@ let layBaySelectionCart = [];
 
     remove.addEventListener("click", removeAvatar);
 
-    details.append(heading, upload, remove, note, status, file);
+    details.append(profileEditor, heading, upload, remove, note, status, file);
     panel.append(avatar, details);
 
     const customerName = $("customerEmail");
@@ -483,6 +507,52 @@ let layBaySelectionCart = [];
     }
 
     avatar.src = avatarPlaceholder();
+    nameInput.value =
+      currentUser?.user_metadata?.full_name ||
+      currentUser?.user_metadata?.name ||
+      "";
+  }
+
+  async function saveCustomerProfile() {
+    const input = $("lbProfileName");
+    const status = $("lbProfileMessage");
+    const saveButton = $("lbProfilePanel")?.querySelector("button");
+    const fullName = String(input?.value || "").trim();
+
+    if (!fullName) {
+      message("lbProfileMessage", "Please enter your name.", false);
+      return;
+    }
+    if (fullName.length > 80) {
+      message("lbProfileMessage", "Your name must be 80 characters or fewer.", false);
+      return;
+    }
+
+    if (saveButton) saveButton.disabled = true;
+    message("lbProfileMessage", "Saving your profile...");
+
+    try {
+      const { data, error } = await db.auth.updateUser({
+        data: {
+          ...(currentUser?.user_metadata || {}),
+          full_name: fullName,
+          name: fullName
+        }
+      });
+      if (error) throw error;
+
+      currentUser = data.user || currentUser;
+      if ($("customerEmail")) $("customerEmail").textContent = fullName;
+      message("lbProfileMessage", "Your profile name has been updated.");
+    } catch (error) {
+      message(
+        "lbProfileMessage",
+        error.message || "Could not update your profile.",
+        false
+      );
+    } finally {
+      if (saveButton) saveButton.disabled = false;
+    }
   }
 
 
@@ -4001,10 +4071,14 @@ let layBaySelectionCart = [];
         loadPlans()
       ]);
 
-      message(
-        "pageMessage",
-        "Dashboard loaded. Your account records are up to date."
-      );
+      // Keep the page header clean after loading; errors and important
+      // notices still use the live message area when needed.
+      const pageStatus = $("pageMessage");
+      if (pageStatus) {
+        pageStatus.textContent = "";
+        pageStatus.classList.remove("show", "error", "success");
+        pageStatus.style.display = "none";
+      }
 
     } catch (error) {
       message(
