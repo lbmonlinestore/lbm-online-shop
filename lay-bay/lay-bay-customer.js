@@ -2817,6 +2817,63 @@ let layBaySelectionCart = [];
 
 
   // =======================================================
+  // 11.9. SHOW A CLEAR SUMMARY AFTER A PLAN IS CREATED
+  // =======================================================
+
+  function showCreatedPlanSummary(plan) {
+    if (!plan) return;
+
+    const plansMessage = $("plansMessage");
+    const plansList = $("plansList");
+    if (!plansMessage || !plansList) return;
+
+    $("lbm-created-plan-summary")?.remove();
+
+    const balance = balanceFor(plan.id);
+    const target = Number(
+      balance?.target_price ?? plan.lay_bay_price_snapshot ?? 0
+    );
+    const verified = Number(balance?.current_balance ?? 0);
+    const remaining = Number(
+      balance?.remaining_balance ?? Math.max(target - verified, 0)
+    );
+    const firstDeposit = Number((target * 0.5).toFixed(2));
+
+    const card = createElement("section", "lb-card");
+    card.id = "lbm-created-plan-summary";
+
+    card.append(
+      createElement("h3", "", "Your Lay-Bay plan has been created!"),
+      createElement("p", "", "Product: " + (plan.product_name_snapshot || "Selected LBM product")),
+      createElement("p", "", "Lay-Bay plan total: " + money(target)),
+      createElement("p", "", "Verified payments so far: " + money(verified)),
+      createElement("p", "", "Remaining balance: " + money(remaining)),
+      createElement(
+        "p",
+        "",
+        "Next step: Submit your first deposit of at least " + money(firstDeposit) + " (50%)."
+      ),
+      createElement(
+        "p",
+        "lb-muted",
+        "Creating this plan does not mean it is fully paid or ready for collection. Your first deposit must be verified by LBM before the 30-day payment period begins."
+      )
+    );
+
+    const nextButton = createElement("button", "", "Go to Deposit Form");
+    nextButton.type = "button";
+    nextButton.addEventListener("click", () => {
+      $("depositSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      $("selectedPlan")?.focus({ preventScroll: true });
+    });
+    card.appendChild(nextButton);
+
+    plansMessage.after(card);
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+
+  // =======================================================
   // 12. CREATE A SAVINGS PLAN
   // =======================================================
 
@@ -2896,14 +2953,14 @@ let layBaySelectionCart = [];
       message(
         "plansMessage",
         matchingPlan
-          ? "Your Lay-Bay plan is awaiting its first deposit of at least 50%. Submit that amount for verification to activate the plan and start the 30-day period."
+          ? "Your Lay-Bay plan is awaiting its first deposit. Review the summary below for the amount and next step."
           : "The plan request was processed. Please refresh your plans."
       );
 
-      if ($("depositSection")) {
-        $("depositSection").scrollIntoView({
-          behavior: "smooth"
-        });
+      if (matchingPlan) {
+        showCreatedPlanSummary(matchingPlan);
+      } else if ($("depositSection")) {
+        $("depositSection").scrollIntoView({ behavior: "smooth" });
       }
 
     } catch (error) {
