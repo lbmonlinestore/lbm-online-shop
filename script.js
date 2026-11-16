@@ -1443,6 +1443,7 @@ function createImagePreview() {
 
             <h3 id="lbm-preview-title"></h3>
             <p id="lbm-preview-price"></p>
+            <p id="lbm-preview-category" class="lbm-preview-category"></p>
             <p id="lbm-preview-description" class="lbm-preview-description"></p>
 
             <div class="lbm-preview-image-area">
@@ -1571,6 +1572,9 @@ function previewProductImage(productId) {
 
     document.getElementById("lbm-preview-price").textContent =
         formatPrice(product.price);
+
+    document.getElementById("lbm-preview-category").textContent =
+        product.category ? "Category: " + product.category : "";
 
     document.getElementById("lbm-preview-description").textContent =
         product.description || "More product details will be provided by LBM Online Shop.";
@@ -3053,6 +3057,14 @@ installOrderCancellation();
 /* =====================================================
    31. ALL STOREFRONT BUTTON EVENTS
    ===================================================== */
+
+document.addEventListener("keydown", function(event) {
+    const title = event.target.closest(".product-card-title[data-action='preview-image']");
+    if (!title || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    previewProductImage(title.dataset.id);
+});
+
 
 document.addEventListener("click", function(event) {
 
