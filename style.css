@@ -1296,22 +1296,79 @@ th {
 
 
 /* =====================================================
-   21. CUSTOMER FAQ — ACCESSIBLE NATIVE ACCORDIONS
+   21. CUSTOMER FAQ — COLLAPSED DROP-DOWN PANEL
    Test branch only
 ===================================================== */
 .lbm-faq-section {
-    padding: 64px 6%;
+    display: block;
+    margin: 28px auto;
+    width: min(920px, 92%);
+    padding: 0;
     background: #101010;
     color: #f5f0e3;
+    border: 1px solid rgba(212,175,55,.45);
+    border-radius: 12px;
+    overflow: hidden;
 }
-.lbm-faq-section .home-section-heading {
+.lbm-faq-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 22px 24px;
+    cursor: pointer;
+    list-style: none;
+    background: linear-gradient(110deg,#181818,#242017);
+}
+.lbm-faq-toggle::-webkit-details-marker { display:none; }
+.lbm-faq-toggle-copy {
+    display: grid;
+    gap: 6px;
+}
+.lbm-faq-toggle-copy .section-label {
+    margin: 0;
+    color: #d4af37;
+    font-size: 10px;
+    letter-spacing: 1.8px;
+}
+.lbm-faq-toggle-copy strong {
+    color: #f5f0e3;
+    font-size: 18px;
+    letter-spacing: .5px;
+}
+.lbm-faq-toggle-copy small {
+    color: #bdb7a9;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.lbm-faq-toggle-icon {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #d4af37;
+    border-radius: 50%;
+    color: #e2c36b;
+    font-size: 25px;
+    line-height: 1;
+}
+.lbm-faq-section[open] .lbm-faq-toggle-icon { font-size: 0; }
+.lbm-faq-section[open] .lbm-faq-toggle-icon::before { content: "−"; font-size: 25px; }
+.lbm-faq-toggle:focus-visible {
+    outline: 2px solid #d4af37;
+    outline-offset: -3px;
+}
+.lbm-faq-content {
+    padding: 28px 24px 30px;
+    border-top: 1px solid rgba(212,175,55,.25);
+}
+.lbm-faq-content .home-section-heading {
     max-width: 760px;
-    margin: 0 auto 28px;
+    margin: 0 auto 24px;
     text-align: center;
 }
-.lbm-faq-section .home-section-heading h2 {
-    color: #f5f0e3;
-}
+.lbm-faq-content .home-section-heading h2 { color: #f5f0e3; }
 .lbm-faq-list {
     width: min(820px, 100%);
     margin: 0 auto;
@@ -1334,9 +1391,7 @@ th {
     cursor: pointer;
     list-style: none;
 }
-.lbm-faq-item summary::-webkit-details-marker {
-    display: none;
-}
+.lbm-faq-item summary::-webkit-details-marker { display:none; }
 .lbm-faq-item summary::after {
     content: "+";
     position: absolute;
@@ -1347,9 +1402,7 @@ th {
     font-size: 22px;
     font-weight: 400;
 }
-.lbm-faq-item[open] summary::after {
-    content: "−";
-}
+.lbm-faq-item[open] summary::after { content: "−"; }
 .lbm-faq-item summary:focus-visible {
     outline: 2px solid #d4af37;
     outline-offset: -3px;
@@ -1361,8 +1414,7 @@ th {
     font-size: 13px;
     line-height: 1.75;
 }
-.lbm-faq-item a,
-.lbm-faq-contact a {
+.lbm-faq-item a, .lbm-faq-contact a {
     color: #e2c36b;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -1374,15 +1426,12 @@ th {
     font-size: 13px;
 }
 @media (max-width: 600px) {
-    .lbm-faq-section {
-        padding: 44px 5%;
-    }
-    .lbm-faq-item summary {
-        padding: 15px 42px 15px 14px;
-        font-size: 13px;
-    }
-    .lbm-faq-item p {
-        padding: 0 14px 15px;
-        font-size: 12px;
-    }
+    .lbm-faq-section { width: 94%; margin: 20px auto; }
+    .lbm-faq-toggle { padding: 17px 15px; gap: 12px; }
+    .lbm-faq-toggle-copy strong { font-size: 14px; }
+    .lbm-faq-toggle-copy small { font-size: 11px; }
+    .lbm-faq-toggle-icon { flex-basis: 34px; width: 34px; height: 34px; }
+    .lbm-faq-content { padding: 22px 12px; }
+    .lbm-faq-item summary { padding: 15px 42px 15px 14px; font-size: 13px; }
+    .lbm-faq-item p { padding: 0 14px 15px; font-size: 12px; }
 }
