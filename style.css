@@ -1435,3 +1435,206 @@ th {
     .lbm-faq-item summary { padding: 15px 42px 15px 14px; font-size: 13px; }
     .lbm-faq-item p { padding: 0 14px 15px; font-size: 12px; }
 }
+
+
+/* =====================================================
+   22. FRESH RETAIL PRODUCT CARDS — TEST BRANCH
+===================================================== */
+.lbm-retail-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    color: #242424;
+    border: 1px solid #e9e4d8;
+    border-radius: 14px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.07);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.lbm-retail-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0,0,0,.12);
+}
+.lbm-retail-image {
+    height: 220px;
+    min-height: 220px;
+    background: #f5f3ee;
+    overflow: hidden;
+}
+.lbm-retail-image .product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: zoom-in;
+}
+.product-category-tag {
+    position: absolute;
+    left: 11px;
+    top: 11px;
+    z-index: 2;
+    padding: 6px 10px;
+    color: #171717;
+    background: #e3c66d;
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+}
+.gallery-arrow {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    color: #171717;
+    background: rgba(255,255,255,.92);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+}
+.gallery-prev { left: 9px; }
+.gallery-next { right: 9px; }
+.lbm-image-counter {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 2;
+    padding: 4px 8px;
+    color: #fff;
+    background: rgba(0,0,0,.68);
+    border-radius: 20px;
+    font-size: 10px;
+}
+.lbm-retail-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 15px;
+    background: #fff;
+    color: #242424;
+}
+.lbm-retail-info .product-eyebrow {
+    margin: 0;
+    color: #94751e;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+.lbm-retail-info .product-card-title {
+    margin: 0;
+    color: #171717;
+    font-size: 15px;
+    font-weight: 750;
+    line-height: 1.4;
+    cursor: pointer;
+}
+.lbm-card-description {
+    margin: 0;
+    color: #696969;
+    font-size: 12px;
+    line-height: 1.55;
+}
+.lbm-price-stock-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 2px;
+}
+.lbm-retail-info .product-price {
+    margin: 0;
+    color: #94751e;
+    font-size: 17px;
+    font-weight: 850;
+}
+.lbm-retail-info .stock-label {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+}
+.lbm-retail-info .stock-label.in-stock { color: #267345; }
+.lbm-retail-info .stock-label.out-of-stock { color: #b3261e; }
+.product-options-row {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 8px;
+    margin-top: 4px;
+}
+.product-option {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+    color: #555;
+    font-size: 10px;
+    font-weight: 700;
+}
+.product-option select {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 7px;
+    border: 1px solid #ded8ca;
+    border-radius: 7px;
+    background: #fff;
+    color: #222;
+    font-size: 12px;
+}
+.lbm-card-add {
+    width: 100%;
+    min-height: 42px;
+    margin-top: auto;
+    border: 0;
+    border-radius: 7px;
+    color: #111;
+    background: #d4af37;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .7px;
+    cursor: pointer;
+}
+.lbm-card-add:disabled {
+    color: #777;
+    background: #e6e3dc;
+    cursor: not-allowed;
+}
+.lbm-view-details {
+    padding: 3px;
+    border: 0;
+    color: #746022;
+    background: transparent;
+    font-size: 11px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+@media (max-width: 600px) {
+    .lbm-retail-image { height: 175px; min-height: 175px; }
+    .lbm-retail-info { padding: 11px; gap: 7px; }
+    .lbm-retail-info .product-card-title { font-size: 13px; }
+    .lbm-retail-info .product-price { font-size: 15px; }
+    .product-options-row { grid-template-columns: 1fr; }
+}
+
+/* FAQ expanded content uses a bright reading surface for contrast. */
+.lbm-faq-content {
+    background: #f7f5ef;
+    color: #252525;
+}
+.lbm-faq-content .home-section-heading h2 { color: #171717; }
+.lbm-faq-content .home-section-heading p { color: #5e5a50; }
+.lbm-faq-item {
+    background: #fff;
+    border: 1px solid #e5dcc5;
+    box-shadow: 0 2px 8px rgba(0,0,0,.035);
+}
+.lbm-faq-item summary { color: #282317; }
+.lbm-faq-item summary::after { color: #9b791e; }
+.lbm-faq-item p { color: #4b4b4b; }
+.lbm-faq-item a, .lbm-faq-contact a { color: #765b13; }
+.lbm-faq-contact { color: #4b4b4b; }
