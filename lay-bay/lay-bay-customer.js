@@ -1294,10 +1294,13 @@ let layBaySelectionCart = [];
       "lb-gallery-selection"
     );
 
+    const galleryDescription = createElement("p", "lb-gallery-description");
+    const galleryPrice = createElement("p", "lb-gallery-price");
+
     const selectionHeading = createElement(
       "h3",
       "",
-      "Configure Each Selected Picture"
+      "Choose Your Options"
     );
 
     const selectionNote = createElement(
@@ -1333,6 +1336,8 @@ let layBaySelectionCart = [];
     content.append(
       close,
       title,
+      galleryDescription,
+      galleryPrice,
       image,
       currentSelectLabel,
       controls,
@@ -1354,6 +1359,8 @@ let layBaySelectionCart = [];
       next,
       close,
       currentSelect,
+      galleryDescription,
+      galleryPrice,
       pictureOptions,
       addButton,
       selectionMessage
@@ -1448,6 +1455,16 @@ let layBaySelectionCart = [];
 
     productGallery.title.textContent =
       product?.name || "Product Pictures";
+
+    productGallery.galleryDescription.textContent =
+      product?.description ||
+      product?.details ||
+      product?.product_description ||
+      "No additional product description is available.";
+
+    productGallery.galleryPrice.textContent =
+      "Normal price: " + money(product?.price) +
+      " | Lay-Bay price: " + money(productPrice(product));
 
     productGallery.selectionMessage.textContent =
       "Select the pictures you want using the checkboxes.";
@@ -2032,13 +2049,9 @@ let layBaySelectionCart = [];
       #productsList > .lb-product > img { width:100%; height:clamp(112px,28vw,190px); object-fit:cover; border-radius:8px; }
       #productsList > .lb-product > h3 { font-size:clamp(13px,3.5vw,17px); line-height:1.25; margin:8px 0 6px; overflow-wrap:anywhere; }
       #productsList > .lb-product > p { font-size:12px; line-height:1.35; margin:4px 0; }
-      .lb-product-expand { margin-top:9px; border:1px solid #665522; border-radius:8px; background:#111; overflow:hidden; }
-      .lb-product-expand > summary { cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:6px; padding:10px; color:#D4AF37; font-size:12px; font-weight:800; }
-      .lb-product-expand > summary::-webkit-details-marker { display:none; }
-      .lb-product-expand > summary::after { content:"＋"; font-size:16px; }
-      .lb-product-expand[open] > summary::after { content:"−"; }
-      .lb-product-expanded-content { padding:0 9px 10px; }
-      .lb-product-expanded-content > p { font-size:12px; line-height:1.45; }
+      .lb-product-photo-hint { color:#D4AF37; font-size:11px; text-align:center; margin:3px 0 7px; }
+      .lb-gallery-description { color:#ddd; text-align:left; line-height:1.5; margin:8px 0 14px; }
+      .lb-gallery-price { color:#D4AF37; font-weight:800; text-align:left; margin:6px 0; }
       .lb-selection-panel { margin:8px 0 2px; padding:9px; border:1px solid #665522; border-radius:9px; background:#101010; }
       .lb-option-details { margin:7px 0; border:1px solid #51451f; border-radius:7px; background:#171717; }
       .lb-option-details summary { cursor:pointer; list-style:none; padding:10px 12px; color:#D4AF37; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:8px; }
@@ -2327,20 +2340,12 @@ let layBaySelectionCart = [];
 
     addButton.type = "button";
 
-    const planButton = createElement(
-      "button",
-      "",
-      "Add & Review Basket"
-    );
-
-    planButton.type = "button";
-
     const actions = createElement(
       "div",
       "lb-selection-actions"
     );
 
-    actions.append(addButton, planButton);
+    actions.appendChild(addButton);
     wrapper.appendChild(actions);
 
     let combinations = [];
@@ -2553,12 +2558,6 @@ let layBaySelectionCart = [];
         added + " selected combination(s) added to your Lay-Bay basket.";
 
       openSelectionBasket();
-    });
-
-    planButton.addEventListener("click", () => {
-      // Every Lay-Bay journey passes through the basket review.
-      // This avoids bypassing the customer's selection and price review.
-      addButton.click();
     });
 
     return {
@@ -2897,18 +2896,6 @@ let layBaySelectionCart = [];
         product.name || "LBM Product"
       );
 
-      const descriptionText =
-        product.description ||
-        product.details ||
-        product.product_description ||
-        "";
-
-      const description = createElement(
-        "p",
-        "lb-muted",
-        descriptionText
-      );
-
       const normal = createElement(
         "p",
         "",
@@ -2938,38 +2925,35 @@ let layBaySelectionCart = [];
         ? "#25a56a"
         : "#d99b35";
 
-      const stock = createElement(
-        "p",
-        "lb-muted",
-        "Available stock: " +
-        (Number(product.stock) || 0)
-      );
-
-      const variants = createVariantSelector(product);
-
-      if (!availability.available) {
-        variants.element
-          .querySelectorAll("input, button")
-          .forEach(control => {
-            control.disabled = true;
-          });
+      if (images.length) {
+        title.style.cursor = "pointer";
+        title.setAttribute("role", "button");
+        title.setAttribute("tabindex", "0");
+        title.setAttribute("aria-label", "Explore " + (product.name || "product") + " pictures and options");
+        title.addEventListener("click", () =>
+          openProductGallery(images, 0, product)
+        );
+        title.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openProductGallery(images, 0, product);
+          }
+        });
       }
 
-      // Keep the catalogue compact: show the essential product details
-      // in the card, and reveal description, stock, sizes and colours on tap.
-      const expand = createElement("details", "lb-product-expand");
-      const expandSummary = createElement("summary", "", "View Description, Sizes & Colours");
-      const expandedContent = createElement("div", "lb-product-expanded-content");
-      expandedContent.append(description, stock, variants.element);
-      expand.append(expandSummary, expandedContent);
+      const photoHint = createElement(
+        "p",
+        "lb-product-photo-hint",
+        images.length ? "Tap picture to explore" : "Pictures unavailable"
+      );
 
       card.append(
         photo,
+        photoHint,
         title,
         normal,
         layBay,
-        status,
-        expand
+        status
       );
 
       container.appendChild(card);
