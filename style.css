@@ -333,6 +333,52 @@ textarea::placeholder {
     max-width: 1000px;
 }
 
+/* LBM CART CONVENIENCE DRAWER — additive; existing cart markup and logic remain */
+.cart-section.open {
+    position: fixed;
+    z-index: 99980;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(520px, 100vw);
+    max-width: none;
+    max-height: 100vh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: 22px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--gold);
+    border-radius: 12px 0 0 12px;
+    box-shadow: 0 0 0 100vmax rgba(0,0,0,.62), -12px 0 38px rgba(0,0,0,.28);
+}
+
+.cart-status {
+    margin: 12px 0 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--gold);
+    border-radius: 7px;
+    background: rgba(212,175,55,.10);
+    color: var(--gold);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+    .cart-section.open {
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        max-height: min(82vh, 82dvh);
+        border-radius: 16px 16px 0 0;
+        border-bottom: 0;
+        padding: 18px 14px calc(18px + env(safe-area-inset-bottom));
+        box-shadow: 0 -10px 36px rgba(0,0,0,.35), 0 0 0 100vmax rgba(0,0,0,.62);
+    }
+}
+
 .cart-section h2,
 .cart-section h3 {
     color: var(--gold);
@@ -1212,3 +1258,180 @@ th {
  .site-header-stack #lbm-product-search{height:41px;font-size:14px}
 }
 @media(prefers-reduced-motion:reduce){.site-header-stack{transition:none}}
+
+
+/* =====================================================
+   20. MAIN SHOP — CLEAN PRODUCT CARDS + FULL GALLERY
+   Test branch only
+===================================================== */
+.product-card-title {
+    cursor: pointer;
+    user-select: none;
+}
+.product-card-title:hover {
+    color: #E2C36B;
+}
+.product-card-title:focus-visible {
+    outline: 2px solid #D4AF37;
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+.product-card .stock-label {
+    margin: 5px 0 0;
+    color: #bdb7a9;
+    font-size: 12px;
+}
+.lbm-preview-description {
+    color: #4b463b;
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding: 10px 12px;
+    margin: 10px 0 14px !important;
+    background: #f7f4ec;
+    border-radius: 7px;
+}
+
+
+/* =====================================================
+   21. CUSTOMER FAQ — COLLAPSED DROP-DOWN PANEL
+   Test branch only
+===================================================== */
+.lbm-faq-section {
+    display: block;
+    margin: 28px auto;
+    width: min(920px, 92%);
+    padding: 0;
+    background: #101010;
+    color: #f5f0e3;
+    border: 1px solid rgba(212,175,55,.45);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.lbm-faq-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 22px 24px;
+    cursor: pointer;
+    list-style: none;
+    background: linear-gradient(110deg,#181818,#242017);
+}
+.lbm-faq-toggle::-webkit-details-marker { display:none; }
+.lbm-faq-toggle-copy {
+    display: grid;
+    gap: 6px;
+}
+.lbm-faq-toggle-copy .section-label {
+    margin: 0;
+    color: #d4af37;
+    font-size: 10px;
+    letter-spacing: 1.8px;
+}
+.lbm-faq-toggle-copy strong {
+    color: #f5f0e3;
+    font-size: 18px;
+    letter-spacing: .5px;
+}
+.lbm-faq-toggle-copy small {
+    color: #bdb7a9;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.lbm-faq-toggle-icon {
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #d4af37;
+    border-radius: 50%;
+    color: #e2c36b;
+    font-size: 25px;
+    line-height: 1;
+}
+.lbm-faq-section[open] .lbm-faq-toggle-icon { font-size: 0; }
+.lbm-faq-section[open] .lbm-faq-toggle-icon::before { content: "−"; font-size: 25px; }
+.lbm-faq-toggle:focus-visible {
+    outline: 2px solid #d4af37;
+    outline-offset: -3px;
+}
+.lbm-faq-content {
+    padding: 28px 24px 30px;
+    border-top: 1px solid rgba(212,175,55,.25);
+}
+.lbm-faq-content .home-section-heading {
+    max-width: 760px;
+    margin: 0 auto 24px;
+    text-align: center;
+}
+.lbm-faq-content .home-section-heading h2 { color: #f5f0e3; }
+.lbm-faq-list {
+    width: min(820px, 100%);
+    margin: 0 auto;
+    display: grid;
+    gap: 10px;
+}
+.lbm-faq-item {
+    border: 1px solid rgba(212,175,55,.32);
+    border-radius: 9px;
+    background: #181818;
+    overflow: hidden;
+}
+.lbm-faq-item summary {
+    position: relative;
+    padding: 17px 48px 17px 18px;
+    color: #e2c36b;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.5;
+    cursor: pointer;
+    list-style: none;
+}
+.lbm-faq-item summary::-webkit-details-marker { display:none; }
+.lbm-faq-item summary::after {
+    content: "+";
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #e2c36b;
+    font-size: 22px;
+    font-weight: 400;
+}
+.lbm-faq-item[open] summary::after { content: "−"; }
+.lbm-faq-item summary:focus-visible {
+    outline: 2px solid #d4af37;
+    outline-offset: -3px;
+}
+.lbm-faq-item p {
+    margin: 0;
+    padding: 0 18px 18px;
+    color: #d0cabb;
+    font-size: 13px;
+    line-height: 1.75;
+}
+.lbm-faq-item a, .lbm-faq-contact a {
+    color: #e2c36b;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.lbm-faq-contact {
+    margin: 24px auto 0;
+    text-align: center;
+    color: #d0cabb;
+    font-size: 13px;
+}
+@media (max-width: 600px) {
+    .lbm-faq-section { width: 94%; margin: 20px auto; }
+    .lbm-faq-toggle { padding: 17px 15px; gap: 12px; }
+    .lbm-faq-toggle-copy strong { font-size: 14px; }
+    .lbm-faq-toggle-copy small { font-size: 11px; }
+    .lbm-faq-toggle-icon { flex-basis: 34px; width: 34px; height: 34px; }
+    .lbm-faq-content { padding: 22px 12px; }
+    .lbm-faq-item summary { padding: 15px 42px 15px 14px; font-size: 13px; }
+    .lbm-faq-item p { padding: 0 14px 15px; font-size: 12px; }
+}

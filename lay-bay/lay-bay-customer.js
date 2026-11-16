@@ -423,6 +423,12 @@ let layBaySelectionCart = [];
       }
     `;
 
+    style.textContent += `
+      .lb-profile-editor { width:100%; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid #51451f; }
+      .lb-profile-editor label { display:block; margin:9px 0 5px; color:#ddd; }
+      .lb-profile-editor input { width:100%; box-sizing:border-box; padding:11px; background:#080808; color:#fff; border:1px solid #777; border-radius:7px; }
+      .lb-profile-editor button { margin-top:9px; }
+    `;
     document.head.appendChild(style);
   }
 
@@ -441,6 +447,24 @@ let layBaySelectionCart = [];
     const details = createElement("div", "lb-avatar-actions");
 
     const heading = createElement("strong", "", "My Profile Picture");
+
+    const profileEditor = createElement("div", "lb-profile-editor");
+    const profileHeading = createElement("strong", "", "Edit Profile");
+    const nameLabel = createElement("label", "", "Full name");
+    nameLabel.htmlFor = "lbProfileName";
+    const nameInput = createElement("input");
+    nameInput.type = "text";
+    nameInput.id = "lbProfileName";
+    nameInput.autocomplete = "name";
+    nameInput.maxLength = 80;
+    nameInput.placeholder = "Enter your full name";
+    const saveProfile = createElement("button", "", "Save Profile");
+    saveProfile.type = "button";
+    const profileStatus = createElement("div", "lb-avatar-note");
+    profileStatus.id = "lbProfileMessage";
+    profileEditor.append(profileHeading, nameLabel, nameInput, saveProfile, profileStatus);
+
+    saveProfile.addEventListener("click", saveCustomerProfile);
 
     const file = createElement("input");
     file.type = "file";
@@ -470,7 +494,7 @@ let layBaySelectionCart = [];
 
     remove.addEventListener("click", removeAvatar);
 
-    details.append(heading, upload, remove, note, status, file);
+    details.append(profileEditor, heading, upload, remove, note, status, file);
     panel.append(avatar, details);
 
     const customerName = $("customerEmail");
@@ -483,6 +507,52 @@ let layBaySelectionCart = [];
     }
 
     avatar.src = avatarPlaceholder();
+    nameInput.value =
+      currentUser?.user_metadata?.full_name ||
+      currentUser?.user_metadata?.name ||
+      "";
+  }
+
+  async function saveCustomerProfile() {
+    const input = $("lbProfileName");
+    const status = $("lbProfileMessage");
+    const saveButton = $("lbProfilePanel")?.querySelector("button");
+    const fullName = String(input?.value || "").trim();
+
+    if (!fullName) {
+      message("lbProfileMessage", "Please enter your name.", false);
+      return;
+    }
+    if (fullName.length > 80) {
+      message("lbProfileMessage", "Your name must be 80 characters or fewer.", false);
+      return;
+    }
+
+    if (saveButton) saveButton.disabled = true;
+    message("lbProfileMessage", "Saving your profile...");
+
+    try {
+      const { data, error } = await db.auth.updateUser({
+        data: {
+          ...(currentUser?.user_metadata || {}),
+          full_name: fullName,
+          name: fullName
+        }
+      });
+      if (error) throw error;
+
+      currentUser = data.user || currentUser;
+      if ($("customerEmail")) $("customerEmail").textContent = fullName;
+      message("lbProfileMessage", "Your profile name has been updated.");
+    } catch (error) {
+      message(
+        "lbProfileMessage",
+        error.message || "Could not update your profile.",
+        false
+      );
+    } finally {
+      if (saveButton) saveButton.disabled = false;
+    }
   }
 
 
@@ -1224,10 +1294,13 @@ let layBaySelectionCart = [];
       "lb-gallery-selection"
     );
 
+    const galleryDescription = createElement("p", "lb-gallery-description");
+    const galleryPrice = createElement("p", "lb-gallery-price");
+
     const selectionHeading = createElement(
       "h3",
       "",
-      "Configure Each Selected Picture"
+      "Choose Your Options"
     );
 
     const selectionNote = createElement(
@@ -1263,6 +1336,8 @@ let layBaySelectionCart = [];
     content.append(
       close,
       title,
+      galleryDescription,
+      galleryPrice,
       image,
       currentSelectLabel,
       controls,
@@ -1284,6 +1359,8 @@ let layBaySelectionCart = [];
       next,
       close,
       currentSelect,
+      galleryDescription,
+      galleryPrice,
       pictureOptions,
       addButton,
       selectionMessage
@@ -1378,6 +1455,16 @@ let layBaySelectionCart = [];
 
     productGallery.title.textContent =
       product?.name || "Product Pictures";
+
+    productGallery.galleryDescription.textContent =
+      product?.description ||
+      product?.details ||
+      product?.product_description ||
+      "No additional product description is available.";
+
+    productGallery.galleryPrice.textContent =
+      "Normal price: " + money(product?.price) +
+      " | Lay-Bay price: " + money(productPrice(product));
 
     productGallery.selectionMessage.textContent =
       "Select the pictures you want using the checkboxes.";
@@ -1832,10 +1919,10 @@ let layBaySelectionCart = [];
       configuredItems.length +
       " picture(s) added successfully. Each picture has its own options.";
 
-    $("layBaySelectionBasket")?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest"
-    });
+    // Close the higher-layer picture picker before opening the basket.
+    // Its z-index otherwise covers the basket until the customer taps Back.
+    closeProductGallery();
+    openSelectionBasket();
   }
 
   // -------------------------------------------------------
@@ -1956,13 +2043,27 @@ let layBaySelectionCart = [];
     style.id = "lbSelectionStyles";
 
     style.textContent = `
-      .lb-selection-panel {
-        margin: 14px 0;
-        padding: 15px;
-        border: 1px solid #665522;
-        border-radius: 10px;
-        background: #101010;
-      }
+      /* Compact two-column Lay-Bay product catalogue */
+      #productsList { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:start; }
+      #productsList > .lb-product { width:100%; min-width:0; margin:0; padding:10px; overflow:hidden; }
+      #productsList > .lb-product > img { width:100%; height:clamp(112px,28vw,190px); object-fit:cover; border-radius:8px; }
+      #productsList > .lb-product > h3 { font-size:clamp(13px,3.5vw,17px); line-height:1.25; margin:8px 0 6px; overflow-wrap:anywhere; }
+      #productsList > .lb-product > p { font-size:12px; line-height:1.35; margin:4px 0; }
+      .lb-product-photo-hint { color:#D4AF37; font-size:11px; text-align:center; margin:3px 0 7px; }
+      .lb-gallery-description { color:#ddd; text-align:left; line-height:1.5; margin:8px 0 14px; }
+      .lb-gallery-price { color:#D4AF37; font-weight:800; text-align:left; margin:6px 0; }
+      .lb-selection-panel { margin:8px 0 2px; padding:9px; border:1px solid #665522; border-radius:9px; background:#101010; }
+      .lb-option-details { margin:7px 0; border:1px solid #51451f; border-radius:7px; background:#171717; }
+      .lb-option-details summary { cursor:pointer; list-style:none; padding:10px 12px; color:#D4AF37; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+      .lb-option-details summary::-webkit-details-marker { display:none; }
+      .lb-option-details summary::after { content:"＋"; font-size:17px; }
+      .lb-option-details[open] summary::after { content:"−"; }
+      .lb-option-details .lb-circle-options { padding:0 10px 10px; gap:7px; }
+      .lb-option-details .lb-circle-option { min-width:0; min-height:34px; padding:6px 9px; gap:5px; font-size:13px; }
+      .lb-option-details .lb-selection-heading { display:none; }
+      .lb-product .lb-selection-panel .lb-product-choice { margin:4px 0 8px; padding:8px 10px; }
+      .lb-product .lb-selection-panel .lb-selection-actions { margin-top:9px; }
+      .lb-product .lb-selection-panel .lb-selection-actions button { padding:9px 10px; font-size:13px; }
 
       .lb-selection-heading {
         color: #D4AF37;
@@ -2086,6 +2187,18 @@ let layBaySelectionCart = [];
         font-size: 19px;
         font-weight: bold;
       }
+      .lb-basket-launcher { position:fixed; left:14px; bottom:14px; z-index:99980; display:none; padding:12px 16px; border:1px solid #080808; border-radius:28px; background:#D4AF37; color:#080808; font-weight:800; box-shadow:0 5px 20px rgba(0,0,0,.45); }
+      .lb-basket-launcher.visible { display:block; }
+      .lb-basket-backdrop { position:fixed; inset:0; z-index:99990; background:rgba(0,0,0,.72); display:none; }
+      .lb-basket-backdrop.open { display:block; }
+      #layBaySelectionBasket.lb-basket-drawer { position:fixed; z-index:99991; top:0; right:0; bottom:0; width:min(520px,100vw); max-height:100vh; max-height:100dvh; overflow-y:auto; overscroll-behavior:contain; margin:0; padding:22px; background:#151515; border:1px solid #D4AF37; border-radius:12px 0 0 12px; box-shadow:0 0 0 100vmax rgba(0,0,0,.62),-12px 0 38px rgba(0,0,0,.28); display:none; }
+      #layBaySelectionBasket.lb-basket-drawer.open { display:block; }
+      .lb-basket-drawer-head { position:sticky; top:-18px; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 0 12px; background:#151515; border-bottom:1px solid #51451f; }
+      .lb-basket-drawer-head h2 { margin:4px 0; }
+      .lb-basket-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+      .lb-basket-actions button { flex:1 1 180px; }
+      .lb-basket-plan-note { padding:12px; margin:12px 0; border:1px solid #665522; border-radius:9px; background:#201c10; line-height:1.5; }
+      @media(max-width:600px) { #productsList { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } #productsList > .lb-product { padding:8px; } #productsList > .lb-product > img { height:clamp(100px,30vw,145px); } #layBaySelectionBasket.lb-basket-drawer { top:auto; right:0; bottom:0; left:0; width:100%; max-height:min(82vh,82dvh); border-radius:16px 16px 0 0; border-bottom:0; padding:18px 14px calc(18px + env(safe-area-inset-bottom)); box-shadow:0 -10px 36px rgba(0,0,0,.35),0 0 0 100vmax rgba(0,0,0,.62); } .lb-basket-drawer-head { top:-14px; } }
 
       @media(max-width: 420px) {
         .lb-combination,
@@ -2144,13 +2257,9 @@ let layBaySelectionCart = [];
     const colourInputs = [];
 
     if (sizes.length) {
-      wrapper.appendChild(
-        createElement(
-          "div",
-          "lb-selection-heading",
-          "Choose sizes"
-        )
-      );
+      const sizeDetails = createElement("details", "lb-option-details");
+      const sizeSummary = createElement("summary", "", "Choose sizes (" + sizes.length + ")");
+      sizeDetails.appendChild(sizeSummary);
 
       const sizeContainer = createElement(
         "div",
@@ -2175,17 +2284,14 @@ let layBaySelectionCart = [];
         sizeInputs.push(checkbox);
       });
 
-      wrapper.appendChild(sizeContainer);
+      sizeDetails.appendChild(sizeContainer);
+      wrapper.appendChild(sizeDetails);
     }
 
     if (colours.length) {
-      wrapper.appendChild(
-        createElement(
-          "div",
-          "lb-selection-heading",
-          "Choose colours"
-        )
-      );
+      const colourDetails = createElement("details", "lb-option-details");
+      const colourSummary = createElement("summary", "", "Choose colours (" + colours.length + ")");
+      colourDetails.appendChild(colourSummary);
 
       const colourContainer = createElement(
         "div",
@@ -2210,7 +2316,8 @@ let layBaySelectionCart = [];
         colourInputs.push(checkbox);
       });
 
-      wrapper.appendChild(colourContainer);
+      colourDetails.appendChild(colourContainer);
+      wrapper.appendChild(colourDetails);
     }
 
     const combinationArea = createElement("div");
@@ -2233,20 +2340,12 @@ let layBaySelectionCart = [];
 
     addButton.type = "button";
 
-    const planButton = createElement(
-      "button",
-      "",
-      "Start Lay-Bay Plan"
-    );
-
-    planButton.type = "button";
-
     const actions = createElement(
       "div",
       "lb-selection-actions"
     );
 
-    actions.append(addButton, planButton);
+    actions.appendChild(addButton);
     wrapper.appendChild(actions);
 
     let combinations = [];
@@ -2458,29 +2557,7 @@ let layBaySelectionCart = [];
       selectionMessage.textContent =
         added + " selected combination(s) added to your Lay-Bay basket.";
 
-      $("layBaySelectionBasket")?.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest"
-      });
-    });
-
-    planButton.addEventListener("click", () => {
-      const selected = getSelectedCombinations();
-
-      if (selected.length !== 1) {
-        selectionMessage.textContent =
-          "To create a plan directly, select exactly one combination. For multiple combinations, add them to your basket first.";
-        return;
-      }
-
-      createPlan(
-        product,
-        planButton,
-        {
-          valid: () => true,
-          getValues: selectedVariantValues
-        }
-      );
+      openSelectionBasket();
     });
 
     return {
@@ -2504,16 +2581,28 @@ let layBaySelectionCart = [];
     section = createElement("section", "lb-panel");
     section.id = "layBaySelectionBasket";
 
-    const heading = createElement(
-      "h2",
-      "",
-      "My Lay-Bay Selection Basket"
-    );
+    section.classList.add("lb-basket-drawer");
+    const backdrop = createElement("div", "lb-basket-backdrop");
+    backdrop.id = "layBayBasketBackdrop";
+    backdrop.addEventListener("click", closeSelectionBasket);
+    document.body.appendChild(backdrop);
 
-    const note = createElement(
-      "p",
-      "lb-muted",
-      "Review your selected products, exact variants and quantities. Adding items here does not create a savings plan or submit a payment."
+    const launcher = createElement("button", "lb-basket-launcher", "Lay-Bay Basket");
+    launcher.id = "layBayBasketLauncher";
+    launcher.type = "button";
+    launcher.addEventListener("click", openSelectionBasket);
+    document.body.appendChild(launcher);
+
+    const drawerHead = createElement("div", "lb-basket-drawer-head");
+    const heading = createElement("h2", "", "My Lay-Bay Basket");
+    const closeButton = createElement("button", "", "×");
+    closeButton.type = "button";
+    closeButton.setAttribute("aria-label", "Close Lay-Bay basket");
+    closeButton.addEventListener("click", closeSelectionBasket);
+    drawerHead.append(heading, closeButton);
+
+    const note = createElement("p", "lb-muted",
+      "Your selections stay in this basket while you continue. Adding items does not create a savings plan or submit a payment."
     );
 
     const list = createElement("div");
@@ -2523,12 +2612,14 @@ let layBaySelectionCart = [];
     total.id = "layBaySelectionBasketTotal";
     total.className = "lb-basket-total";
 
-    const clearButton = createElement(
-      "button",
-      "",
-      "Clear Selection Basket"
+    const planNote = createElement("div", "lb-basket-plan-note",
+      "Payment plan preview: each product and selected variant has its own plan. The first deposit guide is 50% of its Lay-Bay total; the remaining balance is due within 30 days after LBM approves the first deposit. This basket review does not create a plan or submit payment."
     );
+    const continueButton = createElement("button", "", "Continue Selecting Products");
+    continueButton.type = "button";
+    continueButton.addEventListener("click", closeSelectionBasket);
 
+    const clearButton = createElement("button", "", "Clear Selection Basket");
     clearButton.type = "button";
 
     clearButton.addEventListener("click", () => {
@@ -2542,23 +2633,62 @@ let layBaySelectionCart = [];
       renderSelectionBasket();
     });
 
-    section.append(
-      heading,
-      note,
-      list,
-      total,
-      clearButton
-    );
+    const actions = createElement("div", "lb-basket-actions");
+    actions.append(continueButton, clearButton);
+    section.append(drawerHead, note, list, total, planNote, actions);
 
-    const productsSection = $("productsSection");
-
-    if (productsSection) {
-      productsSection.after(section);
-    } else {
-      document.querySelector("main")?.appendChild(section);
-    }
+    // Keep the basket outside the catalogue/page layout.
+    // This "portal" placement prevents it from appearing as a normal
+    // section at the bottom or inheriting clipping/positioning from
+    // the product catalogue container.
+    document.body.appendChild(section);
 
     return section;
+  }
+
+  function openSelectionBasket() {
+    const section = ensureSelectionBasket();
+    const backdrop = $("layBayBasketBackdrop");
+
+    // Match the main shop cart exactly: opening the cart itself creates
+    // the dimmed viewport overlay; no scrolling or Back action is needed.
+    section.classList.add("open");
+    backdrop?.classList.add("open");
+
+    section.style.position = "fixed";
+    section.style.top = "0";
+    section.style.right = "0";
+    section.style.bottom = "0";
+    section.style.left = "auto";
+    section.style.width = "min(520px, 100vw)";
+    section.style.maxHeight = "100vh";
+    section.style.maxHeight = "100dvh";
+    section.style.margin = "0";
+    section.style.borderRadius = "12px 0 0 12px";
+    section.style.overflowY = "auto";
+    section.style.zIndex = "99991";
+    section.style.display = "block";
+
+    if (window.matchMedia("(max-width: 600px)").matches) {
+      section.style.top = "auto";
+      section.style.right = "0";
+      section.style.bottom = "0";
+      section.style.left = "0";
+      section.style.width = "100%";
+      section.style.maxHeight = "min(82vh, 82dvh)";
+      section.style.borderRadius = "16px 16px 0 0";
+    }
+
+    document.body.style.overflow = "hidden";
+    section.setAttribute("role", "dialog");
+    section.setAttribute("aria-modal", "true");
+    section.setAttribute("aria-label", "LBM Lay-Bay basket. Your selection has been added.");
+    section.scrollTop = 0;
+  }
+  function closeSelectionBasket() {
+    $("layBaySelectionBasket")?.classList.remove("open");
+    $("layBayBasketBackdrop")?.classList.remove("open");
+    document.body.style.overflow = "";
   }
 
   function renderSelectionBasket() {
@@ -2570,6 +2700,15 @@ let layBaySelectionCart = [];
     if (!list || !totalElement) return;
 
     list.innerHTML = "";
+
+    const launcher = $("layBayBasketLauncher");
+    const itemCount = layBaySelectionCart.reduce(
+      (sum, item) => sum + Number(item.quantity || 0), 0
+    );
+    if (launcher) {
+      launcher.textContent = "Lay-Bay Basket (" + itemCount + ")";
+      launcher.classList.toggle("visible", itemCount > 0);
+    }
 
     if (!layBaySelectionCart.length) {
       list.textContent =
@@ -2663,6 +2802,18 @@ let layBaySelectionCart = [];
           "Line total: " + money(lineTotal)
         ),
 
+        createElement(
+          "p",
+          "",
+          "First deposit guide (50%): " + money(lineTotal * 0.5)
+        ),
+
+        createElement(
+          "p",
+          "",
+          "Remaining balance guide: " + money(lineTotal * 0.5)
+        ),
+
         remove
       );
 
@@ -2681,6 +2832,18 @@ let layBaySelectionCart = [];
   function renderProducts() {
     const container = $("productsList");
     if (!container) return;
+
+    // Apply the two-column layout directly to the real catalogue element.
+    // This overrides the dashboard's generic .lb-grid min-width rule,
+    // which otherwise forces one card per row on narrow mobile screens.
+    container.style.setProperty("display", "grid", "important");
+    container.style.setProperty(
+      "grid-template-columns",
+      "repeat(2, minmax(0, 1fr))",
+      "important"
+    );
+    container.style.setProperty("gap", "10px", "important");
+    container.style.setProperty("align-items", "start");
 
     container.innerHTML = "";
 
@@ -2702,6 +2865,10 @@ let layBaySelectionCart = [];
       );
       card.dataset.productId = String(product.id);
       card.dataset.category = String(product.category || "");
+      card.style.setProperty("width", "100%", "important");
+      card.style.setProperty("min-width", "0", "important");
+      card.style.setProperty("margin", "0", "important");
+      card.style.setProperty("box-sizing", "border-box");
 
       const images = productImages(product);
 
@@ -2727,18 +2894,6 @@ let layBaySelectionCart = [];
         "h3",
         "",
         product.name || "LBM Product"
-      );
-
-      const descriptionText =
-        product.description ||
-        product.details ||
-        product.product_description ||
-        "";
-
-      const description = createElement(
-        "p",
-        "lb-muted",
-        descriptionText
       );
 
       const normal = createElement(
@@ -2770,32 +2925,35 @@ let layBaySelectionCart = [];
         ? "#25a56a"
         : "#d99b35";
 
-      const stock = createElement(
-        "p",
-        "lb-muted",
-        "Available stock: " +
-        (Number(product.stock) || 0)
-      );
-
-      const variants = createVariantSelector(product);
-
-      if (!availability.available) {
-        variants.element
-          .querySelectorAll("input, button")
-          .forEach(control => {
-            control.disabled = true;
-          });
+      if (images.length) {
+        title.style.cursor = "pointer";
+        title.setAttribute("role", "button");
+        title.setAttribute("tabindex", "0");
+        title.setAttribute("aria-label", "Explore " + (product.name || "product") + " pictures and options");
+        title.addEventListener("click", () =>
+          openProductGallery(images, 0, product)
+        );
+        title.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openProductGallery(images, 0, product);
+          }
+        });
       }
+
+      const photoHint = createElement(
+        "p",
+        "lb-product-photo-hint",
+        images.length ? "Tap picture to explore" : "Pictures unavailable"
+      );
 
       card.append(
         photo,
+        photoHint,
         title,
-        description,
         normal,
         layBay,
-        status,
-        stock,
-        variants.element
+        status
       );
 
       container.appendChild(card);
@@ -2813,6 +2971,63 @@ let layBaySelectionCart = [];
       " main-store products. " +
       enabledCount + " currently available for Lay-Bay."
     );
+  }
+
+
+  // =======================================================
+  // 11.9. SHOW A CLEAR SUMMARY AFTER A PLAN IS CREATED
+  // =======================================================
+
+  function showCreatedPlanSummary(plan) {
+    if (!plan) return;
+
+    const plansMessage = $("plansMessage");
+    const plansList = $("plansList");
+    if (!plansMessage || !plansList) return;
+
+    $("lbm-created-plan-summary")?.remove();
+
+    const balance = balanceFor(plan.id);
+    const target = Number(
+      balance?.target_price ?? plan.lay_bay_price_snapshot ?? 0
+    );
+    const verified = Number(balance?.current_balance ?? 0);
+    const remaining = Number(
+      balance?.remaining_balance ?? Math.max(target - verified, 0)
+    );
+    const firstDeposit = Number((target * 0.5).toFixed(2));
+
+    const card = createElement("section", "lb-card");
+    card.id = "lbm-created-plan-summary";
+
+    card.append(
+      createElement("h3", "", "Your Lay-Bay plan has been created!"),
+      createElement("p", "", "Product: " + (plan.product_name_snapshot || "Selected LBM product")),
+      createElement("p", "", "Lay-Bay plan total: " + money(target)),
+      createElement("p", "", "Verified payments so far: " + money(verified)),
+      createElement("p", "", "Remaining balance: " + money(remaining)),
+      createElement(
+        "p",
+        "",
+        "Next step: Submit your first deposit of at least " + money(firstDeposit) + " (50%)."
+      ),
+      createElement(
+        "p",
+        "lb-muted",
+        "Creating this plan does not mean it is fully paid or ready for collection. Your first deposit must be verified by LBM before the 30-day payment period begins."
+      )
+    );
+
+    const nextButton = createElement("button", "", "Go to Deposit Form");
+    nextButton.type = "button";
+    nextButton.addEventListener("click", () => {
+      $("depositSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      $("selectedPlan")?.focus({ preventScroll: true });
+    });
+    card.appendChild(nextButton);
+
+    plansMessage.after(card);
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
 
@@ -2896,14 +3111,14 @@ let layBaySelectionCart = [];
       message(
         "plansMessage",
         matchingPlan
-          ? "Your Lay-Bay plan is awaiting its first deposit of at least 50%. Submit that amount for verification to activate the plan and start the 30-day period."
+          ? "Your Lay-Bay plan is awaiting its first deposit. Review the summary below for the amount and next step."
           : "The plan request was processed. Please refresh your plans."
       );
 
-      if ($("depositSection")) {
-        $("depositSection").scrollIntoView({
-          behavior: "smooth"
-        });
+      if (matchingPlan) {
+        showCreatedPlanSummary(matchingPlan);
+      } else if ($("depositSection")) {
+        $("depositSection").scrollIntoView({ behavior: "smooth" });
       }
 
     } catch (error) {
@@ -3840,10 +4055,14 @@ let layBaySelectionCart = [];
         loadPlans()
       ]);
 
-      message(
-        "pageMessage",
-        "Dashboard loaded. Your account records are up to date."
-      );
+      // Keep the page header clean after loading; errors and important
+      // notices still use the live message area when needed.
+      const pageStatus = $("pageMessage");
+      if (pageStatus) {
+        pageStatus.textContent = "";
+        pageStatus.classList.remove("show", "error", "success");
+        pageStatus.style.display = "none";
+      }
 
     } catch (error) {
       message(
