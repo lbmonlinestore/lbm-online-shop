@@ -1173,6 +1173,7 @@ function addToCart(productId) {
     if (cartSection) {
         cartSection.classList.add("open");
         cartSection.setAttribute("aria-label", "Shopping cart. Product added successfully.");
+        cartButton?.setAttribute("aria-expanded", "true");
         cartSection.scrollTop = 0;
     }
 
