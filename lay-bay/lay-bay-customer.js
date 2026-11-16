@@ -2243,7 +2243,7 @@ let layBaySelectionCart = [];
     const planButton = createElement(
       "button",
       "",
-      "Start Lay-Bay Plan"
+      "Add & Review Basket"
     );
 
     planButton.type = "button";
@@ -2469,22 +2469,9 @@ let layBaySelectionCart = [];
     });
 
     planButton.addEventListener("click", () => {
-      const selected = getSelectedCombinations();
-
-      if (selected.length !== 1) {
-        selectionMessage.textContent =
-          "To create a plan directly, select exactly one combination. For multiple combinations, add them to your basket first.";
-        return;
-      }
-
-      createPlan(
-        product,
-        planButton,
-        {
-          valid: () => true,
-          getValues: selectedVariantValues
-        }
-      );
+      // Every Lay-Bay journey passes through the basket review.
+      // This avoids bypassing the customer's selection and price review.
+      addButton.click();
     });
 
     return {
@@ -2534,7 +2521,7 @@ let layBaySelectionCart = [];
     total.className = "lb-basket-total";
 
     const planNote = createElement("div", "lb-basket-plan-note",
-      "Payment plan preview: your first deposit must be at least 50% of the Lay-Bay price. The remaining balance is due within 30 days after LBM approves the first deposit. No plan or payment is created just by adding items."
+      "Payment plan preview: each product and selected variant has its own plan. The first deposit guide is 50% of its Lay-Bay total; the remaining balance is due within 30 days after LBM approves the first deposit. This basket review does not create a plan or submit payment."
     );
     const continueButton = createElement("button", "", "Continue Selecting Products");
     continueButton.type = "button";
@@ -2685,6 +2672,18 @@ let layBaySelectionCart = [];
           "p",
           "lb-basket-total",
           "Line total: " + money(lineTotal)
+        ),
+
+        createElement(
+          "p",
+          "",
+          "First deposit guide (50%): " + money(lineTotal * 0.5)
+        ),
+
+        createElement(
+          "p",
+          "",
+          "Remaining balance guide: " + money(lineTotal * 0.5)
         ),
 
         remove
