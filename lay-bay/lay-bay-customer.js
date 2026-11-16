@@ -1956,6 +1956,19 @@ let layBaySelectionCart = [];
     style.id = "lbSelectionStyles";
 
     style.textContent = `
+      /* Compact two-column Lay-Bay product catalogue */
+      #productsList { display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:start; }
+      #productsList > .lb-product { width:100%; min-width:0; margin:0; padding:10px; overflow:hidden; }
+      #productsList > .lb-product > img { width:100%; height:clamp(112px,28vw,190px); object-fit:cover; border-radius:8px; }
+      #productsList > .lb-product > h3 { font-size:clamp(13px,3.5vw,17px); line-height:1.25; margin:8px 0 6px; overflow-wrap:anywhere; }
+      #productsList > .lb-product > p { font-size:12px; line-height:1.35; margin:4px 0; }
+      .lb-product-expand { margin-top:9px; border:1px solid #665522; border-radius:8px; background:#111; overflow:hidden; }
+      .lb-product-expand > summary { cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:6px; padding:10px; color:#D4AF37; font-size:12px; font-weight:800; }
+      .lb-product-expand > summary::-webkit-details-marker { display:none; }
+      .lb-product-expand > summary::after { content:"＋"; font-size:16px; }
+      .lb-product-expand[open] > summary::after { content:"−"; }
+      .lb-product-expanded-content { padding:0 9px 10px; }
+      .lb-product-expanded-content > p { font-size:12px; line-height:1.45; }
       .lb-selection-panel { margin:8px 0 2px; padding:9px; border:1px solid #665522; border-radius:9px; background:#101010; }
       .lb-option-details { margin:7px 0; border:1px solid #51451f; border-radius:7px; background:#171717; }
       .lb-option-details summary { cursor:pointer; list-style:none; padding:10px 12px; color:#D4AF37; font-weight:700; display:flex; align-items:center; justify-content:space-between; gap:8px; }
@@ -2102,7 +2115,7 @@ let layBaySelectionCart = [];
       .lb-basket-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
       .lb-basket-actions button { flex:1 1 180px; }
       .lb-basket-plan-note { padding:12px; margin:12px 0; border:1px solid #665522; border-radius:9px; background:#201c10; line-height:1.5; }
-      @media(max-width:600px) { #layBaySelectionBasket.lb-basket-drawer { top:auto; right:0; bottom:0; left:0; width:100%; max-height:min(82vh,82dvh); border-radius:16px 16px 0 0; border-bottom:0; padding:18px 14px calc(18px + env(safe-area-inset-bottom)); box-shadow:0 -10px 36px rgba(0,0,0,.35),0 0 0 100vmax rgba(0,0,0,.62); } .lb-basket-drawer-head { top:-14px; } }
+      @media(max-width:600px) { #productsList { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } #productsList > .lb-product { padding:8px; } #productsList > .lb-product > img { height:clamp(100px,30vw,145px); } #layBaySelectionBasket.lb-basket-drawer { top:auto; right:0; bottom:0; left:0; width:100%; max-height:min(82vh,82dvh); border-radius:16px 16px 0 0; border-bottom:0; padding:18px 14px calc(18px + env(safe-area-inset-bottom)); box-shadow:0 -10px 36px rgba(0,0,0,.35),0 0 0 100vmax rgba(0,0,0,.62); } .lb-basket-drawer-head { top:-14px; } }
 
       @media(max-width: 420px) {
         .lb-combination,
@@ -2856,15 +2869,21 @@ let layBaySelectionCart = [];
           });
       }
 
+      // Keep the catalogue compact: show the essential product details
+      // in the card, and reveal description, stock, sizes and colours on tap.
+      const expand = createElement("details", "lb-product-expand");
+      const expandSummary = createElement("summary", "", "View Description, Sizes & Colours");
+      const expandedContent = createElement("div", "lb-product-expanded-content");
+      expandedContent.append(description, stock, variants.element);
+      expand.append(expandSummary, expandedContent);
+
       card.append(
         photo,
         title,
-        description,
         normal,
         layBay,
         status,
-        stock,
-        variants.element
+        expand
       );
 
       container.appendChild(card);
