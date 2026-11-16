@@ -1258,3 +1258,38 @@ th {
  .site-header-stack #lbm-product-search{height:41px;font-size:14px}
 }
 @media(prefers-reduced-motion:reduce){.site-header-stack{transition:none}}
+
+
+/* =====================================================
+   20. MAIN SHOP — CLEAN PRODUCT CARDS + FULL GALLERY
+   Test branch only
+===================================================== */
+.product-card-title {
+    cursor: pointer;
+    user-select: none;
+}
+.product-card-title:hover {
+    color: #E2C36B;
+}
+.product-card-title:focus-visible {
+    outline: 2px solid #D4AF37;
+    outline-offset: 3px;
+    border-radius: 3px;
+}
+.product-card .stock-label {
+    margin: 5px 0 0;
+    color: #bdb7a9;
+    font-size: 12px;
+}
+.lbm-preview-description {
+    color: #4b463b;
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    padding: 10px 12px;
+    margin: 10px 0 14px !important;
+    background: #f7f4ec;
+    border-radius: 7px;
+}
