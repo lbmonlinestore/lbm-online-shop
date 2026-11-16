@@ -2553,19 +2553,25 @@ let layBaySelectionCart = [];
     actions.append(continueButton, clearButton);
     section.append(drawerHead, note, list, total, planNote, actions);
 
-    const productsSection = $("productsSection");
-
-    if (productsSection) {
-      productsSection.after(section);
-    } else {
-      document.querySelector("main")?.appendChild(section);
-    }
+    // Keep the basket outside the catalogue/page layout.
+    // This "portal" placement prevents it from appearing as a normal
+    // section at the bottom or inheriting clipping/positioning from
+    // the product catalogue container.
+    document.body.appendChild(section);
 
     return section;
   }
 
   function openSelectionBasket() {
     const section = ensureSelectionBasket();
+
+    // Force a viewport-level overlay, matching the main shop cart.
+    section.style.position = "fixed";
+    section.style.right = "12px";
+    section.style.bottom = "12px";
+    section.style.zIndex = "99991";
+    section.style.display = "block";
+
     section.classList.add("open");
     $("layBayBasketBackdrop")?.classList.add("open");
     document.body.style.overflow = "hidden";
