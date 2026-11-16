@@ -2566,22 +2566,43 @@ let layBaySelectionCart = [];
 
   function openSelectionBasket() {
     const section = ensureSelectionBasket();
+    const backdrop = $("layBayBasketBackdrop");
 
-    // Force a viewport-level overlay, matching the main shop cart.
+    // Match the main shop cart exactly: opening the cart itself creates
+    // the dimmed viewport overlay; no scrolling or Back action is needed.
+    section.classList.add("open");
+    backdrop?.classList.add("open");
+
     section.style.position = "fixed";
-    section.style.right = "12px";
-    section.style.bottom = "12px";
+    section.style.top = "0";
+    section.style.right = "0";
+    section.style.bottom = "0";
+    section.style.left = "auto";
+    section.style.width = "min(520px, 100vw)";
+    section.style.maxHeight = "100vh";
+    section.style.maxHeight = "100dvh";
+    section.style.margin = "0";
+    section.style.borderRadius = "12px 0 0 12px";
+    section.style.overflowY = "auto";
     section.style.zIndex = "99991";
     section.style.display = "block";
 
-    section.classList.add("open");
-    $("layBayBasketBackdrop")?.classList.add("open");
+    if (window.matchMedia("(max-width: 600px)").matches) {
+      section.style.top = "auto";
+      section.style.right = "0";
+      section.style.bottom = "0";
+      section.style.left = "0";
+      section.style.width = "100%";
+      section.style.maxHeight = "min(82vh, 82dvh)";
+      section.style.borderRadius = "16px 16px 0 0";
+    }
+
     document.body.style.overflow = "hidden";
     section.setAttribute("role", "dialog");
     section.setAttribute("aria-modal", "true");
-    section.setAttribute("aria-label", "LBM Lay-Bay selection basket");
+    section.setAttribute("aria-label", "LBM Lay-Bay basket. Your selection has been added.");
+    section.scrollTop = 0;
   }
-
   function closeSelectionBasket() {
     $("layBaySelectionBasket")?.classList.remove("open");
     $("layBayBasketBackdrop")?.classList.remove("open");
