@@ -1087,8 +1087,12 @@ function addToCart(productId) {
 
     const images = getProductImages(product);
     const selection = getCardVariantSelection(productId);
+    const selectedImageIndex = Math.min(
+        Math.max(0, Number(productImageIndices[String(productId)]) || 0),
+        images.length - 1
+    );
 
-    if (!addImageVariantToCart(product, images[0], 0, selection.size, selection.colour)) {
+    if (!addImageVariantToCart(product, images[selectedImageIndex], selectedImageIndex, selection.size, selection.colour)) {
 
         alert("Sorry, the available stock for this product has been reached.");
 
