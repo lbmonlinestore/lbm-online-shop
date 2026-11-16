@@ -2764,6 +2764,18 @@ let layBaySelectionCart = [];
     const container = $("productsList");
     if (!container) return;
 
+    // Apply the two-column layout directly to the real catalogue element.
+    // This overrides the dashboard's generic .lb-grid min-width rule,
+    // which otherwise forces one card per row on narrow mobile screens.
+    container.style.setProperty("display", "grid", "important");
+    container.style.setProperty(
+      "grid-template-columns",
+      "repeat(2, minmax(0, 1fr))",
+      "important"
+    );
+    container.style.setProperty("gap", "10px", "important");
+    container.style.setProperty("align-items", "start");
+
     container.innerHTML = "";
 
     if (!products.length) {
@@ -2784,6 +2796,10 @@ let layBaySelectionCart = [];
       );
       card.dataset.productId = String(product.id);
       card.dataset.category = String(product.category || "");
+      card.style.setProperty("width", "100%", "important");
+      card.style.setProperty("min-width", "0", "important");
+      card.style.setProperty("margin", "0", "important");
+      card.style.setProperty("box-sizing", "border-box");
 
       const images = productImages(product);
 
