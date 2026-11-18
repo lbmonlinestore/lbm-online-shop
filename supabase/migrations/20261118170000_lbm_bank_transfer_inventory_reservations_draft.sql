@@ -194,7 +194,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $submit_lbm_bank_transfer$
 declare
   v_order public.orders%rowtype;
   v_reference text;
@@ -266,7 +266,7 @@ begin
 
   return jsonb_build_object('success',true,'payment_reference',v_reference,'status','Pending Verification');
 end;
-$;
+$submit_lbm_bank_transfer$;
 
 -- Replaces the existing review RPC, retaining its current validation and
 -- adding deadline/reservation consumption inside the same transaction.
