@@ -271,6 +271,7 @@ BEGIN
       AND lp.selected_size IS NOT DISTINCT FROM v_selected_size
       AND lp.selected_colour IS NOT DISTINCT FROM v_selected_colour
       AND COALESCE(lp.quantity, 1) = v_quantity
+      AND lp.cancellation_requested_at IS NULL
       AND pg_catalog.lower(lp.plan_status) IN ('active', 'pending_initial_deposit')
     ORDER BY
         EXISTS (
@@ -377,6 +378,10 @@ BEGIN
 
     IF v_plan.plan_status NOT IN ('active', 'pending_initial_deposit') THEN
         RAISE EXCEPTION 'Deposits can only be submitted for eligible Lay-Bay plans.';
+    END IF;
+
+    IF v_plan.cancellation_requested_at IS NOT NULL THEN
+        RAISE EXCEPTION 'This plan is awaiting a cancellation decision. New deposits are temporarily disabled.';
     END IF;
 
     IF v_plan.expires_at IS NOT NULL
@@ -558,6 +563,10 @@ BEGIN
         );
 
         RETURN 'Deposit rejected successfully.';
+    END IF;
+
+    IF v_plan.cancellation_requested_at IS NOT NULL THEN
+        RAISE EXCEPTION 'This plan has a pending cancellation request. Reject or resolve that request before approving another deposit.';
     END IF;
 
     IF v_plan.plan_status NOT IN ('active', 'pending_initial_deposit') THEN
@@ -932,6 +941,220 @@ BEGIN
 END;
 $function$
 
+
+CREATE OR REPLACE FUNCTION public.request_lay_bay_refund(p_plan_id uuid, p_reason text)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+DECLARE
+    v_user_id uuid;
+    v_plan public.lay_bay_plans%ROWTYPE;
+    v_balance numeric;
+    v_refund_id uuid;
+BEGIN
+    v_user_id := auth.uid();
+    IF v_user_id IS NULL THEN
+        RAISE EXCEPTION 'Please sign in first.';
+    END IF;
+    IF p_reason IS NULL OR length(btrim(p_reason)) < 5 THEN
+        RAISE EXCEPTION 'Please provide a clear cancellation or refund reason.';
+    END IF;
+
+    SELECT * INTO v_plan
+    FROM public.lay_bay_plans
+    WHERE id = p_plan_id AND user_id = v_user_id
+    FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Lay-Bay plan not found.';
+    END IF;
+
+    IF v_plan.plan_status NOT IN ('active', 'expired', 'cancelled') THEN
+        RAISE EXCEPTION 'This Lay-Bay plan is not eligible for cancellation or refund review.';
+    END IF;
+    IF v_plan.cancellation_requested_at IS NOT NULL THEN
+        RAISE EXCEPTION 'A cancellation request is already awaiting review.';
+    END IF;
+
+    SELECT COALESCE(SUM(
+        CASE WHEN entry_type = 'credit' THEN amount
+             WHEN entry_type = 'debit' THEN -amount
+             ELSE 0 END
+    ), 0)
+    INTO v_balance
+    FROM public.lay_bay_ledger
+    WHERE plan_id = p_plan_id AND user_id = v_user_id;
+
+    IF v_balance <= 0 THEN
+        RAISE EXCEPTION 'There is no approved payment balance to refund. Contact LBM if you need help closing an unpaid plan.';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM public.lay_bay_refunds
+        WHERE plan_id = p_plan_id
+          AND request_status IN ('pending','under_review','approved','processing','processed')
+    ) THEN
+        RAISE EXCEPTION 'A refund or cancellation request already exists for this plan.';
+    END IF;
+
+    INSERT INTO public.lay_bay_refunds (
+        plan_id,user_id,cancellation_reason,total_deposited,
+        proposed_deduction,refund_amount,currency,request_status
+    )
+    VALUES (
+        p_plan_id,v_user_id,btrim(p_reason),v_balance,
+        0,v_balance,v_plan.currency,'pending'
+    )
+    RETURNING id INTO v_refund_id;
+
+    IF v_plan.plan_status = 'active' THEN
+        UPDATE public.lay_bay_plans
+        SET cancellation_requested_at = now(), updated_at = now()
+        WHERE id = p_plan_id;
+    END IF;
+
+    INSERT INTO public.lay_bay_audit_logs (
+        actor_user_id,actor_role,action,entity_type,entity_id,description,new_values
+    )
+    VALUES (
+        v_user_id,'customer',
+        CASE WHEN v_plan.plan_status = 'active' THEN 'cancellation_requested' ELSE 'refund_requested' END,
+        'lay_bay_refund',v_refund_id,
+        'Customer submitted a Lay-Bay cancellation/refund request.',
+        jsonb_build_object('plan_id',p_plan_id,'refund_amount',v_balance,'request_status','pending')
+    );
+
+    RETURN v_refund_id;
+END;
+$function$;
+
+CREATE OR REPLACE FUNCTION public.review_lay_bay_refund(
+    p_refund_id uuid,
+    p_decision text,
+    p_deduction_amount numeric,
+    p_deduction_reason text,
+    p_rejection_reason text
+)
+RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+DECLARE
+    v_admin_id uuid;
+    v_refund public.lay_bay_refunds%ROWTYPE;
+    v_plan public.lay_bay_plans%ROWTYPE;
+    v_deduction numeric := COALESCE(p_deduction_amount, 0);
+    v_refund_amount numeric;
+BEGIN
+    v_admin_id := auth.uid();
+    IF v_admin_id IS NULL OR NOT EXISTS (
+        SELECT 1 FROM public.admin_users WHERE user_id = v_admin_id
+    ) THEN
+        RAISE EXCEPTION 'Administrator access required.';
+    END IF;
+    IF p_decision NOT IN ('approve','reject') THEN
+        RAISE EXCEPTION 'Decision must be approve or reject.';
+    END IF;
+
+    SELECT * INTO v_refund
+    FROM public.lay_bay_refunds
+    WHERE id = p_refund_id
+    FOR UPDATE;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Refund request not found.';
+    END IF;
+    IF v_refund.request_status NOT IN ('pending','under_review') THEN
+        RAISE EXCEPTION 'This refund request has already been reviewed.';
+    END IF;
+
+    SELECT * INTO v_plan
+    FROM public.lay_bay_plans
+    WHERE id = v_refund.plan_id
+    FOR UPDATE;
+    IF NOT FOUND OR v_plan.user_id <> v_refund.user_id THEN
+        RAISE EXCEPTION 'Associated Lay-Bay plan could not be verified.';
+    END IF;
+
+    IF p_decision = 'reject' THEN
+        IF p_rejection_reason IS NULL OR length(btrim(p_rejection_reason)) < 5 THEN
+            RAISE EXCEPTION 'A clear rejection reason is required.';
+        END IF;
+
+        UPDATE public.lay_bay_refunds
+        SET request_status='rejected',
+            reviewed_by=v_admin_id,
+            reviewed_at=now(),
+            rejection_reason=btrim(p_rejection_reason),
+            updated_at=now()
+        WHERE id=p_refund_id;
+
+        UPDATE public.lay_bay_plans
+        SET cancellation_requested_at=NULL, updated_at=now()
+        WHERE id=v_plan.id AND plan_status='active';
+
+    ELSE
+        IF v_deduction < 0 OR v_deduction >= v_refund.total_deposited THEN
+            RAISE EXCEPTION 'The deduction must be zero or less than the verified refundable balance.';
+        END IF;
+        IF v_deduction > 0 AND (p_deduction_reason IS NULL OR length(btrim(p_deduction_reason)) < 10) THEN
+            RAISE EXCEPTION 'A clear, specific reason is required for any deduction.';
+        END IF;
+
+        v_refund_amount := v_refund.total_deposited - v_deduction;
+
+        UPDATE public.lay_bay_refunds
+        SET request_status='approved',
+            proposed_deduction=v_deduction,
+            deduction_reason=CASE WHEN v_deduction > 0 THEN btrim(p_deduction_reason) ELSE NULL END,
+            refund_amount=v_refund_amount,
+            reviewed_by=v_admin_id,
+            reviewed_at=now(),
+            rejection_reason=NULL,
+            updated_at=now()
+        WHERE id=p_refund_id;
+
+        -- An approved active-plan cancellation closes the plan.
+        -- The stock-release trigger returns inventory once, if it was deducted and the item was not fulfilled.
+        IF v_plan.plan_status='active' THEN
+            UPDATE public.lay_bay_plans
+            SET plan_status='cancelled',
+                cancelled_at=now(),
+                cancellation_requested_at=NULL,
+                updated_at=now()
+            WHERE id=v_plan.id;
+        END IF;
+    END IF;
+
+    INSERT INTO public.lay_bay_audit_logs (
+        actor_user_id,actor_role,action,entity_type,entity_id,description,old_values,new_values
+    )
+    VALUES (
+        v_admin_id,'admin','refund_' || p_decision,'lay_bay_refund',p_refund_id,
+        'Administrator reviewed a Lay-Bay cancellation/refund request.',
+        jsonb_build_object('request_status',v_refund.request_status),
+        jsonb_build_object(
+            'request_status',CASE WHEN p_decision='approve' THEN 'approved' ELSE 'rejected' END,
+            'verified_balance',v_refund.total_deposited,
+            'deduction',CASE WHEN p_decision='approve' THEN v_deduction ELSE 0 END,
+            'deduction_reason',p_deduction_reason,
+            'refund_amount',CASE WHEN p_decision='approve' THEN v_refund_amount ELSE 0 END,
+            'rejection_reason',p_rejection_reason
+        )
+    );
+
+    RETURN CASE WHEN p_decision='approve'
+        THEN 'Cancellation/refund approved. Record the actual refund payment after it has been sent.'
+        ELSE 'Cancellation/refund request rejected. The active plan has been reopened.'
+    END;
+END;
+$function$;
+
+DROP FUNCTION IF EXISTS public.review_lay_bay_refund(uuid,text,text);
+REVOKE ALL ON FUNCTION public.review_lay_bay_refund(uuid,text,numeric,text,text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.review_lay_bay_refund(uuid,text,numeric,text,text) FROM anon;
+GRANT EXECUTE ON FUNCTION public.review_lay_bay_refund(uuid,text,numeric,text,text) TO authenticated;
 
 REVOKE ALL ON FUNCTION public.create_lay_bay_plan(bigint,text,text,integer) FROM PUBLIC;
 REVOKE ALL ON FUNCTION public.create_lay_bay_plan(bigint,text,text,integer) FROM anon;
