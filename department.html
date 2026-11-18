@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080808">
+<title>Shop Department | LBM Online Store</title>
+<link rel="stylesheet" href="style.css">
+<style>
+body{background:#080808;color:#f6f1e5}.department-header{background:#080808;border-bottom:1px solid #3d3216;padding:14px clamp(12px,3vw,28px)}
+.department-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.department-brand{font:900 30px Georgia,serif;letter-spacing:2px;color:#D4AF37;text-decoration:none}
+.department-theme{border:1px solid #D4AF37;border-radius:20px;padding:8px 12px;background:transparent;color:#D4AF37}
+.department-tools{display:flex;align-items:center;gap:8px}
+.department-tools .lbm-search-panel{flex:1;min-width:0;margin:0;padding:0}
+.department-tools .lbm-search-box{min-height:39px;height:39px;padding:0 9px;border:1px solid #D4AF37;border-radius:24px;background:#111}
+.department-tools #lbm-product-search{height:37px;color:#fff;font-size:12px}
+.department-tools #lbm-search-results{display:none}
+.department-tools .cart-button{width:39px;height:39px}
+.department-account{display:flex;gap:7px}
+.department-account a,.department-account button{width:37px;height:37px;display:grid;place-items:center;border:1px solid #D4AF37;border-radius:7px;background:transparent;color:#D4AF37;text-decoration:none}
+.department-menu{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.department-menu a{color:#D4AF37;text-decoration:none;border:1px solid #51431d;border-radius:18px;padding:6px 10px;font-size:11px}
+.department-intro{width:min(1120px,94%);margin:30px auto 18px}
+.department-intro .eyebrow{color:#D4AF37;font-size:10px;letter-spacing:2px;font-weight:800}
+.department-intro h1{font:700 clamp(28px,5vw,44px) Georgia,serif;margin:8px 0;color:#fff}
+.department-intro p{color:#c9c1ae;font-size:13px}
+.department-products{width:min(1200px,96%);margin:0 auto 50px}
+.department-products .product-grid{display:grid}
+.department-back{display:inline-block;color:#D4AF37;text-decoration:none;margin-top:12px;font-size:12px}
+body.lbm-light-theme{background:#f7f5ef;color:#171717}body.lbm-light-theme .department-header{background:#fff}body.lbm-light-theme .department-intro h1{color:#171717}body.lbm-light-theme .department-intro p{color:#555}
+@media(max-width:390px){.department-tools{gap:5px}.department-tools .cart-button{width:32px;height:32px}.department-account a,.department-account button{width:30px;height:32px}.department-brand{font-size:26px}}
+</style>
+</head>
+<body>
+<header class="department-header">
+ <div class="department-top"><a class="department-brand" href="index.html">LBM</a><button class="department-theme" id="lbm-theme-toggle" type="button">☀ Light</button></div>
+ <div class="department-tools">
+  <div class="lbm-search-panel" role="search"><label class="search-label" for="lbm-product-search">Search this department</label><div class="lbm-search-box"><span class="lbm-search-icon">⌕</span><input id="lbm-product-search" type="search" placeholder="Search products in this department"><button id="lbm-clear-search" type="button" hidden>×</button></div><p id="lbm-search-results">Loading products...</p></div>
+  <button class="cart-button" id="cart-button" type="button" aria-label="Open shopping bag"><span>🛍</span><span class="cart-count-badge" id="cart-count">0</span></button>
+  <div class="department-account"><button id="lbm-announcement-toggle" type="button" aria-label="Announcements">♢</button><a href="lay-bay/login.html" aria-label="Customer login">♙</a></div>
+ </div>
+ <nav class="department-menu" aria-label="Shop departments">
+  <a href="department.html?department=men">Men's Wear</a><a href="department.html?department=women">Women's Wear</a><a href="department.html?department=kids">Kids' Wear</a><a href="department.html?department=footwear">Footwear</a><a href="department.html?department=bags">Bags &amp; Handbags</a><a href="department.html?department=accessories">Accessories</a>
+ </nav>
+</header>
+<main>
+ <section class="department-intro"><p class="eyebrow">LBM ONLINE STORE · SHOP BY DEPARTMENT</p><h1 id="department-title">Our Collection</h1><p id="department-description">Explore products selected for this department.</p><a class="department-back" href="index.html">← Back to homepage</a></section>
+ <section class="department-products"><div class="product-grid" id="product-list"><p>Loading products...</p></div></section>
+ <section class="cart-section" id="cart-section"><div class="cart-header"><h2>YOUR SHOPPING CART</h2><button id="close-cart" class="close-cart">Close ×</button></div><p id="cart-status" class="cart-status" role="status" aria-live="polite">Your cart is ready. Adding an item does not complete your order.</p><div id="cart-items" class="cart-items"><p>Your cart is empty.</p></div><div class="cart-summary"><h3>Total: <span id="cart-total">K0.00</span></h3><button id="checkout-button" class="checkout-button" disabled>CHECKOUT VIA WHATSAPP</button></div></section>
+</main>
+<footer class="footer"><p>© <span id="year"></span> LBM Online Store</p><a href="index.html">Return to LBM homepage</a></footer>
+<script>
+(function(){const names={men:["Men's Wear","Explore men's clothing and footwear."],women:["Women's Wear","Explore dresses, suits and women's fashion."],kids:["Kids' Wear","Explore children's clothing and outfits."],footwear:["Footwear","Explore shoes, sneakers and boots."],bags:["Bags & Handbags","Explore bags and handbags."],accessories:["Fashion Accessories","Explore accessories available at LBM."]};const key=new URLSearchParams(location.search).get("department")||"men";const item=names[key]||names.men;document.title=item[0]+" | LBM Online Store";document.getElementById("department-title").textContent=item[0];document.getElementById("department-description").textContent=item[1];const button=document.getElementById("lbm-theme-toggle");function apply(mode){document.body.classList.toggle("lbm-light-theme",mode==="light");button.textContent=mode==="light"?"☾ Dark":"☀ Light";}let saved="dark";try{saved=localStorage.getItem("lbmColourTheme")||"dark"}catch(e){}apply(saved);button.addEventListener("click",()=>{const next=document.body.classList.contains("lbm-light-theme")?"dark":"light";apply(next);try{localStorage.setItem("lbmColourTheme",next)}catch(e){}});})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="script.js"></script>
+</body></html>
