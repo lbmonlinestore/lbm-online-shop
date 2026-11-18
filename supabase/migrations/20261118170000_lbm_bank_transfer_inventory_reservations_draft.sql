@@ -102,7 +102,22 @@ begin
     from public.lbm_inventory_reservations r
     where r.product_id = v_line.product_id
       and r.status = 'active'
-      and r.expires_at > now();
+      and (
+        r.expires_at > now()
+        or (
+          r.order_id is not null
+          and exists (
+            select 1
+            from public.orders o
+            join public.lbm_bank_transfer_payments bt
+              on bt.order_id = o.id
+            where o.id = r.order_id
+              and bt.status = 'Pending Verification'
+              and o.payment_deadline_at is not null
+              and bt.submitted_at <= o.payment_deadline_at
+          )
+        )
+      );
 
     if v_line.quantity > v_stock - v_reserved then
       raise exception 'Insufficient available stock for product ID %.', v_line.product_id;
