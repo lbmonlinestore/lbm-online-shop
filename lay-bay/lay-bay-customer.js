@@ -2729,7 +2729,10 @@ let layBaySelectionCart = [];
         if (data) createdPlanIds.push(data);
       }
 
-      await loadPlans();
+      const plansLoaded = await loadPlans();
+      if (!plansLoaded) {
+        throw new Error("Your plan request was saved, but we could not refresh your plans. Your basket has been kept. Please retry or refresh the page.");
+      }
 
       const firstPlan = plans.find(plan => createdPlanIds.includes(plan.id));
       if (firstPlan && $("selectedPlan")) {
@@ -3215,7 +3218,7 @@ let layBaySelectionCart = [];
   // =======================================================
 
   async function loadPlans() {
-    if (!currentUser) return;
+    if (!currentUser) return false;
 
     message("plansMessage", "Loading your savings records...");
 
@@ -3253,17 +3256,17 @@ let layBaySelectionCart = [];
 
     if (planResult.error) {
       message("plansMessage", planResult.error.message, false);
-      return;
+      return false;
     }
 
     if (depositResult.error) {
       message("plansMessage", depositResult.error.message, false);
-      return;
+      return false;
     }
 
     if (balanceResult.error) {
       message("plansMessage", balanceResult.error.message, false);
-      return;
+      return false;
     }
 
     plans = planResult.data || [];
@@ -3299,6 +3302,8 @@ let layBaySelectionCart = [];
     if (!receiptResult.error && !refundResult.error) {
       message("plansMessage", "");
     }
+
+    return true;
   }
 
   // =======================================================
