@@ -709,27 +709,23 @@ function normaliseSearchText(value) {
 function searchProducts(searchTerm) {
     const query = normaliseSearchText(searchTerm);
     const department = new URLSearchParams(window.location.search).get("department") || "";
-    const departmentTerms = {
-        men: ["men", "mens", "men's", "male"],
-        women: ["women", "womens", "women's", "ladies", "female"],
-        kids: ["kids", "kid", "children", "child", "boys", "girls"],
-        footwear: ["shoe", "shoes", "footwear", "slipper", "slippers", "sandal", "sandals", "sneaker", "sneakers", "boot", "boots"],
-        bags: ["bag", "bags", "handbag", "handbags", "backpack", "purse"],
-        accessories: ["accessory", "accessories", "belt", "watch", "jewellery", "jewelry", "cap", "hat", "sunglasses"]
+    const departmentRules = {
+        men: product => ["Men's Clothing", "Men's Shoes"].includes(product.category) ||
+            (product.category === "Other" && /men'?s/i.test(product.name || "")),
+        women: product => product.category === "Women's Clothing",
+        kids: product => product.category === "Other" && /children|kids|boys|girls/i.test(product.name || ""),
+        footwear: product => ["Men's Shoes", "Shoes"].includes(product.category),
+        bags: product => product.category === "Accessories" && /bag|handbag|purse/i.test(product.name || ""),
+        accessories: product => product.category === "Accessories"
     };
-    let baseProducts = products;
-    if (department && departmentTerms[department]) {
-        const terms = departmentTerms[department];
-        baseProducts = products.filter(product => {
-            const text = [product.category, product.name, product.brand, product.description]
-                .filter(Boolean).join(" ").toLowerCase();
-            return terms.some(term => text.includes(term));
-        });
-    }
+    const baseProducts = departmentRules[department]
+        ? products.filter(departmentRules[department])
+        : products;
     if (!query) return baseProducts;
     return baseProducts.filter(product => {
         const searchableFields = [product.name, product.brand, product.category, product.description, product.sku];
-        const searchableText = searchableFields.filter(value => value !== null && value !== undefined).map(value => String(value)).join(" ").toLowerCase();
+        const searchableText = searchableFields.filter(value => value !== null && value !== undefined)
+            .map(value => String(value)).join(" ").toLowerCase();
         return searchableText.includes(query);
     });
 }
