@@ -646,7 +646,7 @@ BEGIN
             ELSE plan_status
         END,
         completed_at = CASE
-            WHEN v_balance >= lay_bay_price_snapshot
+            WHEN v_balance >= lay_bay_price_snapshot * COALESCE(quantity, 1)
                 THEN v_now
             ELSE completed_at
         END,
