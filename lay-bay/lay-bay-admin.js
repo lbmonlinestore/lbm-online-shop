@@ -1074,6 +1074,35 @@
           </p>
 
           <p>
+            <strong>Selected variant:</strong>
+            ${lbEscape([
+              plan.selected_size ? "Size " + plan.selected_size : "",
+              plan.selected_colour ? "Colour " + plan.selected_colour : ""
+            ].filter(Boolean).join(" · ") || "Standard")}
+          </p>
+
+          <p>
+            <strong>Quantity:</strong>
+            ${lbEscape(Number(plan.quantity || 1))}
+          </p>
+
+          <p>
+            <strong>Total Lay-Bay price:</strong>
+            ${lbEscape(lbMoney(
+              Number(plan.lay_bay_price_snapshot || 0) * Number(plan.quantity || 1),
+              plan.currency || deposit.currency
+            ))}
+          </p>
+
+          <p>
+            <strong>First deposit guide (50%):</strong>
+            ${lbEscape(lbMoney(
+              Number(plan.lay_bay_price_snapshot || 0) * Number(plan.quantity || 1) * 0.5,
+              plan.currency || deposit.currency
+            ))}
+          </p>
+
+          <p>
             <strong>Deposit:</strong>
             ${lbEscape(lbMoney(deposit.amount, deposit.currency))}
           </p>
@@ -1198,8 +1227,19 @@
       }
     }
 
+    const depositRecord = layBayDeposits.find(
+      item => String(item.id) === String(depositId)
+    );
+    const planRecord = depositRecord?.plan || {};
+    const planQuantity = Number(planRecord.quantity || 1);
+    const isFirstApprovedDeposit = !planRecord.first_deposit_at;
+
     const confirmation = decision === "approve"
-      ? "Approve this deposit? The customer's Lay-Bay ledger will be credited."
+      ? "Approve this deposit? The customer's Lay-Bay ledger will be credited." +
+        (isFirstApprovedDeposit
+          ? "\\n\\nThis is the first approved deposit. LBM stock will be reduced by " +
+            planQuantity + " unit(s), subject to stock availability."
+          : "")
       : "Reject this deposit?";
 
     if (!confirm(confirmation)) return;
