@@ -1382,7 +1382,7 @@ body.lbm-light-theme .lbm-greeting-area{background:#fff;color:#171717;border-col
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="lbm-website-analytics.js?v=1" defer></script>
+<script src="lbm-website-analytics.js?v=20261118-header-refresh" defer></script>
 
 
 <script>
@@ -1399,13 +1399,13 @@ body.lbm-light-theme .lbm-greeting-area{background:#fff;color:#171717;border-col
     }).catch(error=>console.warn("LBM hero image setting could not load:",error));
 })();
 </script>
-    <script src="script.js?v=hero-background-fix-33525da"></script>
-    <script src="features.js?v=20261118-single-header-greeting"></script>
+    <script src="script.js?v=20261118-header-refresh"></script>
+    <script src="features.js?v=20261118-header-refresh"></script>
 
     <script>
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./sw.js?v=laybay-picture-checkbox-v1")
+                navigator.serviceWorker.register("./sw.js?v=20261118-header-refresh")
                     .then(registration => {
                         console.log(
                             "LBM App Service Worker registered:",
@@ -1562,6 +1562,6 @@ body.lbm-light-theme .lbm-greeting-area{background:#fff;color:#171717;border-col
     </script>
 
 
-<script src="lbm-customer-behaviour-analytics.js?v=1" defer></script>
+<script src="lbm-customer-behaviour-analytics.js?v=20261118-header-refresh" defer></script>
 <script>(function(){const key='lbmColourTheme';const button=document.getElementById('lbm-theme-toggle');if(!button)return;function apply(mode){document.body.classList.toggle('lbm-light-theme',mode==='light');button.textContent=mode==='light'?'☾ Dark':'☀ Light';button.setAttribute('aria-label',mode==='light'?'Switch to dark theme':'Switch to light theme');}let saved='dark';try{saved=localStorage.getItem(key)||'dark'}catch(e){}apply(saved);button.addEventListener('click',function(){const next=document.body.classList.contains('lbm-light-theme')?'dark':'light';apply(next);try{localStorage.setItem(key,next)}catch(e){}});})();</script><script>(function(){const title=document.getElementById("lbm-greeting-title");const message=document.getElementById("lbm-greeting-message");if(!title||!message)return;const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Africa/Lusaka",hour:"2-digit",hourCycle:"h23"}).formatToParts(new Date());const hour=Number(parts.find(p=>p.type==="hour")?.value||0);const greeting=hour<12?"Good Morning":hour<18?"Good Afternoon":"Good Evening";title.textContent=greeting+"! Welcome to LBM Online Store.";message.textContent="We're glad you're here. Explore our collections and find a look that feels like you.";})();</script></body>
 </html>
