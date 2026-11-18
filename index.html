@@ -709,6 +709,25 @@
 }
 .lbm-welcome-guide{margin:16px auto 10px!important}
 
+
+/* LBM approved two-row header */
+.site-header-stack .topbar{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;padding:12px clamp(12px,3vw,28px)!important;min-height:0!important}
+.lbm-header-brand-row{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:42px}
+.lbm-header-brand-row .brand{font-family:Georgia,serif!important;font-size:clamp(25px,5vw,34px)!important;font-weight:900!important;letter-spacing:2px!important;color:#D4AF37!important;text-decoration:none!important}
+.lbm-header-brand-row .brand span{display:inline!important}
+.lbm-theme-toggle{border:1px solid #D4AF37;border-radius:22px;padding:8px 13px;background:transparent;color:#D4AF37;font-weight:700;font-size:12px;white-space:nowrap}
+.lbm-header-tools-row{display:flex;align-items:center;gap:8px;width:100%;min-width:0}
+.lbm-header-tools-row .lbm-menu-toggle{flex:0 0 36px;width:36px;height:36px}
+.lbm-header-tools-row .lbm-header-search{display:block!important;flex:1 1 auto!important;min-width:0!important;max-width:none!important;margin:0!important;padding:0!important}
+.lbm-header-tools-row .lbm-search-box{height:38px!important;min-height:38px!important;width:100%!important;padding:0 8px!important}
+.lbm-header-tools-row #lbm-product-search{min-width:0!important;width:100%!important;font-size:12px!important}
+.lbm-header-tools-row #lbm-search-results{display:none!important}
+.lbm-header-tools-row .header-actions{display:flex!important;flex:0 0 auto!important;margin:0 0 0 auto!important;gap:6px!important}
+.lbm-header-tools-row .header-account-tools{display:flex!important;gap:5px!important}
+.lbm-header-tools-row .cart-button{width:36px!important;height:36px!important;flex:0 0 36px!important}
+.lbm-header-tools-row .header-icon-button{width:34px!important;height:36px!important;flex:0 0 34px!important}
+@media(max-width:390px){.site-header-stack .topbar{padding:9px!important;gap:7px!important}.lbm-header-tools-row{gap:5px}.lbm-header-tools-row .lbm-menu-toggle{width:31px;flex-basis:31px}.lbm-header-tools-row .cart-button{width:31px!important;flex-basis:31px!important}.lbm-header-tools-row .header-icon-button{width:29px!important;flex-basis:29px!important}.lbm-header-tools-row .header-actions,.lbm-header-tools-row .header-account-tools{gap:3px!important}.lbm-theme-toggle{padding:7px 10px}}
+body.lbm-light-theme{background:#f7f5ef!important;color:#171717!important}body.lbm-light-theme .site-header-stack,body.lbm-light-theme .topbar{background:#fff!important}body.lbm-light-theme .lbm-welcome-guide,body.lbm-light-theme .collection-heading,body.lbm-light-theme .products,body.lbm-light-theme .home-section-heading{color:#171717!important}
 </style>
 </head>
 
@@ -717,13 +736,14 @@
     <div class="site-header-stack" id="site-header-stack">
 
     <header class="topbar">
-        <button class="lbm-menu-toggle" id="lbm-menu-toggle" type="button"
-                aria-label="Open store menu" aria-controls="lbm-department-menu" aria-expanded="false">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-        </button>
-
-        <a href="#home" class="brand" aria-label="LBM Online Store home">LBM</a>
-
+        <div class="lbm-header-brand-row">
+            <a href="#home" class="brand" aria-label="LBM Online Store home">LBM</a>
+            <button type="button" class="lbm-theme-toggle" id="lbm-theme-toggle" aria-label="Switch colour theme">☀ Light</button>
+        </div>
+        <div class="lbm-header-tools-row">
+            <button class="lbm-menu-toggle" id="lbm-menu-toggle" type="button" aria-label="Open store menu" aria-controls="lbm-department-menu" aria-expanded="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            </button>
         <div class="lbm-search-panel lbm-header-search" role="search">
             <label class="search-label" for="lbm-product-search">Search LBM products</label>
             <div class="lbm-search-box">
@@ -736,6 +756,7 @@
             </div>
             <p id="lbm-search-results" aria-live="polite">Browse our latest products</p>
         </div>
+
 
         <div class="header-actions">
             <button class="cart-button" id="cart-button" type="button" aria-label="Open shopping bag">
@@ -756,12 +777,14 @@
             </div>
         </div>
 
+
+        </div>
         <nav class="lbm-menu-panel" id="lbm-department-menu" aria-label="Store departments and links" hidden>
             <p class="lbm-menu-kicker">SHOP BY DEPARTMENT</p>
-            <a href="#products" class="lbm-menu-link lbm-category-link" data-lbm-search-term="men">Men's Wear <span>→</span></a>
-            <a href="#products" class="lbm-menu-link lbm-category-link" data-lbm-search-term="women">Women's Wear <span>→</span></a>
-            <a href="#products" class="lbm-menu-link lbm-category-link" data-lbm-search-term="kids">Kids' Wear <span>→</span></a>
-            <a href="#products" class="lbm-menu-link lbm-category-link" data-lbm-search-term="shoe">Shoes &amp; Slippers <span>→</span></a>
+            <a href="department.html?department=men" class="lbm-menu-link">Men's Wear <span>→</span></a>
+            <a href="department.html?department=women" class="lbm-menu-link">Women's Wear <span>→</span></a>
+            <a href="department.html?department=kids" class="lbm-menu-link">Kids' Wear <span>→</span></a>
+            <a href="department.html?department=footwear" class="lbm-menu-link">Shoes &amp; Slippers <span>→</span></a>
             <div class="lbm-menu-divider"></div>
             <a href="lay-bay/index.html" class="lbm-menu-link">LBM Lay-Bay</a>
             <a href="technical-assistant.html" class="lbm-menu-link">Technical Assistant</a>
@@ -769,8 +792,8 @@
             <a href="#faq" class="lbm-menu-link">Frequently Asked Questions</a>
             <a href="https://wa.me/260969034955" class="lbm-menu-link" target="_blank" rel="noopener noreferrer">Contact LBM on WhatsApp</a>
         </nav>
-    </header>
 
+    </header>
 
 
             
@@ -842,19 +865,19 @@
                 <p>Go straight to the styles and products you are looking for.</p>
             </div>
             <div class="category-tiles lbm-department-grid">
-                <a class="category-tile lbm-department-card" href="#products" data-lbm-search-term="men">
+                <a class="category-tile lbm-department-card" href="department.html?department=men">
                     <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800&auto=format&fit=crop" alt="Men's formal fashion" loading="lazy">
                     <span>01</span><strong>MEN'S WEAR</strong><small>Suits, shirts &amp; everyday style</small>
                 </a>
-                <a class="category-tile lbm-department-card" href="#products" data-lbm-search-term="women">
+                <a class="category-tile lbm-department-card" href="department.html?department=women">
                     <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&auto=format&fit=crop" alt="Women's fashion dress" loading="lazy">
                     <span>02</span><strong>WOMEN'S WEAR</strong><small>Dresses, suits &amp; more</small>
                 </a>
-                <a class="category-tile lbm-department-card" href="#products" data-lbm-search-term="kids">
+                <a class="category-tile lbm-department-card" href="department.html?department=kids">
                     <img src="https://images.unsplash.com/photo-1503919005314-30d93d07d823?w=800&auto=format&fit=crop" alt="Children's clothing" loading="lazy">
                     <span>03</span><strong>KIDS' WEAR</strong><small>Styles for little ones</small>
                 </a>
-                <a class="category-tile lbm-department-card" href="#products" data-lbm-search-term="shoe">
+                <a class="category-tile lbm-department-card" href="department.html?department=footwear">
                     <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop" alt="Fashion footwear" loading="lazy">
                     <span>04</span><strong>SHOES &amp; SLIPPERS</strong><small>Step out with confidence</small>
                 </a>
@@ -1528,5 +1551,5 @@
 
 
 <script src="lbm-customer-behaviour-analytics.js?v=1" defer></script>
-</body>
+<script>(function(){const key='lbmColourTheme';const button=document.getElementById('lbm-theme-toggle');if(!button)return;function apply(mode){document.body.classList.toggle('lbm-light-theme',mode==='light');button.textContent=mode==='light'?'☾ Dark':'☀ Light';button.setAttribute('aria-label',mode==='light'?'Switch to dark theme':'Switch to light theme');}let saved='dark';try{saved=localStorage.getItem(key)||'dark'}catch(e){}apply(saved);button.addEventListener('click',function(){const next=document.body.classList.contains('lbm-light-theme')?'dark':'light';apply(next);try{localStorage.setItem(key,next)}catch(e){}});})();</script></body>
 </html>
