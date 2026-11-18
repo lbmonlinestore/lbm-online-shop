@@ -103,9 +103,11 @@
    html+='<div class="lbmPayRef">YOUR ORDER RECOVERY CODE<br><span style="overflow-wrap:anywhere;display:block;margin:8px 0">'+esc(order.recoveryCode)+'</span><button type="button" id="lbmCopyRecovery" class="lbmPayBtn" style="margin-top:4px">COPY RECOVERY CODE</button></div><p class="lbmPayNote"><strong>Important:</strong> Save this code somewhere safe. You need both this code and your order number to resume receipt submission if you close this page. LBM cannot retrieve the original code for you.</p>';
   }
   html+='<div class="lbmPayRef">PAYMENT REFERENCE<br>'+esc(order.reference)+'</div><p><strong>Order total: '+money(order.total)+'</strong></p>';
-  if(order.paymentStatus&&order.paymentStatus!=="Awaiting Payment"){
-   html+='<div class="lbmPaySuccess">Current payment status: <strong>'+esc(order.paymentStatus)+'</strong>. You do not need to submit another receipt unless LBM asks you to.</div>';
-  }else if(String(order.orderStatus||"").toLowerCase()==="cancelled"){
+  if(String(order.orderStatus||"").toLowerCase()==="cancelled"){
+   html+='<div class="lbmPayError">This order has been cancelled. Do not make a transfer.</div>';
+  }else if(order.paymentStatus==="Paid"||order.paymentStatus==="Pending Verification"){
+   html+='<div class="lbmPaySuccess">Current payment status: <strong>'+esc(order.paymentStatus)+'</strong>. '+(order.paymentStatus==="Paid"?"This order has already been paid.":"Your receipt is awaiting LBM verification.")+'</div>';
+  }else{
    html+='<div class="lbmPayError">This order has been cancelled. Do not make a transfer.</div>';
   }else{
    html+='<p class="lbmPayNote">Use the payment reference when making the transfer. Then choose the account you paid into and submit your transaction reference and receipt.</p>';
