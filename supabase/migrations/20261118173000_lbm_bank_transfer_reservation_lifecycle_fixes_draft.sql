@@ -43,10 +43,6 @@ begin
     return new;
   end if;
 
-  -- Set the deadline here as well: this trigger may run before the
-  -- separate deadline trigger due to PostgreSQL's alphabetical trigger order.
-  new.payment_deadline_at := coalesce(new.payment_deadline_at, now() + interval '24 hours');
-
   for v_line in
     select (x.value->>'product_id')::bigint as product_id,
            sum((x.value->>'quantity')::bigint)::integer as quantity
