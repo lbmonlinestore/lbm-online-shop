@@ -1891,7 +1891,6 @@ let layBaySelectionCart = [];
     configuredItems.forEach(item => {
       const existing = layBaySelectionCart.find(entry =>
         String(entry.product_id) === String(product.id) &&
-        Number(entry.image_index) === Number(item.index) &&
         String(entry.size || "") === String(item.size || "") &&
         String(entry.colour || "") === String(item.colour || "")
       );
