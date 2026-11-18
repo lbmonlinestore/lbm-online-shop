@@ -4,6 +4,82 @@
 
 begin;
 
+-- A timely receipt awaiting verification continues to consume available stock
+-- after its nominal expiry, preventing a second customer reserving the same units.
+create or replace function public.lbm_reserve_bank_transfer_order_inventory()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_line record;
+  v_stock integer;
+  v_reserved bigint;
+begin
+  if lower(coalesce(new.payment_method, '')) <> 'bank transfer' then
+    return new;
+  end if;
+
+  for v_line in
+    select (x.value->>'product_id')::bigint as product_id,
+           sum((x.value->>'quantity')::bigint)::integer as quantity
+    from jsonb_array_elements(new.items) x(value)
+    group by (x.value->>'product_id')::bigint
+    order by (x.value->>'product_id')::bigint
+  loop
+    select p.stock into v_stock
+    from public.products p
+    where p.id = v_line.product_id
+    for update;
+
+    if not found then
+      raise exception 'A product is no longer available.';
+    end if;
+
+    select coalesce(sum(r.quantity), 0) into v_reserved
+    from public.lbm_inventory_reservations r
+    where r.product_id = v_line.product_id
+      and r.status = 'active'
+      and (
+        r.expires_at > now()
+        or (
+          r.order_id is not null
+          and exists (
+            select 1
+            from public.orders o
+            join public.lbm_bank_transfer_payments bt on bt.order_id = o.id
+            where o.id = r.order_id
+              and bt.status = 'Pending Verification'
+              and bt.submitted_at <= o.payment_deadline_at
+          )
+        )
+      );
+
+    if v_line.quantity > v_stock - v_reserved then
+      raise exception 'Insufficient available stock for product ID %.', v_line.product_id;
+    end if;
+  end loop;
+
+  for v_line in
+    select (x.value->>'product_id')::bigint as product_id,
+           sum((x.value->>'quantity')::bigint)::integer as quantity
+    from jsonb_array_elements(new.items) x(value)
+    group by (x.value->>'product_id')::bigint
+    order by (x.value->>'product_id')::bigint
+  loop
+    insert into public.lbm_inventory_reservations
+      (order_id, product_id, quantity, expires_at)
+    values
+      (new.id, v_line.product_id, v_line.quantity, new.payment_deadline_at)
+    on conflict (order_id, product_id) where order_id is not null
+    do nothing;
+  end loop;
+
+  return new;
+end;
+$;
+
 -- A receipt submitted before the 24-hour deadline keeps the reservation while
 -- LBM verifies it, even if an administrator reviews it after the deadline.
 create or replace function public.review_lbm_bank_transfer(
