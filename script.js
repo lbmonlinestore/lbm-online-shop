@@ -708,25 +708,61 @@ function normaliseSearchText(value) {
 
 function searchProducts(searchTerm) {
     const query = normaliseSearchText(searchTerm);
-    const department = new URLSearchParams(window.location.search).get("department") || "";
-    const productName = product => String(product.name || "").toLowerCase();
-    const isBag = product => /\\b(bag|handbag|purse)\\b/.test(productName(product));
+    const params = new URLSearchParams(window.location.search);
+    const department = String(params.get("department") || "").trim().toLowerCase();
+
+    const categoryOf = product =>
+        String(product.category || "").trim().toLowerCase();
+
+    const productName = product =>
+        String(product.name || "").trim().toLowerCase();
+
+    const isBag = product =>
+        /\b(bag|handbag|purse)\b/.test(productName(product));
+
     const departmentRules = {
-        men: product => ["Men's Clothing", "Men's Shoes"].includes(product.category),
-        women: product => product.category === "Women's Clothing",
-        kids: product => product.category === "Kids' Clothing",
-        footwear: product => ["Men's Shoes", "Women's Shoes", "Kids' Shoes", "Shoes"].includes(product.category),
-        bags: product => product.category === "Accessories" && isBag(product),
-        accessories: product => product.category === "Accessories" && !isBag(product)
+        men: product =>
+            ["men's clothing", "men's shoes"].includes(categoryOf(product)),
+
+        women: product =>
+            categoryOf(product) === "women's clothing",
+
+        kids: product =>
+            ["kids' clothing", "children's clothing", "kids clothing"].includes(categoryOf(product)),
+
+        footwear: product =>
+            ["men's shoes", "women's shoes", "kids' shoes", "shoes"].includes(categoryOf(product)),
+
+        bags: product =>
+            categoryOf(product) === "accessories" && isBag(product),
+
+        accessories: product =>
+            categoryOf(product) === "accessories" && !isBag(product)
     };
-    const baseProducts = departmentRules[department]
-        ? products.filter(departmentRules[department])
+
+    const rule = departmentRules[department];
+
+    const baseProducts = rule
+        ? products.filter(rule)
         : products;
+
     if (!query) return baseProducts;
+
     return baseProducts.filter(product => {
-        const searchableFields = [product.name, product.brand, product.category, product.description, product.sku];
-        const searchableText = searchableFields.filter(value => value !== null && value !== undefined)
-            .map(value => String(value)).join(" ").toLowerCase();
+        const searchableFields = [
+            product.name,
+            product.brand,
+            product.category,
+            product.description,
+            product.sku
+        ];
+
+        const searchableText = searchableFields
+            .filter(value => value !== null && value !== undefined)
+            .map(value => String(value))
+            .join(" ")
+            .toLowerCase();
+
         return searchableText.includes(query);
     });
 }
