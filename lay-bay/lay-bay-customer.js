@@ -1891,7 +1891,6 @@ let layBaySelectionCart = [];
     configuredItems.forEach(item => {
       const existing = layBaySelectionCart.find(entry =>
         String(entry.product_id) === String(product.id) &&
-        Number(entry.image_index) === Number(item.index) &&
         String(entry.size || "") === String(item.size || "") &&
         String(entry.colour || "") === String(item.colour || "")
       );
@@ -2530,8 +2529,7 @@ let layBaySelectionCart = [];
                 const existing = layBaySelectionCart.find(entry =>
           String(entry.product_id) === String(product.id) &&
           String(entry.size || "") === String(item.size || "") &&
-          String(entry.colour || "") === String(item.colour || "") &&
-          !entry.image_url
+          String(entry.colour || "") === String(item.colour || "")
         );
 
         const quantity = Number(item.quantity.value);
@@ -2615,6 +2613,11 @@ let layBaySelectionCart = [];
     const planNote = createElement("div", "lb-basket-plan-note",
       "Payment plan preview: each product and selected variant has its own plan. The first deposit guide is 50% of its Lay-Bay total; the remaining balance is due within 30 days after LBM approves the first deposit. This basket review does not create a plan or submit payment."
     );
+    const proceedButton = createElement("button", "", "Proceed to Lay-Bay Plans");
+    proceedButton.type = "button";
+    proceedButton.id = "layBayProceedButton";
+    proceedButton.addEventListener("click", processSelectionBasket);
+
     const continueButton = createElement("button", "", "Continue Selecting Products");
     continueButton.type = "button";
     continueButton.addEventListener("click", closeSelectionBasket);
@@ -2634,7 +2637,7 @@ let layBaySelectionCart = [];
     });
 
     const actions = createElement("div", "lb-basket-actions");
-    actions.append(continueButton, clearButton);
+    actions.append(proceedButton, continueButton, clearButton);
     section.append(drawerHead, note, list, total, planNote, actions);
 
     // Keep the basket outside the catalogue/page layout.
@@ -2686,9 +2689,82 @@ let layBaySelectionCart = [];
     section.scrollTop = 0;
   }
   function closeSelectionBasket() {
-    $("layBaySelectionBasket")?.classList.remove("open");
+    const section = $("layBaySelectionBasket");
+    section?.classList.remove("open");
+    if (section) {
+      section.style.display = "none";
+      section.removeAttribute("aria-modal");
+    }
     $("layBayBasketBackdrop")?.classList.remove("open");
     document.body.style.overflow = "";
+  }
+
+  async function processSelectionBasket() {
+    if (!currentUser) {
+      message("productsMessage", "Please sign in before creating Lay-Bay plans.", false);
+      return;
+    }
+    if (!layBaySelectionCart.length) return;
+
+    const proceedButton = $("layBayProceedButton");
+    setButton(proceedButton, true, "Creating your plans...");
+
+    const requested = [...layBaySelectionCart];
+    const createdPlanIds = [];
+
+    try {
+      for (const item of requested) {
+        const quantity = Number(item.quantity);
+        if (!Number.isInteger(quantity) || quantity < 1) {
+          throw new Error("One of the selected quantities is invalid. Please review your basket.");
+        }
+
+        const { data, error } = await db.rpc("create_lay_bay_plan", {
+          p_product_id: item.product_id,
+          p_selected_size: item.size,
+          p_selected_colour: item.colour,
+          p_quantity: quantity
+        });
+        if (error) throw error;
+        if (data) createdPlanIds.push(data);
+      }
+
+      const plansLoaded = await loadPlans();
+      if (!plansLoaded) {
+        throw new Error("Your plan request was saved, but we could not refresh your plans. Your basket has been kept. Please retry or refresh the page.");
+      }
+
+      const firstPlan = plans.find(plan => createdPlanIds.includes(plan.id));
+      if (firstPlan && $("selectedPlan")) {
+        $("selectedPlan").value = firstPlan.id;
+      }
+
+      layBaySelectionCart = [];
+      renderSelectionBasket();
+      closeSelectionBasket();
+
+      message(
+        "plansMessage",
+        requested.length === 1
+          ? "Your Lay-Bay plan has been created. Review its total and submit your first deposit."
+          : requested.length + " Lay-Bay plans have been created. Review each plan and submit the required first deposit."
+      );
+
+      if (firstPlan) {
+        showCreatedPlanSummary(firstPlan);
+      } else {
+        $("plansList")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    } catch (error) {
+      message(
+        "productsMessage",
+        error.message || "We could not create all the selected Lay-Bay plans. Your basket has been kept so you can review and try again.",
+        false
+      );
+    } finally {
+      setButton(proceedButton, false, "Proceed to Lay-Bay Plans");
+      renderSelectionBasket();
+    }
   }
 
   function renderSelectionBasket() {
@@ -2709,6 +2785,9 @@ let layBaySelectionCart = [];
       launcher.textContent = "Lay-Bay Basket (" + itemCount + ")";
       launcher.classList.toggle("visible", itemCount > 0);
     }
+
+    const proceedButton = $("layBayProceedButton");
+    if (proceedButton) proceedButton.disabled = layBaySelectionCart.length === 0;
 
     if (!layBaySelectionCart.length) {
       list.textContent =
@@ -3139,7 +3218,7 @@ let layBaySelectionCart = [];
   // =======================================================
 
   async function loadPlans() {
-    if (!currentUser) return;
+    if (!currentUser) return false;
 
     message("plansMessage", "Loading your savings records...");
 
@@ -3177,17 +3256,17 @@ let layBaySelectionCart = [];
 
     if (planResult.error) {
       message("plansMessage", planResult.error.message, false);
-      return;
+      return false;
     }
 
     if (depositResult.error) {
       message("plansMessage", depositResult.error.message, false);
-      return;
+      return false;
     }
 
     if (balanceResult.error) {
       message("plansMessage", balanceResult.error.message, false);
-      return;
+      return false;
     }
 
     plans = planResult.data || [];
@@ -3223,6 +3302,8 @@ let layBaySelectionCart = [];
     if (!receiptResult.error && !refundResult.error) {
       message("plansMessage", "");
     }
+
+    return true;
   }
 
   // =======================================================
@@ -3292,13 +3373,19 @@ let layBaySelectionCart = [];
         );
       }
 
+      card.appendChild(
+        createElement("p", "", "Quantity: " + Number(plan.quantity || 1))
+      );
+
       const status = createElement(
         "p",
         "",
         "Plan status: " + (
-          plan.plan_status === "pending_initial_deposit"
-            ? "Awaiting 50% first deposit"
-            : (plan.plan_status || "Unknown")
+          plan.cancellation_requested_at
+            ? "Cancellation request pending"
+            : (plan.plan_status === "pending_initial_deposit"
+                ? "Awaiting 50% first deposit"
+                : (plan.plan_status || "Unknown"))
         )
       );
 
@@ -3461,7 +3548,8 @@ let layBaySelectionCart = [];
       '<option value="">Choose a Lay-Bay plan</option>';
 
     plans.filter(plan =>
-      ["active", "pending_initial_deposit"].includes(plan.plan_status)
+      ["active", "pending_initial_deposit"].includes(plan.plan_status) &&
+      !plan.cancellation_requested_at
     ).forEach(plan => {
       const option = document.createElement("option");
 
@@ -3481,7 +3569,8 @@ let layBaySelectionCart = [];
         (plan.product_name_snapshot || "Lay-Bay Product") +
         (variants.length ? " (" + variants.join(", ") + ")" : "") +
         " — " +
-        money(plan.lay_bay_price_snapshot) +
+        money(Number(plan.lay_bay_price_snapshot) * Number(plan.quantity || 1)) +
+        " — Qty " + Number(plan.quantity || 1) +
         (plan.plan_status === "pending_initial_deposit"
           ? " — Awaiting 50% first deposit"
           : " — Active");
@@ -3900,10 +3989,17 @@ let layBaySelectionCart = [];
     const planId = $("selectedPlan")?.value;
     const amount = Number($("depositAmount")?.value);
     const selectedPlan = plans.find(plan => String(plan.id) === String(planId));
+    if (selectedPlan?.cancellation_requested_at) {
+      message("depositMessage", "This plan is awaiting a cancellation decision. New deposits are temporarily disabled.", false);
+      return;
+    }
     const selectedBalance = balanceFor(planId);
     const alreadyPaid = Number(selectedBalance?.current_balance || 0);
     const firstDepositMinimum = selectedPlan
-      ? Number((Number(selectedPlan.lay_bay_price_snapshot) * 0.5).toFixed(2))
+      ? Number((
+          Number(selectedPlan.lay_bay_price_snapshot) *
+          Number(selectedPlan.quantity || 1) * 0.5
+        ).toFixed(2))
       : 0;
     const method = $("paymentMethod")?.value.trim();
     const reference = $("paymentReference")?.value.trim();
