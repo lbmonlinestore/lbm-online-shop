@@ -1,8 +1,64 @@
--- LBM Lay-Bay quantity-aware plans and first-deposit stock deduction
+-- LBM Lay-Bay quantity-aware checkout and inventory lifecycle.
+-- Existing plans remain quantity 1; existing historical deposits are not re-deducted.
+
 ALTER TABLE public.lay_bay_plans
   ADD COLUMN IF NOT EXISTS quantity integer NOT NULL DEFAULT 1;
 ALTER TABLE public.lay_bay_plans
-  ADD CONSTRAINT lay_bay_plans_quantity_positive CHECK (quantity BETWEEN 1 AND 100);
+  ADD COLUMN IF NOT EXISTS stock_deducted_at timestamptz;
+ALTER TABLE public.lay_bay_plans
+  ADD COLUMN IF NOT EXISTS stock_released_at timestamptz;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'public.lay_bay_plans'::regclass
+      AND conname = 'lay_bay_plans_quantity_positive'
+  ) THEN
+    ALTER TABLE public.lay_bay_plans
+      ADD CONSTRAINT lay_bay_plans_quantity_positive
+      CHECK (quantity BETWEEN 1 AND 100);
+  END IF;
+END;
+$$;
+
+UPDATE public.lay_bay_plans
+SET expires_at = first_deposit_at + INTERVAL '30 days',
+    updated_at = now()
+WHERE plan_status = 'active'
+  AND first_deposit_at IS NOT NULL
+  AND expires_at > first_deposit_at + INTERVAL '30 days';
+
+CREATE OR REPLACE FUNCTION public.release_lay_bay_stock_on_plan_close()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO ''
+AS $function$
+BEGIN
+  IF NEW.plan_status IN ('cancelled', 'expired')
+     AND OLD.plan_status IS DISTINCT FROM NEW.plan_status
+     AND NEW.stock_deducted_at IS NOT NULL
+     AND NEW.stock_released_at IS NULL
+     AND NEW.fulfilled_at IS NULL THEN
+    UPDATE public.products
+    SET stock = COALESCE(stock, 0) + COALESCE(NEW.quantity, 1)
+    WHERE id = NEW.product_id;
+    IF FOUND THEN
+      UPDATE public.lay_bay_plans
+      SET stock_released_at = now()
+      WHERE id = NEW.id AND stock_released_at IS NULL;
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$function$;
+
+DROP TRIGGER IF EXISTS trg_release_lay_bay_stock_on_plan_close
+ON public.lay_bay_plans;
+CREATE TRIGGER trg_release_lay_bay_stock_on_plan_close
+AFTER UPDATE OF plan_status ON public.lay_bay_plans
+FOR EACH ROW EXECUTE FUNCTION public.release_lay_bay_stock_on_plan_close();
 
 CREATE OR REPLACE FUNCTION public.create_lay_bay_plan(p_product_id bigint, p_selected_size text, p_selected_colour text, p_quantity integer)
  RETURNS uuid
@@ -532,7 +588,7 @@ BEGIN
         RAISE EXCEPTION 'Deposit exceeds the outstanding plan balance.';
     END IF;
 
-    IF v_plan.first_deposit_at IS NULL THEN
+    IF v_plan.first_deposit_at IS NULL AND v_plan.stock_deducted_at IS NULL THEN
         UPDATE public.products
         SET stock = stock - COALESCE(v_plan.quantity, 1)
         WHERE id = v_plan.product_id AND stock >= COALESCE(v_plan.quantity, 1);
@@ -577,6 +633,7 @@ BEGIN
     UPDATE public.lay_bay_plans
     SET
         first_deposit_at = COALESCE(first_deposit_at, v_now),
+        stock_deducted_at = CASE WHEN first_deposit_at IS NULL THEN COALESCE(stock_deducted_at, v_now) ELSE stock_deducted_at END,
         expires_at = COALESCE(
             expires_at,
             v_now + INTERVAL '30 days'
@@ -698,5 +755,186 @@ AS $function$
 $function$
 
 
+CREATE OR REPLACE FUNCTION public.expire_lay_bay_plans()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE
+    v_plan RECORD;
+    v_balance numeric;
+    v_new_status text;
+    v_count integer := 0;
+BEGIN
+    FOR v_plan IN
+        SELECT *
+        FROM public.lay_bay_plans
+        WHERE plan_status = 'active'
+          AND first_deposit_at IS NOT NULL
+          AND expires_at <= now()
+        FOR UPDATE SKIP LOCKED
+    LOOP
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN entry_type = 'credit' THEN amount
+                WHEN entry_type = 'debit' THEN -amount
+                ELSE 0
+            END
+        ), 0)
+        INTO v_balance
+        FROM public.lay_bay_ledger
+        WHERE plan_id = v_plan.id;
+
+        IF v_balance >= v_plan.lay_bay_price_snapshot * COALESCE(v_plan.quantity, 1) THEN
+            v_new_status := 'completed';
+        ELSE
+            v_new_status := 'expired';
+        END IF;
+
+        UPDATE public.lay_bay_plans
+        SET plan_status = v_new_status,
+            completed_at = CASE
+                WHEN v_new_status = 'completed' THEN now()
+                ELSE completed_at
+            END,
+            updated_at = now()
+        WHERE id = v_plan.id;
+
+        INSERT INTO public.lay_bay_audit_logs (
+            actor_role, action, entity_type, entity_id,
+            description, old_values, new_values
+        )
+        VALUES (
+            'system',
+            'automatic_plan_expiry',
+            'lay_bay_plan',
+            v_plan.id,
+            'Lay-Bay plan reached its 30-day deadline.',
+            jsonb_build_object(
+                'plan_status', 'active',
+                'expires_at', v_plan.expires_at
+            ),
+            jsonb_build_object(
+                'plan_status', v_new_status,
+                'approved_balance', v_balance,
+                'target_price', v_plan.lay_bay_price_snapshot * COALESCE(v_plan.quantity, 1)
+            )
+        );
+
+        v_count := v_count + 1;
+    END LOOP;
+
+    RETURN v_count;
+END;
+$function$
+
+
+CREATE OR REPLACE FUNCTION public.generate_lay_bay_receipt()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO ''
+AS $function$
+DECLARE
+    v_plan public.lay_bay_plans%ROWTYPE;
+    v_receipt_id uuid;
+    v_receipt_number text;
+BEGIN
+    -- Only approved deposits qualify.
+    IF NEW.verification_status <> 'approved' THEN
+        RETURN NEW;
+    END IF;
+
+    SELECT *
+    INTO v_plan
+    FROM public.lay_bay_plans
+    WHERE id = NEW.plan_id;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Associated Lay-Bay plan not found.';
+    END IF;
+
+    v_receipt_number :=
+        'LBM-LB-' ||
+        pg_catalog.to_char(now(), 'YYYYMMDD') ||
+        '-' ||
+        pg_catalog.lpad(
+            pg_catalog.nextval(
+                'public.lay_bay_receipt_seq'::regclass
+            )::text,
+            6,
+            '0'
+        );
+
+    INSERT INTO public.lay_bay_receipts (
+        receipt_number,
+        deposit_id,
+        plan_id,
+        user_id,
+        product_name_snapshot,
+        plan_total,
+        amount,
+        currency,
+        payment_method,
+        payment_reference,
+        deposit_submitted_at,
+        deposit_verified_at
+    )
+    VALUES (
+        v_receipt_number,
+        NEW.id,
+        NEW.plan_id,
+        NEW.user_id,
+        v_plan.product_name_snapshot,
+        v_plan.lay_bay_price_snapshot * COALESCE(v_plan.quantity, 1),
+        NEW.amount,
+        NEW.currency,
+        NEW.payment_method,
+        NEW.payment_reference,
+        NEW.submitted_at,
+        COALESCE(NEW.verified_at, now())
+    )
+    ON CONFLICT (deposit_id) DO NOTHING
+    RETURNING id INTO v_receipt_id;
+
+    -- Record receipt creation in the audit trail.
+    IF v_receipt_id IS NOT NULL THEN
+        INSERT INTO public.lay_bay_audit_logs (
+            actor_user_id,
+            actor_role,
+            action,
+            entity_type,
+            entity_id,
+            description,
+            new_values
+        )
+        VALUES (
+            NEW.verified_by,
+            CASE
+                WHEN NEW.verified_by IS NULL THEN 'system'
+                ELSE 'admin'
+            END,
+            'receipt_generated',
+            'lay_bay_receipt',
+            v_receipt_id,
+            'Receipt automatically generated for an approved deposit.',
+            jsonb_build_object(
+                'receipt_number', v_receipt_number,
+                'deposit_id', NEW.id,
+                'amount', NEW.amount,
+                'currency', NEW.currency
+            )
+        );
+    END IF;
+
+    RETURN NEW;
+END;
+$function$
+
+
 REVOKE ALL ON FUNCTION public.create_lay_bay_plan(bigint,text,text,integer) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.create_lay_bay_plan(bigint,text,text,integer) FROM anon;
 GRANT EXECUTE ON FUNCTION public.create_lay_bay_plan(bigint,text,text,integer) TO authenticated;
+REVOKE ALL ON FUNCTION public.release_lay_bay_stock_on_plan_close() FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.release_lay_bay_stock_on_plan_close() FROM anon;
