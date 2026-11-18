@@ -728,6 +728,11 @@
 .lbm-header-tools-row .header-icon-button{width:34px!important;height:36px!important;flex:0 0 34px!important}
 @media(max-width:390px){.site-header-stack .topbar{padding:9px!important;gap:7px!important}.lbm-header-tools-row{gap:5px}.lbm-header-tools-row .lbm-menu-toggle{width:31px;flex-basis:31px}.lbm-header-tools-row .cart-button{width:31px!important;flex-basis:31px!important}.lbm-header-tools-row .header-icon-button{width:29px!important;flex-basis:29px!important}.lbm-header-tools-row .header-actions,.lbm-header-tools-row .header-account-tools{gap:3px!important}.lbm-theme-toggle{padding:7px 10px}}
 body.lbm-light-theme{background:#f7f5ef!important;color:#171717!important}body.lbm-light-theme .site-header-stack,body.lbm-light-theme .topbar{background:#fff!important}body.lbm-light-theme .lbm-welcome-guide,body.lbm-light-theme .collection-heading,body.lbm-light-theme .products,body.lbm-light-theme .home-section-heading{color:#171717!important}
+
+.lbm-greeting-area{width:min(1120px,92%);margin:13px auto 12px;padding:12px 15px;text-align:center;border:1px solid #3c321b;border-radius:8px;background:#111;color:#f5f0e3}
+.lbm-greeting-area .lbm-greeting-title{margin:0 0 4px;color:#D4AF37;font:700 18px Georgia,serif}
+.lbm-greeting-area p:last-child{margin:0;color:#d3cbb8;font-size:12px;line-height:1.5}
+body.lbm-light-theme .lbm-greeting-area{background:#fff;color:#171717;border-color:#d4af37}body.lbm-light-theme .lbm-greeting-area p:last-child{color:#555}
 </style>
 </head>
 
@@ -802,7 +807,12 @@ body.lbm-light-theme{background:#f7f5ef!important;color:#171717!important}body.l
 
     <main>
 
-        <section class="hero-image-section" id="home" aria-label="LBM featured fashion photograph">
+        <section class="lbm-greeting-area" aria-label="Welcome message">
+    <p class="lbm-greeting-title" id="lbm-greeting-title">Welcome to LBM Online Store</p>
+    <p id="lbm-greeting-message">Style, convenience and confidence — all in one place.</p>
+</section>
+
+<section class="hero-image-section" id="home" aria-label="LBM featured fashion photograph">
             <img id="lbm-hero-image" class="hero-model-photo"
                  src="assets/lbm-hero-lifestyle.jpg"
                  alt="LBM fashion models wearing LBM Online Store T-shirts">
@@ -1553,5 +1563,5 @@ body.lbm-light-theme{background:#f7f5ef!important;color:#171717!important}body.l
 
 
 <script src="lbm-customer-behaviour-analytics.js?v=1" defer></script>
-<script>(function(){const key='lbmColourTheme';const button=document.getElementById('lbm-theme-toggle');if(!button)return;function apply(mode){document.body.classList.toggle('lbm-light-theme',mode==='light');button.textContent=mode==='light'?'☾ Dark':'☀ Light';button.setAttribute('aria-label',mode==='light'?'Switch to dark theme':'Switch to light theme');}let saved='dark';try{saved=localStorage.getItem(key)||'dark'}catch(e){}apply(saved);button.addEventListener('click',function(){const next=document.body.classList.contains('lbm-light-theme')?'dark':'light';apply(next);try{localStorage.setItem(key,next)}catch(e){}});})();</script></body>
+<script>(function(){const key='lbmColourTheme';const button=document.getElementById('lbm-theme-toggle');if(!button)return;function apply(mode){document.body.classList.toggle('lbm-light-theme',mode==='light');button.textContent=mode==='light'?'☾ Dark':'☀ Light';button.setAttribute('aria-label',mode==='light'?'Switch to dark theme':'Switch to light theme');}let saved='dark';try{saved=localStorage.getItem(key)||'dark'}catch(e){}apply(saved);button.addEventListener('click',function(){const next=document.body.classList.contains('lbm-light-theme')?'dark':'light';apply(next);try{localStorage.setItem(key,next)}catch(e){}});})();</script><script>(function(){const title=document.getElementById("lbm-greeting-title");const message=document.getElementById("lbm-greeting-message");if(!title||!message)return;const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Africa/Lusaka",hour:"2-digit",hourCycle:"h23"}).formatToParts(new Date());const hour=Number(parts.find(p=>p.type==="hour")?.value||0);const greeting=hour<12?"Good Morning":hour<18?"Good Afternoon":"Good Evening";title.textContent=greeting+"! Welcome to LBM Online Store.";message.textContent="We're glad you're here. Explore our collections and find a look that feels like you.";})();</script></body>
 </html>
