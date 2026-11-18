@@ -3566,7 +3566,8 @@ let layBaySelectionCart = [];
         (plan.product_name_snapshot || "Lay-Bay Product") +
         (variants.length ? " (" + variants.join(", ") + ")" : "") +
         " — " +
-        money(plan.lay_bay_price_snapshot) +
+        money(Number(plan.lay_bay_price_snapshot) * Number(plan.quantity || 1)) +
+        " — Qty " + Number(plan.quantity || 1) +
         (plan.plan_status === "pending_initial_deposit"
           ? " — Awaiting 50% first deposit"
           : " — Active");
@@ -3988,7 +3989,10 @@ let layBaySelectionCart = [];
     const selectedBalance = balanceFor(planId);
     const alreadyPaid = Number(selectedBalance?.current_balance || 0);
     const firstDepositMinimum = selectedPlan
-      ? Number((Number(selectedPlan.lay_bay_price_snapshot) * 0.5).toFixed(2))
+      ? Number((
+          Number(selectedPlan.lay_bay_price_snapshot) *
+          Number(selectedPlan.quantity || 1) * 0.5
+        ).toFixed(2))
       : 0;
     const method = $("paymentMethod")?.value.trim();
     const reference = $("paymentReference")?.value.trim();
