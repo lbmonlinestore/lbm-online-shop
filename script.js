@@ -707,21 +707,54 @@ function normaliseSearchText(value) {
 
 
 function searchProducts(searchTerm) {
-
     const query = normaliseSearchText(searchTerm);
+    const params = new URLSearchParams(window.location.search);
+    const department = String(params.get("department") || "").trim().toLowerCase();
 
-    if (!query) return products;
+    const categoryOf = product =>
+        String(product.category || "").trim().toLowerCase();
 
-    return products.filter(product => {
+    const productName = product =>
+        String(product.name || "").trim().toLowerCase();
 
+    const isBag = product =>
+        /\b(bag|handbag|purse)\b/.test(productName(product));
+
+    const departmentRules = {
+        men: product =>
+            ["men's clothing", "men's shoes"].includes(categoryOf(product)),
+
+        women: product =>
+            categoryOf(product) === "women's clothing",
+
+        kids: product =>
+            ["kids' clothing", "children's clothing", "kids clothing"].includes(categoryOf(product)),
+
+        footwear: product =>
+            ["men's shoes", "women's shoes", "kids' shoes", "shoes"].includes(categoryOf(product)),
+
+        bags: product =>
+            categoryOf(product) === "accessories" && isBag(product),
+
+        accessories: product =>
+            categoryOf(product) === "accessories" && !isBag(product)
+    };
+
+    const rule = departmentRules[department];
+
+    const baseProducts = rule
+        ? products.filter(rule)
+        : products;
+
+    if (!query) return baseProducts;
+
+    return baseProducts.filter(product => {
         const searchableFields = [
-
             product.name,
             product.brand,
             product.category,
             product.description,
             product.sku
-
         ];
 
         const searchableText = searchableFields
@@ -731,11 +764,8 @@ function searchProducts(searchTerm) {
             .toLowerCase();
 
         return searchableText.includes(query);
-
     });
-
 }
-
 
 function updateSearchResults(resultCount, searchTerm) {
 
@@ -841,7 +871,7 @@ function installProductSearch() {
    13. DISPLAY PRODUCTS
    ===================================================== */
 
-function displayProducts(productArray = products) {
+function displayProducts(productArray = searchProducts(productSearchTerm)) {
 
     if (!productList) return;
 

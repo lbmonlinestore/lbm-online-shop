@@ -546,6 +546,194 @@
  .hero-primary-action,.hero-secondary-action{font-size:9px;padding:11px}
 }
 </style>
+
+<style id="lbm-mobile-homepage-redesign">
+:root{--lbm-black:#080808;--lbm-gold:#D4AF37;--lbm-gold-light:#E7CC78}
+.site-header-stack,.site-header-stack.header-hidden{position:static!important;top:auto!important;transform:none!important;transition:none!important;will-change:auto!important}
+.site-header-stack .topbar{position:relative!important;top:auto!important;display:flex;align-items:center;justify-content:space-between;min-height:68px;padding:10px clamp(14px,4vw,48px);gap:12px;background:#080808;border-bottom:1px solid rgba(212,175,55,.45);flex-wrap:nowrap}
+.site-header-stack .topbar .brand{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:block;text-align:center;color:#D4AF37;font-size:clamp(18px,2.5vw,25px);line-height:1;font-weight:900;letter-spacing:1.5px}
+.site-header-stack .topbar .brand span{display:block;margin-top:5px;color:#fff;font-size:9px;letter-spacing:3px}
+.lbm-menu-toggle{width:42px;height:42px;display:grid;place-items:center;flex:0 0 42px;border:1px solid #D4AF37;border-radius:7px;background:transparent;color:#D4AF37;cursor:pointer}
+.lbm-menu-toggle svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.site-header-stack .header-actions{display:flex;align-items:center;gap:9px;margin-left:auto}
+.site-header-stack .cart-button{position:relative;width:43px;height:43px;display:grid;place-items:center;padding:8px;border:1px solid #D4AF37;border-radius:7px;background:#D4AF37;color:#080808}
+.site-header-stack .cart-button svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cart-count-badge{position:absolute;top:-7px;right:-7px;min-width:19px;height:19px;padding:0 5px;border:2px solid #080808;border-radius:20px;background:#fff;color:#080808;font-size:10px;font-weight:900;line-height:15px;text-align:center}
+.site-header-stack .header-account-tools{display:flex;gap:7px;margin:0}
+.site-header-stack .header-icon-button{width:39px;height:39px;flex:0 0 39px}
+.site-header-stack .header-icon-button svg{width:19px;height:19px}
+.lbm-menu-panel{position:absolute;z-index:10020;top:100%;left:0;width:min(360px,92vw);max-height:calc(100vh - 90px);overflow:auto;padding:18px;background:#101010;border:1px solid rgba(212,175,55,.55);border-top:0;border-radius:0 0 12px 0;box-shadow:0 18px 35px #0007}
+.lbm-menu-panel[hidden]{display:none!important}
+.lbm-menu-kicker{margin:0 0 10px;color:#D4AF37;font-size:10px;font-weight:900;letter-spacing:1.6px}
+.lbm-menu-link{display:flex;justify-content:space-between;gap:10px;padding:13px 5px;border-bottom:1px solid #ffffff18;color:#f5f0e3;text-decoration:none;font-size:14px}
+.lbm-menu-link:hover{color:#D4AF37}
+.lbm-menu-link span{color:#D4AF37}
+.lbm-menu-divider{height:1px;margin:10px 0;background:#D4AF3744}
+.site-header-stack .lbm-search-panel{display:block;width:100%;max-width:none;margin:0;padding:10px clamp(14px,4vw,48px) 13px;background:#080808;border:0;border-bottom:1px solid rgba(212,175,55,.25)}
+.site-header-stack .lbm-search-panel .search-label{display:none}
+.site-header-stack .lbm-search-box{width:100%;max-width:1120px;min-height:45px;height:45px;margin:0 auto;padding:0 13px;border:1px solid #D4AF37;border-radius:6px;background:#171717;box-shadow:none}
+.site-header-stack .lbm-search-icon{color:#D4AF37;font-size:23px;margin-right:9px}
+.site-header-stack #lbm-product-search{height:43px;color:#fff;font-size:14px}
+.site-header-stack #lbm-product-search::placeholder{color:#aaa}
+.site-header-stack #lbm-clear-search{background:#333;color:#D4AF37}
+.site-header-stack #lbm-search-results{max-width:1120px;margin:5px auto 0;color:#aaa;font-size:10px}
+.hero-image-section{margin:0!important;padding:0!important;background:#080808!important}
+.hero-model-photo{display:block!important;width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;object-position:center!important}
+.hero-fresh{padding:30px clamp(18px,5vw,60px)!important;background:#fff!important;color:#111!important}
+.hero-fresh h1{font-size:clamp(38px,6vw,66px)!important}
+.lbm-welcome-guide{width:min(1120px,92%);margin:20px auto 10px;padding:20px 19px;border:1px solid rgba(212,175,55,.5);border-radius:11px;background:linear-gradient(145deg,#111,#1d1a12);color:#f5f0e3;box-shadow:0 7px 22px #0000000d}
+.lbm-welcome-intro .section-label{margin:0 0 7px;color:#D4AF37;font-size:10px;letter-spacing:1.7px}
+.lbm-welcome-intro h2{margin:0 0 8px;color:#fff;font-family:Georgia,serif;font-size:clamp(21px,3vw,29px);line-height:1.2}
+.lbm-welcome-intro>p:last-child{max-width:850px;margin:0;color:#d2ccbd;font-size:13px;line-height:1.65}
+.lbm-welcome-details{margin-top:14px;border-top:1px solid #D4AF3745}
+.lbm-welcome-details summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0 2px;list-style:none;cursor:pointer;color:#E7CC78;font-size:11px;font-weight:900;letter-spacing:.7px}
+.lbm-welcome-details summary::-webkit-details-marker{display:none}
+.lbm-welcome-details summary b{display:grid;place-items:center;width:27px;height:27px;border:1px solid #D4AF37;border-radius:50%;font-size:20px;font-weight:400}
+.lbm-welcome-details[open] summary b{font-size:0}
+.lbm-welcome-details[open] summary b:before{content:"−";font-size:20px}
+.lbm-welcome-details-content{padding:12px 0 3px;color:#d8d2c5;font-size:12px;line-height:1.7}
+.lbm-welcome-details-content h3{margin:15px 0 4px;color:#E7CC78;font-size:11px;letter-spacing:.8px}
+.lbm-welcome-details-content p{margin:5px 0}
+.lbm-welcome-details-content ol{padding-left:20px;margin:7px 0}
+.lbm-welcome-details-content li{padding:2px 0}
+.lbm-welcome-thanks{padding-top:10px;color:#fff!important}
+.home-categories{padding:42px 5%!important;background:#faf9f6!important}
+.home-section-heading h2{color:#171717!important}
+.home-section-heading>p:last-child{color:#6d675b!important}
+.category-tiles.lbm-department-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;max-width:1050px}
+.lbm-department-card{position:relative;min-height:185px;padding:16px;justify-content:flex-end;overflow:hidden;border:1px solid #D4AF3744;border-radius:9px;background:#161616;color:#fff;text-decoration:none}
+.lbm-department-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.lbm-department-card:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(0,0,0,.82),rgba(0,0,0,.04) 75%)}
+.lbm-department-card:after{display:none}
+.lbm-department-card:hover img{transform:scale(1.04)}
+.lbm-department-card span,.lbm-department-card strong,.lbm-department-card small{position:relative;z-index:2}
+.lbm-department-card span{font-size:10px;color:#E7CC78}
+.lbm-department-card strong{font-size:clamp(14px,2vw,19px);letter-spacing:.5px}
+.lbm-department-card small{font-size:11px;color:#f0e9da}
+.lbm-quick-filters{padding:20px 0 28px;background:#faf9f6}
+.lbm-quick-filters-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1120px;margin:0 auto 11px;padding:0 5%}
+.lbm-quick-filters-heading .section-label{margin:0;color:#9c761c;font-size:9px;letter-spacing:1.4px}
+.lbm-quick-filters-heading strong{color:#181818;font-size:12px}
+.lbm-quick-filter-row{display:flex;gap:8px;overflow-x:auto;padding:2px 5% 10px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.lbm-quick-filter{flex:0 0 auto;scroll-snap-align:start;padding:9px 14px;border:1px solid #c8b77e;border-radius:30px;background:#fff;color:#242016;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer}
+.lbm-quick-filter:hover,.lbm-quick-filter:focus-visible{background:#080808;color:#E7CC78;border-color:#D4AF37}
+.collection-heading{padding:42px 16px 20px!important;background:#080808!important}
+.collection-heading h2{color:#fff}
+.products{padding:14px 4% 40px!important}
+.product-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px!important;max-width:1180px;margin:0 auto}
+.product-card{min-width:0;border:1px solid rgba(212,175,55,.28)!important;border-radius:9px!important;background:#111!important;overflow:hidden}
+.product-card .product-image,.product-card img.product-image{width:100%;height:auto!important;aspect-ratio:3/4;max-height:none!important;object-fit:cover}
+.product-info{padding:12px!important}
+.product-card h3{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em;color:#f5f0e3!important;font-size:13px!important}
+.product-card .product-price{color:#E7CC78!important;font-weight:900}
+.lbm-spotlight-banners{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;width:min(1120px,92%);margin:12px auto 35px}
+.lbm-spotlight-banner{min-height:205px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:8px;padding:22px;border-radius:10px;overflow:hidden;color:#fff;text-decoration:none;box-shadow:0 8px 22px #0002}
+.lbm-formal-banner{background:linear-gradient(110deg,#090909eF,#09090960),url('https://images.unsplash.com/photo-1593032465175-481ac7f401a0?w=1000&auto=format&fit=crop') center/cover}
+.lbm-casual-banner{background:linear-gradient(110deg,#090909eF,#09090960),url('https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1000&auto=format&fit=crop') center/cover}
+.lbm-spotlight-banner span{color:#E7CC78;font-size:9px;font-weight:900;letter-spacing:1.5px}
+.lbm-spotlight-banner strong{max-width:360px;font-family:Georgia,serif;font-size:clamp(19px,3vw,27px);line-height:1.15}
+.lbm-spotlight-banner small{color:#eee;font-size:11px;line-height:1.5}
+.lbm-spotlight-banner b{margin-top:5px;color:#E7CC78;font-size:10px;letter-spacing:.6px}
+.benefits-strip{margin-top:20px;background:#080808!important}
+.benefits-strip small{color:#d0c9b8!important}
+.laybay-promo{margin:20px auto 0!important}
+.lbm-footer-accordions{width:min(760px,100%);margin:20px auto 25px;text-align:left}
+.lbm-footer-accordions details{border-top:1px solid rgba(212,175,55,.3)}
+.lbm-footer-accordions details:last-child{border-bottom:1px solid rgba(212,175,55,.3)}
+.lbm-footer-accordions summary{padding:14px 4px;color:#E7CC78;font-size:11px;font-weight:800;letter-spacing:1px;cursor:pointer;list-style:none}
+.lbm-footer-accordions summary::-webkit-details-marker{display:none}
+.lbm-footer-accordions summary:after{content:"+";float:right;font-size:17px;font-weight:400}
+.lbm-footer-accordions details[open] summary:after{content:"−"}
+.lbm-footer-accordions details>div{display:flex;flex-wrap:wrap;gap:8px 18px;padding:0 4px 15px}
+.lbm-footer-accordions a{color:#ddd;text-decoration:none;font-size:12px}
+.lbm-footer-accordions a:hover{color:#D4AF37}
+@media(max-width:760px){
+ .site-header-stack .topbar{min-height:62px;padding:8px 12px;gap:7px}
+ .site-header-stack .topbar .brand{font-size:18px;letter-spacing:1px}
+ .site-header-stack .topbar .brand span{font-size:8px;letter-spacing:2px}
+ .site-header-stack .header-actions{gap:5px}
+ .site-header-stack .header-account-tools{gap:5px}
+ .site-header-stack .header-icon-button{width:34px;height:34px;flex-basis:34px}
+ .site-header-stack .cart-button{width:38px;height:38px}
+ .lbm-menu-toggle{width:37px;height:37px;flex-basis:37px}
+ .site-header-stack .lbm-search-panel{padding:9px 12px 10px}
+ .site-header-stack #lbm-search-results{display:block;font-size:9px}
+ .category-tiles.lbm-department-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .lbm-department-card{min-height:145px;padding:11px}
+ .lbm-department-card strong{font-size:13px}
+ .lbm-department-card small{font-size:9px}
+ .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+ .products{padding-left:12px!important;padding-right:12px!important}
+ .product-info{padding:9px!important}
+ .product-card h3{font-size:12px!important}
+ .lbm-spotlight-banners{grid-template-columns:1fr;gap:11px}
+ .lbm-spotlight-banner{min-height:170px;padding:18px}
+ .lbm-welcome-guide{width:94%;padding:17px 14px}
+ .lbm-welcome-intro h2{font-size:21px}
+ .lbm-welcome-intro>p:last-child{font-size:12px}
+ .lbm-footer-accordions{padding:0 8px}
+}
+@media(max-width:380px){
+ .site-header-stack .topbar .brand{font-size:16px}
+ .site-header-stack .header-icon-button{width:31px;height:31px;flex-basis:31px}
+ .site-header-stack .cart-button{width:35px;height:35px}
+ .lbm-menu-toggle{width:34px;height:34px;flex-basis:34px}
+}
+
+/* Final header and welcome placement correction */
+.site-header-stack .topbar{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:9px!important;flex-wrap:nowrap!important;min-height:64px!important;padding:8px clamp(9px,2.5vw,24px)!important}
+.site-header-stack .topbar .brand{position:static!important;left:auto!important;top:auto!important;transform:none!important;display:block!important;flex:0 0 auto!important;margin:0!important;font-size:clamp(16px,2vw,21px)!important;letter-spacing:1px!important;white-space:nowrap!important}
+.site-header-stack .topbar .brand span{display:none!important}
+.site-header-stack .lbm-menu-toggle{flex:0 0 34px!important;width:34px!important;height:36px!important}
+.site-header-stack .lbm-header-search{display:block!important;order:0!important;flex:1 1 auto!important;width:auto!important;min-width:72px!important;max-width:230px!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important}
+.site-header-stack .lbm-header-search .lbm-search-box{height:36px!important;min-height:36px!important;width:100%!important;padding:0 7px!important;border-radius:6px!important;background:#171717!important}
+.site-header-stack .lbm-header-search .lbm-search-icon{font-size:19px!important;margin-right:4px!important}
+.site-header-stack .lbm-header-search #lbm-product-search{height:34px!important;min-width:0!important;font-size:11px!important}
+.site-header-stack .lbm-header-search #lbm-clear-search{width:21px!important;height:21px!important;font-size:16px!important}
+.site-header-stack .lbm-header-search #lbm-search-results{display:none!important}
+.site-header-stack .header-actions{display:flex!important;align-items:center!important;flex:0 0 auto!important;gap:6px!important;margin-left:auto!important}
+.site-header-stack .header-account-tools{display:flex!important;align-items:center!important;gap:5px!important;margin:0!important}
+.site-header-stack .cart-button{width:34px!important;height:36px!important;flex:0 0 34px!important;padding:5px!important}
+.site-header-stack .header-icon-button{width:32px!important;height:36px!important;flex:0 0 32px!important;border-radius:6px!important}
+.site-header-stack .header-icon-button svg,.site-header-stack .cart-button svg{width:18px!important;height:18px!important}
+@media(max-width:380px){
+ .site-header-stack .topbar{gap:5px!important;padding-left:7px!important;padding-right:7px!important}
+ .site-header-stack .topbar .brand{font-size:15px!important}
+ .site-header-stack .lbm-menu-toggle{width:30px!important;flex-basis:30px!important}
+ .site-header-stack .header-actions{gap:4px!important}
+ .site-header-stack .header-account-tools{gap:3px!important}
+ .site-header-stack .cart-button{width:30px!important;flex-basis:30px!important}
+ .site-header-stack .header-icon-button{width:29px!important;flex-basis:29px!important}
+ .site-header-stack .lbm-header-search{min-width:62px!important}
+ .site-header-stack .lbm-header-search #lbm-product-search{font-size:10px!important}
+}
+.lbm-welcome-guide{margin:16px auto 10px!important}
+
+
+/* LBM approved two-row header */
+.site-header-stack .topbar{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;padding:12px clamp(12px,3vw,28px)!important;min-height:0!important}
+.lbm-header-brand-row{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:42px}
+.lbm-header-brand-row .brand{font-family:Georgia,serif!important;font-size:clamp(25px,5vw,34px)!important;font-weight:900!important;letter-spacing:2px!important;color:#D4AF37!important;text-decoration:none!important}
+.lbm-header-brand-row .brand span{display:inline!important}
+.lbm-theme-toggle{border:1px solid #D4AF37;border-radius:22px;padding:8px 13px;background:transparent;color:#D4AF37;font-weight:700;font-size:12px;white-space:nowrap}
+.lbm-header-tools-row{display:flex;align-items:center;gap:8px;width:100%;min-width:0}
+.lbm-header-tools-row .lbm-menu-toggle{flex:0 0 36px;width:36px;height:36px}
+.lbm-header-tools-row .lbm-header-search{display:block!important;flex:1 1 auto!important;min-width:0!important;max-width:none!important;margin:0!important;padding:0!important}
+.lbm-header-tools-row .lbm-search-box{height:38px!important;min-height:38px!important;width:100%!important;padding:0 8px!important}
+.lbm-header-tools-row #lbm-product-search{min-width:0!important;width:100%!important;font-size:12px!important}
+.lbm-header-tools-row #lbm-search-results{display:none!important}
+.lbm-header-tools-row .header-actions{display:flex!important;flex:0 0 auto!important;margin:0 0 0 auto!important;gap:6px!important}
+.lbm-header-tools-row .header-account-tools{display:flex!important;gap:5px!important}
+.lbm-header-tools-row .cart-button{width:36px!important;height:36px!important;flex:0 0 36px!important}
+.lbm-header-tools-row .header-icon-button{width:34px!important;height:36px!important;flex:0 0 34px!important}
+@media(max-width:390px){.site-header-stack .topbar{padding:9px!important;gap:7px!important}.lbm-header-tools-row{gap:5px}.lbm-header-tools-row .lbm-menu-toggle{width:31px;flex-basis:31px}.lbm-header-tools-row .cart-button{width:31px!important;flex-basis:31px!important}.lbm-header-tools-row .header-icon-button{width:29px!important;flex-basis:29px!important}.lbm-header-tools-row .header-actions,.lbm-header-tools-row .header-account-tools{gap:3px!important}.lbm-theme-toggle{padding:7px 10px}}
+body.lbm-light-theme{background:#f7f5ef!important;color:#171717!important}body.lbm-light-theme .site-header-stack,body.lbm-light-theme .topbar{background:#fff!important}body.lbm-light-theme .lbm-welcome-guide,body.lbm-light-theme .collection-heading,body.lbm-light-theme .products,body.lbm-light-theme .home-section-heading{color:#171717!important}
+
+.lbm-greeting-area{width:min(1120px,92%);margin:13px auto 12px;padding:12px 15px;text-align:center;border:1px solid #3c321b;border-radius:8px;background:#111;color:#f5f0e3}
+.lbm-greeting-area .lbm-greeting-title{margin:0 0 4px;color:#D4AF37;font:700 18px Georgia,serif}
+.lbm-greeting-area p:last-child{margin:0;color:#d3cbb8;font-size:12px;line-height:1.5}
+body.lbm-light-theme .lbm-greeting-area{background:#fff;color:#171717;border-color:#d4af37}body.lbm-light-theme .lbm-greeting-area p:last-child{color:#555}
+</style>
 </head>
 
 <body>
@@ -553,71 +741,111 @@
     <div class="site-header-stack" id="site-header-stack">
 
     <header class="topbar">
-
-        <a href="#home" class="brand">
-            LBM <span>ONLINE SHOP</span>
-        </a>
-
-        <nav class="navigation" aria-label="Main navigation">
-            <a href="#home">Home</a>
-            <a href="#products">Shop</a>
-            <a href="lay-bay/index.html">Lay-Bay</a>
-            <a href="#about">About</a>
-            <a href="#faq">FAQs</a>
-            <a href="#contact">Contact</a>
-            <a href="technical-assistant.html">Technical Assistant</a>
-            <a href="returns.html">Returns & Exchanges</a>
-        </nav>
-
-        <a class="header-whatsapp"
-           href="https://wa.me/260969034955"
-           target="_blank"
-           rel="noopener noreferrer">
-            WhatsApp
-        </a>
-
-        <button class="cart-button" id="cart-button" type="button">
-            Cart (<span id="cart-count">0</span>)
-        </button>
-
-        <div class="header-account-tools" aria-label="Customer tools">
-            <button class="header-icon-button" id="lbm-announcement-toggle"
-                    type="button" aria-label="Open announcements"
-                    aria-controls="lbm-announcements-dialog" aria-expanded="false">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>
-                </svg>
-                <span class="announcement-count" id="lbm-announcement-count" hidden>1</span>
-            </button>
-            <a class="header-icon-button" href="lay-bay/login.html"
-               aria-label="Customer login and account" title="Customer account">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="8" r="4"/>
-                    <path d="M4 21a8 8 0 0 1 16 0"/>
-                </svg>
-            </a>
+        <div class="lbm-header-brand-row">
+            <a href="#home" class="brand" aria-label="LBM Online Store home">LBM</a>
+            <button type="button" class="lbm-theme-toggle" id="lbm-theme-toggle" aria-label="Switch colour theme">☀ Light</button>
         </div>
-
-        <div class="lbm-search-panel" role="search">
+        <div class="lbm-header-tools-row">
+            <button class="lbm-menu-toggle" id="lbm-menu-toggle" type="button" aria-label="Open store menu" aria-controls="lbm-department-menu" aria-expanded="false">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+            </button>
+        <div class="lbm-search-panel lbm-header-search" role="search">
             <label class="search-label" for="lbm-product-search">Search LBM products</label>
             <div class="lbm-search-box">
                 <span class="lbm-search-icon" aria-hidden="true">⌕</span>
                 <input type="search" id="lbm-product-search"
-                       placeholder="Search..." aria-label="Search products"
+                       placeholder="Search products" aria-label="Search products"
                        autocomplete="off">
                 <button type="button" id="lbm-clear-search"
                         aria-label="Clear search" hidden>×</button>
             </div>
             <p id="lbm-search-results" aria-live="polite">Browse our latest products</p>
         </div>
+
+
+        <div class="header-actions">
+            <button class="cart-button" id="cart-button" type="button" aria-label="Open shopping bag">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 13H4L5 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+                <span class="cart-count-badge" id="cart-count">0</span>
+            </button>
+            <div class="header-account-tools" aria-label="Customer tools">
+                <button class="header-icon-button" id="lbm-announcement-toggle"
+                        type="button" aria-label="Open announcements"
+                        aria-controls="lbm-announcements-dialog" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+                    <span class="announcement-count" id="lbm-announcement-count" hidden>1</span>
+                </button>
+                <a class="header-icon-button" href="lay-bay/login.html"
+                   aria-label="Customer login and account" title="Customer account">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+                </a>
+            </div>
+        </div>
+
+
+        </div>
+        <nav class="lbm-menu-panel" id="lbm-department-menu" aria-label="Store departments and links" hidden>
+            <p class="lbm-menu-kicker">SHOP BY DEPARTMENT</p>
+            <a href="department.html?department=men" class="lbm-menu-link">Men's Wear <span>→</span></a>
+            <a href="department.html?department=women" class="lbm-menu-link">Women's Wear <span>→</span></a>
+            <a href="department.html?department=kids" class="lbm-menu-link">Kids' Wear <span>→</span></a>
+            <a href="department.html?department=footwear" class="lbm-menu-link">Shoes &amp; Slippers <span>→</span></a>
+            <a href="department.html?department=accessories" class="lbm-menu-link">Fashion Accessories <span>→</span></a>
+            <a href="department.html?department=bags" class="lbm-menu-link">Bags &amp; Handbags <span>→</span></a>
+            <div class="lbm-menu-divider"></div>
+            <a href="lay-bay/index.html" class="lbm-menu-link">LBM Lay-Bay</a>
+            <a href="technical-assistant.html" class="lbm-menu-link">Technical Assistant</a>
+            <a href="returns.html" class="lbm-menu-link">Returns &amp; Exchanges</a>
+            <a href="#faq" class="lbm-menu-link">Frequently Asked Questions</a>
+            <a href="https://wa.me/260969034955" class="lbm-menu-link" target="_blank" rel="noopener noreferrer">Contact LBM on WhatsApp</a>
+        </nav>
+
     </header>
+
+
+            
 
     <main>
 
-        <section class="hero-image-section" id="home" aria-label="LBM featured fashion photograph">
+        <section class="lbm-greeting-area" aria-label="Welcome message">
+    <p class="lbm-greeting-title" id="lbm-greeting-title">Welcome to LBM Online Store</p>
+    <p id="lbm-greeting-message">Style, convenience and confidence — all in one place.</p>
+</section>
+
+<section class="hero-image-section" id="home" aria-label="LBM featured fashion photograph">
             <img id="lbm-hero-image" class="hero-model-photo"
                  src="assets/lbm-hero-lifestyle.jpg"
                  alt="LBM fashion models wearing LBM Online Store T-shirts">
+        </section>
+
+        <section class="lbm-welcome-guide" aria-labelledby="lbm-welcome-title">
+            <div class="lbm-welcome-intro">
+                <p class="section-label">WELCOME TO LBM ONLINE STORE</p>
+                <h2 id="lbm-welcome-title">Your Style. Your Choice. Your Convenience.</h2>
+                <p>Discover fashionable clothing, footwear and accessories for men, women and children. Explore our collections and enjoy convenient online shopping across Zambia.</p>
+            </div>
+            <details class="lbm-welcome-details">
+                <summary><span>WANT TO KNOW MORE ABOUT LBM?</span><b aria-hidden="true">+</b></summary>
+                <div class="lbm-welcome-details-content">
+                    <h3>WHAT WE OFFER</h3>
+                    <p>Explore men's wear, women's wear, kids' wear, shoes, slippers and fashion accessories. View product photos, descriptions, prices and available sizes and colours.</p>
+                    <h3>HOW TO SHOP WITH US</h3>
+                    <ol>
+                        <li>Browse our collections or search for a product.</li>
+                        <li>Select your preferred item, pictures, sizes and colours where available.</li>
+                        <li>Add your selections to the shopping cart.</li>
+                        <li>Review your items, options, quantities and total.</li>
+                        <li>Proceed to checkout and provide your contact and delivery details.</li>
+                        <li>Submit your order and follow the payment and confirmation instructions.</li>
+                        <li>Arrange delivery or collection with our team.</li>
+                    </ol>
+                    <h3>MORE WAYS TO SHOP</h3>
+                    <p><strong>LBM Lay-Bay:</strong> Structured payment arrangements for eligible products, subject to the applicable terms. <strong>WhatsApp Ordering:</strong> Contact us directly for ordering assistance. <strong>Customer Support:</strong> Get help with products, orders and shopping enquiries.</p>
+                    <h3>SHOP WITH CONFIDENCE</h3>
+                    <p>Review product details, prices, payment and delivery arrangements, and our Returns &amp; Exchanges information before ordering.</p>
+                    <p class="lbm-welcome-thanks"><strong>Thank you for choosing LBM Online Store.</strong><br>Making Fashion Shopping Convenient Across Zambia.</p>
+                </div>
+            </details>
         </section>
 
         <section class="hero hero-fresh" aria-label="LBM welcome">
@@ -640,34 +868,52 @@
             </div>
         </section>
 
+
+
         <section class="home-categories" aria-labelledby="category-title">
             <div class="home-section-heading">
                 <p class="section-label">FIND YOUR LOOK</p>
-                <h2 id="category-title">SHOP BY CATEGORY</h2>
-                <p>Explore the LBM collection, all in one place.</p>
+                <h2 id="category-title">SHOP BY DEPARTMENT</h2>
+                <p>Go straight to the styles and products you are looking for.</p>
             </div>
-            <div class="category-tiles">
-                <a class="category-tile category-fashion" href="#products"><span>01</span><strong>Clothing</strong><small>Everyday style, made simple</small></a>
-                <a class="category-tile category-footwear" href="#products"><span>02</span><strong>Footwear</strong><small>Step out with confidence</small></a>
-                <a class="category-tile category-accessories" href="#products"><span>03</span><strong>Accessories</strong><small>Complete your look</small></a>
+            <div class="category-tiles lbm-department-grid">
+                <a class="category-tile lbm-department-card" href="department.html?department=men">
+                    <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800&auto=format&fit=crop" alt="Men's formal fashion" loading="lazy">
+                    <span>01</span><strong>MEN'S WEAR</strong><small>Suits, shirts &amp; everyday style</small>
+                </a>
+                <a class="category-tile lbm-department-card" href="department.html?department=women">
+                    <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&auto=format&fit=crop" alt="Women's fashion dress" loading="lazy">
+                    <span>02</span><strong>WOMEN'S WEAR</strong><small>Dresses, suits &amp; more</small>
+                </a>
+                <a class="category-tile lbm-department-card" href="department.html?department=kids">
+                    <img src="https://images.unsplash.com/photo-1503919005314-30d93d07d823?w=800&auto=format&fit=crop" alt="Children's clothing" loading="lazy">
+                    <span>03</span><strong>KIDS' WEAR</strong><small>Styles for little ones</small>
+                </a>
+                <a class="category-tile lbm-department-card" href="department.html?department=footwear">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&auto=format&fit=crop" alt="Fashion footwear" loading="lazy">
+                    <span>04</span><strong>SHOES &amp; SLIPPERS</strong><small>Step out with confidence</small>
+                </a>
             </div>
         </section>
 
-        <section class="benefits-strip" aria-label="Why shop with LBM">
-            <div><b>01</b><span><strong>SHOP WITH EASE</strong><small>Browse from anywhere in Zambia</small></span></div>
-            <div><b>02</b><span><strong>PAY YOUR WAY</strong><small>Mobile money and WhatsApp support</small></span></div>
-            <div><b>03</b><span><strong>LBM LAY-BAY</strong><small>Spread payments on eligible items</small></span></div>
+        <section class="lbm-quick-filters" aria-label="Quick shopping filters">
+            <div class="lbm-quick-filters-heading">
+                <span class="section-label">FIND IT FASTER</span>
+                <strong>SHOP BY STYLE</strong>
+            </div>
+            <div class="lbm-quick-filter-row">
+                <button type="button" class="lbm-quick-filter" data-lbm-search-term="suit">Men's Suits</button>
+                <button type="button" class="lbm-quick-filter" data-lbm-search-term="ladies suit">Ladies' Suits</button>
+                <button type="button" class="lbm-quick-filter" data-lbm-search-term="shirt">Office Shirts</button>
+                <button type="button" class="lbm-quick-filter" data-lbm-search-term="dress">Dresses</button>
+                <button type="button" class="lbm-quick-filter" data-lbm-search-term="slipper">Slippers</button>
+                <button type="button" class="lbm-quick-filter" data-lbm-search-term="kids">Kids' Sets</button>
+            </div>
         </section>
 
-        <section class="laybay-promo">
-            <div class="laybay-promo-copy">
-                <p class="section-label">A SMARTER WAY TO SHOP</p>
-                <h2>Get what you love.<br><span>Pay over time.</span></h2>
-                <p>Choose an eligible product and follow its LBM Lay-Bay payment plan. Your selected product and plan details stay clear from the start.</p>
-                <a href="lay-bay/index.html" class="laybay-promo-button">SHOP WITH LAY-BAY <span>→</span></a>
-            </div>
-            <div class="laybay-promo-mark" aria-hidden="true"><span>LBM</span><strong>LAY-BAY</strong><small>YOUR PRODUCT. YOUR PLAN.</small></div>
-        </section>
+
+
+
 
         <section class="collection-heading" id="products">
 
@@ -675,7 +921,7 @@
                 THE LBM COLLECTION
             </p>
 
-            <h2>FEATURED PRODUCTS</h2>
+            <h2>NEW ARRIVALS &amp; FEATURED PRODUCTS</h2>
 
             <p>
                 Explore our latest fashion selections.
@@ -727,6 +973,37 @@
 
             </div>
 
+        </section>
+
+        <section class="lbm-spotlight-banners" aria-label="Featured fashion collections">
+            <a class="lbm-spotlight-banner lbm-formal-banner" href="#products" data-lbm-search-term="suit">
+                <span>THE FORMAL EDIT</span>
+                <strong>Executive Suits &amp; Office Shirts</strong>
+                <small>Look sharp for work and special occasions.</small>
+                <b>SHOP FORMAL →</b>
+            </a>
+            <a class="lbm-spotlight-banner lbm-casual-banner" href="#products" data-lbm-search-term="dress">
+                <span>EVERYDAY STYLE</span>
+                <strong>Fashion for Every Day</strong>
+                <small>Explore dresses, tops and comfortable footwear.</small>
+                <b>SHOP CASUAL →</b>
+            </a>
+        </section>
+
+                <section class="laybay-promo">
+            <div class="laybay-promo-copy">
+                <p class="section-label">A SMARTER WAY TO SHOP</p>
+                <h2>Get what you love.<br><span>Pay over time.</span></h2>
+                <p>Choose an eligible product and follow its LBM Lay-Bay payment plan. Your selected product and plan details stay clear from the start.</p>
+                <a href="lay-bay/index.html" class="laybay-promo-button">SHOP WITH LAY-BAY <span>→</span></a>
+            </div>
+            <div class="laybay-promo-mark" aria-hidden="true"><span>LBM</span><strong>LAY-BAY</strong><small>YOUR PRODUCT. YOUR PLAN.</small></div>
+        </section>
+
+                <section class="benefits-strip" aria-label="Why shop with LBM">
+            <div><b>01</b><span><strong>SHOP WITH EASE</strong><small>Browse from anywhere in Zambia</small></span></div>
+            <div><b>02</b><span><strong>PAY YOUR WAY</strong><small>Mobile money and WhatsApp support</small></span></div>
+            <div><b>03</b><span><strong>LBM LAY-BAY</strong><small>Spread payments on eligible items</small></span></div>
         </section>
 
         <section class="how-laybay-help" aria-label="Shopping help">
@@ -967,6 +1244,12 @@
         <p>Fashion. Elegance. Confidence.</p>
         <p>MTN • Airtel • Zamtel Mobile Money</p>
 
+        <div class="lbm-footer-accordions">
+            <details><summary>SHOP CATEGORIES</summary><div><a href="department.html?department=men">Men</a><a href="department.html?department=women">Women</a><a href="department.html?department=kids">Kids</a><a href="department.html?department=footwear">Shoes &amp; Slippers</a></div></details>
+            <details><summary>CUSTOMER CARE</summary><div><a href="#delivery">Delivery Information</a><a href="returns.html">Returns &amp; Exchanges</a><a href="#faq">Shopping FAQs</a><a href="https://wa.me/260969034955" target="_blank" rel="noopener noreferrer">Contact / WhatsApp</a></div></details>
+            <details><summary>MORE FROM LBM</summary><div><a href="#about">About LBM</a><a href="lay-bay/index.html">LBM Lay-Bay</a><a href="technical-assistant.html">Technical Assistant</a></div></details>
+        </div>
+
         <div class="social-links" aria-label="LBM social media">
 
             <a
@@ -1067,8 +1350,39 @@
 
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="lbm-website-analytics.js?v=1" defer></script>
+    
+<script>
+(function(){
+  const menuButton=document.getElementById("lbm-menu-toggle");
+  const menu=document.getElementById("lbm-department-menu");
+  const search=document.getElementById("lbm-product-search");
+  if(!menuButton||!menu)return;
+  function closeMenu(){menu.hidden=true;menuButton.setAttribute("aria-expanded","false");menuButton.setAttribute("aria-label","Open store menu");}
+  menuButton.addEventListener("click",function(){
+    menu.hidden=!menu.hidden;
+    menuButton.setAttribute("aria-expanded",String(!menu.hidden));
+    menuButton.setAttribute("aria-label",menu.hidden?"Open store menu":"Close store menu");
+  });
+  document.addEventListener("click",function(event){
+    if(!menu.hidden&&!menu.contains(event.target)&&!menuButton.contains(event.target))closeMenu();
+  });
+  document.addEventListener("keydown",function(event){if(event.key==="Escape")closeMenu();});
+  document.querySelectorAll("[data-lbm-search-term]").forEach(function(item){
+    item.addEventListener("click",function(event){
+      const term=item.getAttribute("data-lbm-search-term");
+      if(search&&term){
+        search.value=term;
+        search.dispatchEvent(new Event("input",{bubbles:true}));
+      }
+      closeMenu();
+      if(item.tagName==="BUTTON")document.getElementById("products")?.scrollIntoView({behavior:"smooth"});
+    });
+  });
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="lbm-website-analytics.js?v=20261118-header-refresh" defer></script>
 
 
 <script>
@@ -1085,13 +1399,13 @@
     }).catch(error=>console.warn("LBM hero image setting could not load:",error));
 })();
 </script>
-    <script src="script.js?v=hero-background-fix-33525da"></script>
-    <script src="features.js?v=announcement-bell-account-v1"></script>
+    <script src="script.js?v=20261118-header-refresh"></script>
+    <script src="features.js?v=20261118-header-refresh"></script>
 
     <script>
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", () => {
-                navigator.serviceWorker.register("./sw.js?v=laybay-picture-checkbox-v1")
+                navigator.serviceWorker.register("./sw.js?v=20261118-header-refresh")
                     .then(registration => {
                         console.log(
                             "LBM App Service Worker registered:",
@@ -1248,37 +1562,6 @@
     </script>
 
 
-<script>
-/* LBM header: hide while scrolling down, reveal while scrolling up. */
-(function () {
-    const header = document.getElementById("site-header-stack");
-    if (!header) return;
-    let lastY = window.scrollY || 0;
-    let ticking = false;
-    function updateHeader() {
-        const currentY = window.scrollY || 0;
-        const delta = currentY - lastY;
-        if (currentY < 80) {
-            header.classList.remove("header-hidden");
-        } else if (Math.abs(delta) > 6) {
-            if (delta > 0 && !document.activeElement.closest?.("#site-header-stack")) {
-                header.classList.add("header-hidden");
-            } else if (delta < 0) {
-                header.classList.remove("header-hidden");
-            }
-        }
-        lastY = currentY;
-        ticking = false;
-    }
-    window.addEventListener("scroll", function () {
-        if (!ticking) {
-            window.requestAnimationFrame(updateHeader);
-            ticking = true;
-        }
-    }, { passive: true });
-})();
-</script>
-
-<script src="lbm-customer-behaviour-analytics.js?v=1" defer></script>
-</body>
+<script src="lbm-customer-behaviour-analytics.js?v=20261118-header-refresh" defer></script>
+<script>(function(){const key='lbmColourTheme';const button=document.getElementById('lbm-theme-toggle');if(!button)return;function apply(mode){document.body.classList.toggle('lbm-light-theme',mode==='light');button.textContent=mode==='light'?'☾ Dark':'☀ Light';button.setAttribute('aria-label',mode==='light'?'Switch to dark theme':'Switch to light theme');}let saved='dark';try{saved=localStorage.getItem(key)||'dark'}catch(e){}apply(saved);button.addEventListener('click',function(){const next=document.body.classList.contains('lbm-light-theme')?'dark':'light';apply(next);try{localStorage.setItem(key,next)}catch(e){}});})();</script><script>(function(){const title=document.getElementById("lbm-greeting-title");const message=document.getElementById("lbm-greeting-message");if(!title||!message)return;const parts=new Intl.DateTimeFormat("en-GB",{timeZone:"Africa/Lusaka",hour:"2-digit",hourCycle:"h23"}).formatToParts(new Date());const hour=Number(parts.find(p=>p.type==="hour")?.value||0);const greeting=hour<12?"Good Morning":hour<18?"Good Afternoon":"Good Evening";title.textContent=greeting+"! Welcome to LBM Online Store.";message.textContent="We're glad you're here. Explore our collections and find a look that feels like you.";})();</script></body>
 </html>

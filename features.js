@@ -712,9 +712,51 @@
        8. START FEATURES
        ===================================================== */
 
+    /* =====================================================
+       HOMEPAGE DUPLICATE-ELEMENT SAFEGUARD
+       Keep the redesigned static header and greeting as the
+       single source of truth. Remove legacy injected copies.
+       ===================================================== */
+
+    function removeLegacyHomepageDuplicates() {
+        const primaryHeader =
+            document.querySelector("#site-header-stack > header.topbar") ||
+            document.querySelector("#site-header-stack header.topbar");
+
+        document.querySelectorAll("header.topbar").forEach(header => {
+            if (primaryHeader && header !== primaryHeader) {
+                header.remove();
+            }
+        });
+
+        if (primaryHeader) {
+            [".lbm-header-brand-row", ".lbm-header-tools-row"].forEach(selector => {
+                const rows = primaryHeader.querySelectorAll(selector);
+                rows.forEach((row, index) => {
+                    if (index > 0) row.remove();
+                });
+            });
+
+            const themeButtons = primaryHeader.querySelectorAll("#lbm-theme-switcher");
+            themeButtons.forEach(button => button.remove());
+        }
+
+        const legacyGreeting = document.getElementById("lbm-welcome-greeting");
+        if (legacyGreeting) legacyGreeting.remove();
+
+        const greetingAreas = document.querySelectorAll(".lbm-greeting-area");
+        greetingAreas.forEach((area, index) => {
+            if (index > 0) area.remove();
+        });
+
+        const themeButtons = document.querySelectorAll("#lbm-theme-switcher");
+        themeButtons.forEach(button => button.remove());
+    }
+
     async function startLBMFeatures() {
+        removeLegacyHomepageDuplicates();
         installStyles();
-        installGreeting();
+        // The homepage HTML owns the single header, theme toggle and greeting.
         createFeatureSections();
         installAnnouncementPanel();
         installReviewForm();
@@ -1089,17 +1131,8 @@
         applyTheme(savedTheme);
     }
 
-    /* INSTALL THE THEME SWITCH */
-
-    if (document.readyState === "loading") {
-        document.addEventListener(
-            "DOMContentLoaded",
-            installThemeSwitcher,
-            { once: true }
-        );
-    } else {
-        installThemeSwitcher();
-    }
+    /* The redesigned index.html now owns the single theme switch.
+       Keep this legacy function inactive to avoid adding a duplicate button. */
 
   
 })();
