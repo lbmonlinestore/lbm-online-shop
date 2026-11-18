@@ -138,11 +138,6 @@ BEGIN
             'This product is not enabled for Lay-Bay.';
     END IF;
 
-    IF v_stock IS NULL OR v_stock < v_quantity THEN
-        RAISE EXCEPTION
-            'This product is currently out of stock.';
-    END IF;
-
     IF v_normal_price IS NULL OR v_normal_price <= 0 THEN
         RAISE EXCEPTION
             'The normal product price is invalid.';
@@ -293,6 +288,13 @@ BEGIN
             'This product does not have a valid Lay-Bay price configured.';
     END IF;
 
+    -- Existing plans already hold their inventory reservation. Check available
+    -- stock only when creating a new plan, not when re-opening/reusing one.
+    IF v_stock IS NULL OR v_stock < v_quantity THEN
+        RAISE EXCEPTION
+            'There is not enough unreserved stock for this quantity.';
+    END IF;
+
     INSERT INTO public.lay_bay_plans (
         user_id,
         product_id,
@@ -430,7 +432,7 @@ BEGIN
        AND p_amount < pg_catalog.round(v_plan.lay_bay_price_snapshot * COALESCE(v_plan.quantity, 1) * 0.50, 2) THEN
         RAISE EXCEPTION
             'The first deposit must be at least 50%% of the Lay-Bay price (ZMW %).',
-            pg_catalog.round(v_plan.lay_bay_price_snapshot * 0.50, 2);
+            pg_catalog.round(v_plan.lay_bay_price_snapshot * COALESCE(v_plan.quantity, 1) * 0.50, 2);
     END IF;
 
     IF p_amount > v_available THEN
