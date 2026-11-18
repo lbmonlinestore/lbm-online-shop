@@ -33,7 +33,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_line record;
   v_stock integer;
@@ -42,8 +42,6 @@ begin
   if lower(coalesce(new.payment_method, '')) <> 'bank transfer' then
     return new;
   end if;
-
-  new.payment_deadline_at := coalesce(new.payment_deadline_at, now() + interval '24 hours');
 
   for v_line in
     select (x.value->>'product_id')::bigint as product_id,
@@ -102,7 +100,7 @@ begin
 
   return new;
 end;
-$;
+$$;
 
 -- A receipt submitted before the 24-hour deadline keeps the reservation while
 -- LBM verifies it, even if an administrator reviews it after the deadline.
