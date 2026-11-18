@@ -11,7 +11,7 @@ alter table public.orders
 create table if not exists public.lbm_inventory_reservations (
   id uuid primary key default gen_random_uuid(),
   order_id bigint references public.orders(id) on delete restrict,
-  lay_bay_plan_id uuid,
+  lay_bay_plan_id uuid references public.lay_bay_plans(id) on delete restrict,
   product_id bigint not null references public.products(id) on delete restrict,
   quantity integer not null check (quantity > 0),
   status text not null default 'active'
@@ -181,6 +181,93 @@ begin
 end;
 $$;
 
+-- Enforce the same 24-hour deadline at receipt submission (server-side).
+create or replace function public.submit_lbm_bank_transfer(
+  p_order_id bigint,
+  p_phone text,
+  p_bank_account_id uuid,
+  p_transaction_reference text,
+  p_amount numeric,
+  p_receipt_path text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_order public.orders%rowtype;
+  v_reference text;
+  v_token uuid;
+begin
+  select * into v_order
+  from public.orders
+  where id = p_order_id
+    and regexp_replace(phone, '[^0-9]', '', 'g') =
+        regexp_replace(coalesce(p_phone,''), '[^0-9]', '', 'g')
+  for update;
+
+  if not found then raise exception 'Order not found. Check the order reference and phone number.'; end if;
+  if lower(coalesce(v_order.payment_method,'')) <> 'bank transfer' then
+    raise exception 'This order was not placed using Bank Transfer.';
+  end if;
+  if lower(coalesce(v_order.status,'')) = 'cancelled' then raise exception 'This order has been cancelled.'; end if;
+  if v_order.payment_status = 'Paid' then raise exception 'This order is already marked as paid.'; end if;
+  if v_order.payment_deadline_at is null or v_order.payment_deadline_at <= now() then
+    raise exception 'The 24-hour payment window has expired. Contact LBM for a manual stock check.';
+  end if;
+  if p_amount is null or p_amount <> v_order.total then
+    raise exception 'The submitted amount must match the order total.';
+  end if;
+  if nullif(trim(coalesce(p_transaction_reference,'')), '') is null then
+    raise exception 'Enter the bank transaction reference.';
+  end if;
+  if not exists (
+    select 1 from public.lbm_bank_accounts b
+    where b.id=p_bank_account_id and b.is_active=true
+  ) then raise exception 'The selected bank account is no longer available.'; end if;
+  if p_receipt_path is null or split_part(p_receipt_path,'/',1) <> p_order_id::text then
+    raise exception 'Invalid receipt path.';
+  end if;
+
+  begin
+    v_token := split_part(split_part(p_receipt_path,'/',2),'.',1)::uuid;
+  exception when others then
+    raise exception 'Invalid receipt upload token.';
+  end;
+
+  if not exists (
+    select 1 from storage.objects s
+    where s.bucket_id='lbm-bank-transfer-receipts' and s.name=p_receipt_path
+  ) then raise exception 'The uploaded receipt could not be verified.'; end if;
+
+  if not exists (
+    select 1 from public.lbm_bank_receipt_upload_tokens t
+    where t.token=v_token and t.order_id=p_order_id
+      and t.used_at is null and t.expires_at > now()
+  ) then raise exception 'Receipt upload token is invalid or expired. Please upload the receipt again.'; end if;
+
+  if exists (
+    select 1 from public.lbm_bank_transfer_payments p
+    where p.order_id=p_order_id and p.status in ('Pending Verification','Approved')
+  ) then raise exception 'A payment submission already exists for this order.'; end if;
+
+  v_reference := coalesce(v_order.payment_reference,'LBM-BT-'||lpad(p_order_id::text,7,'0'));
+  insert into public.lbm_bank_transfer_payments(
+    order_id,bank_account_id,payment_reference,transaction_reference,amount,receipt_path
+  ) values (
+    p_order_id,p_bank_account_id,v_reference,trim(p_transaction_reference),p_amount,p_receipt_path
+  );
+
+  update public.lbm_bank_receipt_upload_tokens set used_at=now() where token=v_token;
+  update public.orders
+  set payment_reference=v_reference,payment_status='Pending Verification',updated_at=now()
+  where id=p_order_id;
+
+  return jsonb_build_object('success',true,'payment_reference',v_reference,'status','Pending Verification');
+end;
+$;
+
 -- Replaces the existing review RPC, retaining its current validation and
 -- adding deadline/reservation consumption inside the same transaction.
 create or replace function public.review_lbm_bank_transfer(
@@ -326,9 +413,7 @@ commit;
 -- 1. This migration is a draft, not applied.
 -- 2. Existing create_lbm_bank_transfer_order already inserts Bank Transfer orders;
 --    the BEFORE trigger sets the deadline and AFTER trigger reserves stock in the same transaction.
--- 3. Existing submit_lbm_bank_transfer must also be replaced to reject submissions
---    when payment_deadline_at <= now(). That exact replacement is intentionally
---    not included until the RPC's token lifecycle is reviewed with the frontend.
--- 4. Schedule expire_lbm_bank_transfer_orders() only after deciding whether to
---    reuse the existing pg_cron schedule and verifying the project's cron setup.
+-- 3. submit_lbm_bank_transfer now rejects late receipt submissions.
+-- 4. Schedule expire_lbm_bank_transfer_orders() only after verifying pg_cron
+--    and the project's existing job naming/schedule.
 -- 5. A failed approval rolls back the stock decrement and payment/order updates.
