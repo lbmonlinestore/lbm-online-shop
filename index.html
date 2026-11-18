@@ -679,6 +679,36 @@
  .site-header-stack .cart-button{width:35px;height:35px}
  .lbm-menu-toggle{width:34px;height:34px;flex-basis:34px}
 }
+
+/* Final header and welcome placement correction */
+.site-header-stack .topbar{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:9px!important;flex-wrap:nowrap!important;min-height:64px!important;padding:8px clamp(9px,2.5vw,24px)!important}
+.site-header-stack .topbar .brand{position:static!important;left:auto!important;top:auto!important;transform:none!important;display:block!important;flex:0 0 auto!important;margin:0!important;font-size:clamp(16px,2vw,21px)!important;letter-spacing:1px!important;white-space:nowrap!important}
+.site-header-stack .topbar .brand span{display:none!important}
+.site-header-stack .lbm-menu-toggle{flex:0 0 34px!important;width:34px!important;height:36px!important}
+.site-header-stack .lbm-header-search{display:block!important;order:0!important;flex:1 1 auto!important;width:auto!important;min-width:72px!important;max-width:230px!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important}
+.site-header-stack .lbm-header-search .lbm-search-box{height:36px!important;min-height:36px!important;width:100%!important;padding:0 7px!important;border-radius:6px!important;background:#171717!important}
+.site-header-stack .lbm-header-search .lbm-search-icon{font-size:19px!important;margin-right:4px!important}
+.site-header-stack .lbm-header-search #lbm-product-search{height:34px!important;min-width:0!important;font-size:11px!important}
+.site-header-stack .lbm-header-search #lbm-clear-search{width:21px!important;height:21px!important;font-size:16px!important}
+.site-header-stack .lbm-header-search #lbm-search-results{display:none!important}
+.site-header-stack .header-actions{display:flex!important;align-items:center!important;flex:0 0 auto!important;gap:6px!important;margin-left:auto!important}
+.site-header-stack .header-account-tools{display:flex!important;align-items:center!important;gap:5px!important;margin:0!important}
+.site-header-stack .cart-button{width:34px!important;height:36px!important;flex:0 0 34px!important;padding:5px!important}
+.site-header-stack .header-icon-button{width:32px!important;height:36px!important;flex:0 0 32px!important;border-radius:6px!important}
+.site-header-stack .header-icon-button svg,.site-header-stack .cart-button svg{width:18px!important;height:18px!important}
+@media(max-width:380px){
+ .site-header-stack .topbar{gap:5px!important;padding-left:7px!important;padding-right:7px!important}
+ .site-header-stack .topbar .brand{font-size:15px!important}
+ .site-header-stack .lbm-menu-toggle{width:30px!important;flex-basis:30px!important}
+ .site-header-stack .header-actions{gap:4px!important}
+ .site-header-stack .header-account-tools{gap:3px!important}
+ .site-header-stack .cart-button{width:30px!important;flex-basis:30px!important}
+ .site-header-stack .header-icon-button{width:29px!important;flex-basis:29px!important}
+ .site-header-stack .lbm-header-search{min-width:62px!important}
+ .site-header-stack .lbm-header-search #lbm-product-search{font-size:10px!important}
+}
+.lbm-welcome-guide{margin:16px auto 10px!important}
+
 </style>
 </head>
 
@@ -692,7 +722,20 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
 
-        <a href="#home" class="brand">LBM <span>ONLINE STORE</span></a>
+        <a href="#home" class="brand" aria-label="LBM Online Store home">LBM</a>
+
+        <div class="lbm-search-panel lbm-header-search" role="search">
+            <label class="search-label" for="lbm-product-search">Search LBM products</label>
+            <div class="lbm-search-box">
+                <span class="lbm-search-icon" aria-hidden="true">⌕</span>
+                <input type="search" id="lbm-product-search"
+                       placeholder="Search products" aria-label="Search products"
+                       autocomplete="off">
+                <button type="button" id="lbm-clear-search"
+                        aria-label="Clear search" hidden>×</button>
+            </div>
+            <p id="lbm-search-results" aria-live="polite">Browse our latest products</p>
+        </div>
 
         <div class="header-actions">
             <button class="cart-button" id="cart-button" type="button" aria-label="Open shopping bag">
@@ -728,18 +771,7 @@
         </nav>
     </header>
 
-        <div class="lbm-search-panel" role="search">
-            <label class="search-label" for="lbm-product-search">Search LBM products</label>
-            <div class="lbm-search-box">
-                <span class="lbm-search-icon" aria-hidden="true">⌕</span>
-                <input type="search" id="lbm-product-search"
-                       placeholder="Search..." aria-label="Search products"
-                       autocomplete="off">
-                <button type="button" id="lbm-clear-search"
-                        aria-label="Clear search" hidden>×</button>
-            </div>
-            <p id="lbm-search-results" aria-live="polite">Browse our latest products</p>
-        </div>
+
 
             
 
@@ -749,26 +781,6 @@
             <img id="lbm-hero-image" class="hero-model-photo"
                  src="assets/lbm-hero-lifestyle.jpg"
                  alt="LBM fashion models wearing LBM Online Store T-shirts">
-        </section>
-
-        <section class="hero hero-fresh" aria-label="LBM welcome">
-            <div class="hero-content hero-fresh-content">
-                <p class="hero-label">LBM ONLINE SHOP · STYLE FOR EVERY DAY</p>
-                <h1>Look Good.<br><span>Feel Great.</span></h1>
-                <p class="hero-description">Discover clothing, footwear and accessories selected to bring confidence to every look.</p>
-                <div class="hero-actions">
-                    <a href="#products" class="hero-primary-action">SHOP THE COLLECTION <span>→</span></a>
-                    <a href="lay-bay/index.html" class="hero-secondary-action">EXPLORE LBM LAY-BAY</a>
-                </div>
-                <p class="hero-small-note">Shop today. Choose a payment option that works for you.</p>
-                <a class="hero-laybay-callout" href="lay-bay/index.html">
-                    <strong>Shop with Lay-Bay</strong>
-                    <span>Pay in instalments</span>
-                    <span>No interest</span>
-                    <span>Easy approval</span>
-                    <b>LEARN MORE →</b>
-                </a>
-            </div>
         </section>
 
         <section class="lbm-welcome-guide" aria-labelledby="lbm-welcome-title">
@@ -800,6 +812,28 @@
                 </div>
             </details>
         </section>
+
+        <section class="hero hero-fresh" aria-label="LBM welcome">
+            <div class="hero-content hero-fresh-content">
+                <p class="hero-label">LBM ONLINE SHOP · STYLE FOR EVERY DAY</p>
+                <h1>Look Good.<br><span>Feel Great.</span></h1>
+                <p class="hero-description">Discover clothing, footwear and accessories selected to bring confidence to every look.</p>
+                <div class="hero-actions">
+                    <a href="#products" class="hero-primary-action">SHOP THE COLLECTION <span>→</span></a>
+                    <a href="lay-bay/index.html" class="hero-secondary-action">EXPLORE LBM LAY-BAY</a>
+                </div>
+                <p class="hero-small-note">Shop today. Choose a payment option that works for you.</p>
+                <a class="hero-laybay-callout" href="lay-bay/index.html">
+                    <strong>Shop with Lay-Bay</strong>
+                    <span>Pay in instalments</span>
+                    <span>No interest</span>
+                    <span>Easy approval</span>
+                    <b>LEARN MORE →</b>
+                </a>
+            </div>
+        </section>
+
+
 
         <section class="home-categories" aria-labelledby="category-title">
             <div class="home-section-heading">
