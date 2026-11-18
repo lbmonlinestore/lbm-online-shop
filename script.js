@@ -709,14 +709,15 @@ function normaliseSearchText(value) {
 function searchProducts(searchTerm) {
     const query = normaliseSearchText(searchTerm);
     const department = new URLSearchParams(window.location.search).get("department") || "";
+    const productName = product => String(product.name || "").toLowerCase();
+    const isBag = product => /\\b(bag|handbag|purse)\\b/.test(productName(product));
     const departmentRules = {
-        men: product => ["Men's Clothing", "Men's Shoes"].includes(product.category) ||
-            (product.category === "Other" && /men'?s/i.test(product.name || "")),
+        men: product => ["Men's Clothing", "Men's Shoes"].includes(product.category),
         women: product => product.category === "Women's Clothing",
-        kids: product => product.category === "Other" && /children|kids|boys|girls/i.test(product.name || ""),
-        footwear: product => ["Men's Shoes", "Shoes"].includes(product.category),
-        bags: product => product.category === "Accessories" && /bag|handbag|purse/i.test(product.name || ""),
-        accessories: product => product.category === "Accessories"
+        kids: product => product.category === "Kids' Clothing",
+        footwear: product => ["Men's Shoes", "Women's Shoes", "Kids' Shoes", "Shoes"].includes(product.category),
+        bags: product => product.category === "Accessories" && isBag(product),
+        accessories: product => product.category === "Accessories" && !isBag(product)
     };
     const baseProducts = departmentRules[department]
         ? products.filter(departmentRules[department])
@@ -834,7 +835,7 @@ function installProductSearch() {
    13. DISPLAY PRODUCTS
    ===================================================== */
 
-function displayProducts(productArray = products) {
+function displayProducts(productArray = searchProducts(productSearchTerm)) {
 
     if (!productList) return;
 
