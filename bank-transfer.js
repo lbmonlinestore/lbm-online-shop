@@ -108,8 +108,9 @@
   }else if(order.paymentStatus==="Paid"||order.paymentStatus==="Pending Verification"){
    html+='<div class="lbmPaySuccess">Current payment status: <strong>'+esc(order.paymentStatus)+'</strong>. '+(order.paymentStatus==="Paid"?"This order has already been paid.":"Your receipt is awaiting LBM verification.")+'</div>';
   }else{
-   html+='<div class="lbmPayError">This order has been cancelled. Do not make a transfer.</div>';
-  }else{
+   if(order.paymentStatus==="Payment Rejected"){
+    html+='<div class="lbmPayError">The previous receipt was rejected. Review the administrator note if one was provided, then submit a corrected receipt.</div>';
+   }
    html+='<p class="lbmPayNote">Use the payment reference when making the transfer. Then choose the account you paid into and submit your transaction reference and receipt.</p>';
    banks.forEach((b,i)=>{
     html+='<div class="lbmBank"><label><input type="radio" name="lbmBankChoice" value="'+esc(b.id)+'" '+(i===0?"checked":"")+'> <strong>'+esc(b.bank_name)+'</strong></label><p><strong>Account name:</strong> '+esc(b.account_name)+'</p><p><strong>Account number:</strong> '+esc(b.account_number)+'</p><p><strong>Branch:</strong> '+esc(b.branch||"Not specified")+'</p><p><strong>Account type:</strong> '+esc(b.account_type||"Not specified")+'</p>'+(b.instructions?'<p>'+esc(b.instructions)+'</p>':'')+'</div>';
