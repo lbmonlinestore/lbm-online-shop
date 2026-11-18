@@ -50,8 +50,22 @@ create policy lbm_inventory_reservations_admin_read
     select 1 from public.admin_users a where a.user_id = auth.uid()
   ));
 
--- An AFTER INSERT trigger makes reservation creation atomic with the existing
--- create_lbm_bank_transfer_order RPC without changing its customer-facing API.
+-- Set the deadline before insert, then create FK-backed reservation rows
+-- only after the parent order exists. Both triggers execute in the same transaction.
+create or replace function public.lbm_set_bank_transfer_deadline()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if lower(coalesce(new.payment_method, '')) = 'bank transfer' then
+    new.payment_deadline_at := coalesce(new.payment_deadline_at, now() + interval '24 hours');
+  end if;
+  return new;
+end;
+$$;
+
 create or replace function public.lbm_reserve_bank_transfer_order_inventory()
 returns trigger
 language plpgsql
@@ -95,8 +109,6 @@ begin
     end if;
   end loop;
 
-  new.payment_deadline_at := coalesce(new.payment_deadline_at, now() + interval '24 hours');
-
   for v_line in
     select (x.value->>'product_id')::bigint as product_id,
            sum((x.value->>'quantity')::bigint)::integer as quantity
@@ -116,9 +128,15 @@ begin
 end;
 $$;
 
+drop trigger if exists trg_lbm_set_bank_transfer_deadline on public.orders;
+create trigger trg_lbm_set_bank_transfer_deadline
+before insert on public.orders
+for each row
+execute function public.lbm_set_bank_transfer_deadline();
+
 drop trigger if exists trg_lbm_reserve_bank_transfer_inventory on public.orders;
 create trigger trg_lbm_reserve_bank_transfer_inventory
-before insert on public.orders
+after insert on public.orders
 for each row
 execute function public.lbm_reserve_bank_transfer_order_inventory();
 
@@ -295,6 +313,7 @@ begin
 end;
 $$;
 
+revoke all on function public.lbm_set_bank_transfer_deadline() from public, anon, authenticated;
 revoke all on function public.lbm_reserve_bank_transfer_order_inventory() from public, anon, authenticated;
 revoke all on function public.lbm_consume_order_inventory(bigint) from public, anon, authenticated;
 revoke all on function public.expire_lbm_bank_transfer_orders() from public, anon, authenticated;
@@ -306,7 +325,7 @@ commit;
 -- IMPORTANT REVIEW NOTES:
 -- 1. This migration is a draft, not applied.
 -- 2. Existing create_lbm_bank_transfer_order already inserts Bank Transfer orders;
---    the BEFORE INSERT trigger reserves stock in the same transaction.
+--    the BEFORE trigger sets the deadline and AFTER trigger reserves stock in the same transaction.
 -- 3. Existing submit_lbm_bank_transfer must also be replaced to reject submissions
 --    when payment_deadline_at <= now(). That exact replacement is intentionally
 --    not included until the RPC's token lifecycle is reviewed with the frontend.
