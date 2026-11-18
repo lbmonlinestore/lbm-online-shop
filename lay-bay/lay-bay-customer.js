@@ -3381,9 +3381,11 @@ let layBaySelectionCart = [];
         "p",
         "",
         "Plan status: " + (
-          plan.plan_status === "pending_initial_deposit"
-            ? "Awaiting 50% first deposit"
-            : (plan.plan_status || "Unknown")
+          plan.cancellation_requested_at
+            ? "Cancellation request pending"
+            : (plan.plan_status === "pending_initial_deposit"
+                ? "Awaiting 50% first deposit"
+                : (plan.plan_status || "Unknown"))
         )
       );
 
@@ -3546,7 +3548,8 @@ let layBaySelectionCart = [];
       '<option value="">Choose a Lay-Bay plan</option>';
 
     plans.filter(plan =>
-      ["active", "pending_initial_deposit"].includes(plan.plan_status)
+      ["active", "pending_initial_deposit"].includes(plan.plan_status) &&
+      !plan.cancellation_requested_at
     ).forEach(plan => {
       const option = document.createElement("option");
 
@@ -3986,6 +3989,10 @@ let layBaySelectionCart = [];
     const planId = $("selectedPlan")?.value;
     const amount = Number($("depositAmount")?.value);
     const selectedPlan = plans.find(plan => String(plan.id) === String(planId));
+    if (selectedPlan?.cancellation_requested_at) {
+      message("depositMessage", "This plan is awaiting a cancellation decision. New deposits are temporarily disabled.", false);
+      return;
+    }
     const selectedBalance = balanceFor(planId);
     const alreadyPaid = Number(selectedBalance?.current_balance || 0);
     const firstDepositMinimum = selectedPlan
