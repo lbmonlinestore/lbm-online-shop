@@ -714,7 +714,7 @@
 
     async function startLBMFeatures() {
         installStyles();
-        installGreeting();
+        // Greeting is now managed by index.html to prevent duplicate welcome messages.
         createFeatureSections();
         installAnnouncementPanel();
         installReviewForm();
@@ -1089,17 +1089,8 @@
         applyTheme(savedTheme);
     }
 
-    /* INSTALL THE THEME SWITCH */
-
-    if (document.readyState === "loading") {
-        document.addEventListener(
-            "DOMContentLoaded",
-            installThemeSwitcher,
-            { once: true }
-        );
-    } else {
-        installThemeSwitcher();
-    }
+    /* The redesigned index.html now owns the single theme switch.
+       Keep this legacy function inactive to avoid adding a duplicate button. */
 
   
 })();
