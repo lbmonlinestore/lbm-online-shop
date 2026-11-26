@@ -1384,6 +1384,12 @@ let layBaySelectionCart = [];
       if (event.target === overlay) closeProductGallery();
     });
 
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && productGallery?.overlay?.classList.contains("open")) {
+        closeProductGallery();
+      }
+    });
+
     previous.addEventListener("click", () =>
       showGalleryImage(galleryIndex - 1)
     );
