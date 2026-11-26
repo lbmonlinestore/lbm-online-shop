@@ -3098,16 +3098,31 @@ let layBaySelectionCart = [];
         p_items:items,p_payment_method:method,p_payment_reference:reference,p_proof_url:proofUrl
       });
       if(error) throw error;
-      await loadPlans();
+      // The server has accepted the payment evidence and created the plans.
+      // Refreshing the dashboard must not turn a successful checkout into a
+      // displayed failure or cause the uploaded proof to be deleted.
       const count=Number(data?.checkout_lines||items.length);
       layBaySelectionCart=[];
-      renderSelectionBasket();
+      const launcher=$("layBayBasketLauncher");
+      if(launcher){launcher.textContent="Lay-Bay Basket (0)";launcher.classList.remove("visible");}
+      $("layBaySelectionBasketList").textContent="Your basket is now empty.";
+      $("layBaySelectionBasketTotal").textContent="Estimated total: K0.00";
+      $("layBaySelectionBasketList").style.display="none";
+      $("layBaySelectionBasketTotal").style.display="none";
+      const note=$("layBaySelectionBasket")?.querySelector(".lb-basket-plan-note");
+      if(note) note.style.display="none";
       $("layBayCheckoutLines").textContent="";
       $("layBayCheckoutMethod").value="";
       $("layBayCheckoutReference").value="";
       $("layBayCheckoutProof").value="";
-      status.textContent="Checkout submitted. One combined payment of "+money(combinedPayment)+" has been allocated across "+count+" separate product-specific plan(s). All deposits are awaiting LBM verification. Your plan balances remain separate; receipts are generated after approval.";
+      status.textContent="Checkout submitted successfully. One combined payment of "+money(combinedPayment)+" has been allocated across "+count+" separate product-specific plan(s). All deposits are awaiting LBM verification. Your plan balances remain separate; receipts are generated after approval.";
+      status.style.padding="14px";
+      status.style.border="1px solid #8b702c";
+      status.style.borderRadius="10px";
+      status.style.background="#29220f";
       button.textContent="Checkout Submitted";
+      button.disabled=true;
+      try { await loadPlans(); } catch(refreshError) { console.warn("Checkout accepted; dashboard refresh will retry later.",refreshError); }
       return;
     } catch(error) {
       if(proofPath) {
