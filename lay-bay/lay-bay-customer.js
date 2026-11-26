@@ -3514,6 +3514,7 @@ let layBaySelectionCart = [];
 
       card.append(
         title,
+        createElement("p", "lb-plan-variant", "Quantity: " + Math.max(1, Number(plan.quantity || 1))),
         status,
         total,
         saved,
