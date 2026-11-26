@@ -985,6 +985,12 @@ let layBaySelectionCart = [];
 
       .lb-gallery-close {
         position:fixed;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        pointer-events:auto;
+        touch-action:manipulation;
         top:10px;
         right:12px;
         width:42px;
@@ -1366,10 +1372,17 @@ let layBaySelectionCart = [];
       selectionMessage
     };
 
-    close.addEventListener(
-      "click",
-      closeProductGallery
-    );
+    close.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeProductGallery();
+    });
+
+    // Also allow customers to dismiss the gallery by tapping the dark backdrop
+    // or pressing Escape. The close control remains the primary visible action.
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) closeProductGallery();
+    });
 
     previous.addEventListener("click", () =>
       showGalleryImage(galleryIndex - 1)
@@ -2202,6 +2215,7 @@ let layBaySelectionCart = [];
       #layBaySelectionBasket .lb-basket-actions button:nth-child(2),
       #layBayCheckoutSubmit {background:linear-gradient(135deg,#e7c15d,#bd8e24);color:#17120a;font-weight:800;border:0;}
       #layBaySelectionBasket button:disabled {opacity:.55;cursor:wait;}
+      #layBaySelectionBasket .lb-basket-close {cursor:pointer;pointer-events:auto;touch-action:manipulation;}
       #layBayCheckoutPanel {display:none;margin-top:12px;padding:14px;border:1px solid #6a5522;border-radius:14px;background:#101010;}
       #layBayCheckoutPanel h3 {font-size:19px;color:#e8c45f;margin-bottom:7px;}
       #layBayCheckoutPanel label {display:block;color:#f2d77e;font-size:13px;font-weight:700;margin:12px 0 6px;}
@@ -2654,10 +2668,14 @@ let layBaySelectionCart = [];
 
     const drawerHead = createElement("div", "lb-basket-drawer-head");
     const heading = createElement("h2", "", "My Lay-Bay Basket");
-    const closeButton = createElement("button", "", "×");
+    const closeButton = createElement("button", "lb-basket-close", "×");
     closeButton.type = "button";
     closeButton.setAttribute("aria-label", "Close Lay-Bay basket");
-    closeButton.addEventListener("click", closeSelectionBasket);
+    closeButton.addEventListener("click", event => {
+      event.preventDefault();
+      event.stopPropagation();
+      closeSelectionBasket();
+    });
     drawerHead.append(heading, closeButton);
 
     const note = createElement("p", "lb-muted",
