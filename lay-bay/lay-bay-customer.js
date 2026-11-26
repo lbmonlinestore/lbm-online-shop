@@ -2772,8 +2772,19 @@ let layBaySelectionCart = [];
     section.scrollTop = 0;
   }
   function closeSelectionBasket() {
-    $("layBaySelectionBasket")?.classList.remove("open");
-    $("layBayBasketBackdrop")?.classList.remove("open");
+    const section = $("layBaySelectionBasket");
+    const backdrop = $("layBayBasketBackdrop");
+
+    // openSelectionBasket() sets an inline display:block. Removing only
+    // the .open class is not enough because inline display overrides CSS.
+    if (section) {
+      section.classList.remove("open");
+      section.style.display = "none";
+      section.removeAttribute("aria-modal");
+      section.removeAttribute("role");
+    }
+
+    backdrop?.classList.remove("open");
     document.body.style.overflow = "";
   }
 
@@ -3234,11 +3245,14 @@ let layBaySelectionCart = [];
         "Normal price: " + money(product.price)
       );
 
+      const configuredLayBayPrice = productPrice(product);
       const layBay = createElement(
         "p",
         "",
         "Lay-Bay price: " +
-        money(productPrice(product))
+        (configuredLayBayPrice > 0
+          ? money(configuredLayBayPrice)
+          : "Not configured")
       );
 
       layBay.style.color = "#D4AF37";
