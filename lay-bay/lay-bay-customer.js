@@ -2170,6 +2170,65 @@ let layBaySelectionCart = [];
         min-width: 145px;
       }
 
+      /* Smooth, mobile-first checkout drawer */
+      #layBaySelectionBasket.lb-basket-drawer {
+        background:#090909 !important;
+        color:#f5f5f5 !important;
+        border:1px solid rgba(212,175,55,.38) !important;
+        box-shadow:0 22px 70px rgba(0,0,0,.55) !important;
+        padding:18px !important;
+        transition:transform .28s ease, opacity .22s ease;
+        overscroll-behavior:contain;
+      }
+      #layBaySelectionBasket .lb-basket-drawer-head {
+        position:sticky;top:-18px;z-index:3;
+        display:flex;align-items:center;justify-content:space-between;
+        gap:12px;padding:12px 0;background:#090909;
+        border-bottom:1px solid rgba(212,175,55,.28);margin-bottom:12px;
+      }
+      #layBaySelectionBasket .lb-basket-drawer-head h2 {font-size:20px;color:#D4AF37;margin:0;}
+      #layBaySelectionBasket .lb-basket-drawer-head button {
+        width:40px;height:40px;border-radius:50%;font-size:25px;
+        padding:0;background:#1c1c1c;color:#fff;border:1px solid #55451b;
+      }
+      #layBayBasketBackdrop {opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;}
+      #layBayBasketBackdrop.open {opacity:1;visibility:visible;}
+      #layBaySelectionBasket .lb-basket-card {background:#141414;border:1px solid #4e421f;border-radius:12px;padding:13px;margin:10px 0;}
+      #layBaySelectionBasket .lb-basket-card h3,#layBaySelectionBasket .lb-basket-card h4 {color:#f7d879;font-size:15px;margin-bottom:7px;}
+      #layBaySelectionBasket .lb-basket-card p {font-size:13px;margin:5px 0;color:#dedede;}
+      #layBaySelectionBasket .lb-basket-total {color:#f4d16f;font-weight:800;font-size:17px;}
+      #layBaySelectionBasket .lb-basket-actions {display:grid;grid-template-columns:1fr;gap:9px;margin-top:16px;}
+      #layBaySelectionBasket button {min-height:44px;border-radius:9px;cursor:pointer;}
+      #layBaySelectionBasket .lb-basket-actions button:nth-child(2),
+      #layBayCheckoutSubmit {background:linear-gradient(135deg,#e7c15d,#bd8e24);color:#17120a;font-weight:800;border:0;}
+      #layBaySelectionBasket button:disabled {opacity:.55;cursor:wait;}
+      #layBayCheckoutPanel {display:none;margin-top:12px;padding:14px;border:1px solid #6a5522;border-radius:14px;background:#101010;}
+      #layBayCheckoutPanel h3 {font-size:19px;color:#e8c45f;margin-bottom:7px;}
+      #layBayCheckoutPanel label {display:block;color:#f2d77e;font-size:13px;font-weight:700;margin:12px 0 6px;}
+      #layBayCheckoutPanel input,#layBayCheckoutPanel select {
+        width:100%;min-height:46px;border-radius:9px;border:1px solid #62532d;
+        background:#1a1a1a;color:#fff;padding:10px;font-size:16px;
+      }
+      #layBayCheckoutPanel input[type=file] {font-size:13px;padding:8px;}
+      #layBayCheckoutPanel .lb-checkout-intro,#layBayCheckoutPanel .lb-muted {color:#bdb8aa;font-size:13px;line-height:1.5;}
+      #layBayCheckoutPanel .lb-checkout-payment-total {
+        position:sticky;bottom:0;z-index:2;padding:14px;margin:14px 0;
+        background:#29220f;border:1px solid #9b7929;border-radius:11px;
+        color:#ffe08a;font-size:17px;font-weight:800;text-align:center;
+      }
+      #layBayCheckoutPanel .lb-message {font-size:13px;line-height:1.5;margin:12px 0;color:#f4d77c;}
+      #layBayCheckoutPanel button {width:100%;margin:8px 0;min-height:46px;}
+      #layBayCheckoutPanel button:last-child {background:#252525;color:#fff;border:1px solid #555;}
+      #layBayCheckoutPanel [data-checkout-remaining] {color:#b8d9b8 !important;}
+      #layBayBasketLauncher {box-shadow:0 8px 25px rgba(0,0,0,.3);transition:transform .2s ease;}
+      #layBayBasketLauncher.visible {display:block;}
+      @media(max-width:600px) {
+        #layBaySelectionBasket.lb-basket-drawer {padding:15px 14px calc(18px + env(safe-area-inset-bottom)) !important;}
+        #layBaySelectionBasket .lb-basket-drawer-head {top:-15px;}
+        #layBayCheckoutPanel {padding:11px;}
+        #layBayCheckoutPanel .lb-checkout-payment-total {font-size:16px;}
+      }
+
       .lb-basket-card {
         border: 1px solid #665522;
         border-radius: 9px;
@@ -2633,8 +2692,11 @@ let layBaySelectionCart = [];
       renderSelectionBasket();
     });
 
+    const checkoutButton = createElement("button", "", "Continue to Checkout");
+    checkoutButton.type = "button";
+    checkoutButton.addEventListener("click", openLayBayCheckout);
     const actions = createElement("div", "lb-basket-actions");
-    actions.append(continueButton, clearButton);
+    actions.append(continueButton, checkoutButton, clearButton);
     section.append(drawerHead, note, list, total, planNote, actions);
 
     // Keep the basket outside the catalogue/page layout.
@@ -2711,11 +2773,19 @@ let layBaySelectionCart = [];
     }
 
     if (!layBaySelectionCart.length) {
-      list.textContent =
-        "Your Lay-Bay selection basket is empty.";
-
+      list.textContent = "Your Lay-Bay selection basket is empty.";
       totalElement.textContent = "Estimated total: K0.00";
+      const checkout=$("layBayCheckoutPanel");
+      if(checkout) checkout.style.display="none";
       return;
+    }
+    const checkout=$("layBayCheckoutPanel");
+    if(checkout && checkout.style.display!=="none"){
+      checkout.style.display="none";
+      list.style.display="";
+      totalElement.style.display="";
+      const note=$("layBaySelectionBasket")?.querySelector(".lb-basket-plan-note");
+      if(note) note.style.display="";
     }
 
     let total = 0;
@@ -2824,6 +2894,244 @@ let layBaySelectionCart = [];
       "Estimated total: " + money(total);
   }
 
+
+
+  // =======================================================
+  // 10B. SINGLE-DRAWER LAY-BAY CHECKOUT
+  // =======================================================
+
+  let layBayCheckoutPanel = null;
+
+  function ensureLayBayCheckoutPanel() {
+    if (layBayCheckoutPanel) return layBayCheckoutPanel;
+    layBayCheckoutPanel = createElement("section", "lb-basket-plan-note");
+    layBayCheckoutPanel.id = "layBayCheckoutPanel";
+    layBayCheckoutPanel.style.display = "none";
+    const heading = createElement("h3", "", "Secure Lay-Bay Checkout");
+    const intro = createElement("p", "lb-checkout-intro", "One combined payment can cover all selected products. LBM will allocate the amount you enter below to each separate product-specific plan. Every plan requires at least 50% of its own total as the first deposit.");
+    const lines = createElement("div");
+    lines.id = "layBayCheckoutLines";
+    const methodLabel = createElement("label", "", "Payment method");
+    const method = createElement("select");
+    method.id = "layBayCheckoutMethod";
+    [
+      ["", "Choose payment method"],
+      ["MTN Mobile Money", "MTN Mobile Money"],
+      ["Airtel Money", "Airtel Money"],
+      ["Zamtel Kwacha", "Zamtel Kwacha"],
+      ["Bank Transfer", "Bank Transfer"],
+      ["Other", "Other"]
+    ].forEach(([value,label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      method.appendChild(option);
+    });
+    const referenceLabel = createElement("label", "", "Transaction reference");
+    const reference = createElement("input");
+    reference.id = "layBayCheckoutReference";
+    reference.type = "text";
+    reference.maxLength = 150;
+    reference.placeholder = "Enter the actual payment reference";
+    reference.autocomplete = "off";
+    const proofLabel = createElement("label", "", "Payment proof (JPG, PNG, WEBP or PDF; max 5 MB)");
+    const proof = createElement("input");
+    proof.id = "layBayCheckoutProof";
+    proof.type = "file";
+    proof.accept = "image/jpeg,image/png,image/webp,application/pdf";
+    const status = createElement("p", "lb-message");
+    status.id = "layBayCheckoutMessage";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    const submit = createElement("button", "", "Submit Lay-Bay Checkout");
+    submit.type = "button";
+    submit.id = "layBayCheckoutSubmit";
+    submit.addEventListener("click", submitLayBayCheckout);
+    const back = createElement("button", "", "Back to Basket");
+    back.type = "button";
+    back.style.marginLeft = "8px";
+    back.addEventListener("click", () => {
+      layBayCheckoutPanel.style.display = "none";
+      $("layBaySelectionBasketList").style.display = "";
+      $("layBaySelectionBasketTotal").style.display = "";
+      const note = $("layBaySelectionBasket")?.querySelector(".lb-basket-plan-note");
+      if (note) note.style.display = "";
+    });
+    const paymentTotal=createElement("div","lb-checkout-payment-total","Combined payment to send: K0.00");
+    paymentTotal.id="layBayCheckoutPaymentTotal";
+    const paymentNote=createElement("p","lb-muted","Make one payment for the combined amount shown. Use one transaction reference and attach one proof file. LBM verifies the transaction and credits each plan separately.");
+    layBayCheckoutPanel.append(heading,intro,lines,paymentTotal,paymentNote,methodLabel,method,referenceLabel,reference,proofLabel,proof,status,submit,back);
+    $("layBaySelectionBasket").appendChild(layBayCheckoutPanel);
+    return layBayCheckoutPanel;
+  }
+
+  function getLayBayCheckoutLines() {
+    const grouped = new Map();
+    layBaySelectionCart.forEach(item => {
+      const key = [
+        String(item.product_id),
+        String(item.size || "").trim().toLowerCase(),
+        String(item.colour || "").trim().toLowerCase()
+      ].join("::");
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          product_id: item.product_id,
+          product_name: item.product_name,
+          size: item.size || null,
+          colour: item.colour || null,
+          quantity: 0,
+          unit_price: Number(item.unit_price),
+          image_url: item.image_url || null
+        });
+      }
+      const line = grouped.get(key);
+      line.quantity += Number(item.quantity || 0);
+    });
+    return [...grouped.values()];
+  }
+
+  function updateLayBayCheckoutTotals() {
+    const lines = getLayBayCheckoutLines();
+    let depositTotal = 0;
+    lines.forEach((item,index) => {
+      const input = document.querySelector('[data-checkout-amount="' + index + '"]');
+      if (input && Number.isFinite(Number(input.value))) {
+        depositTotal += Number(input.value);
+        const total = Number((item.unit_price * item.quantity).toFixed(2));
+        const remaining = Math.max(0,total-Number(input.value));
+        const output = document.querySelector('[data-checkout-remaining="' + index + '"]');
+        if(output) output.textContent = "Remaining after this deposit: " + money(remaining);
+      }
+    });
+    const summary=$("layBayCheckoutPaymentTotal");
+    if(summary) summary.textContent="Combined payment to send: "+money(depositTotal);
+  }
+
+  function openLayBayCheckout() {
+    if (!currentUser) {
+      message("productsMessage", "Please sign in before checking out.", false);
+      return;
+    }
+    const checkoutItems=getLayBayCheckoutLines();
+    if (!checkoutItems.length) {
+      message("productsMessage", "Your Lay-Bay basket is empty.", false);
+      return;
+    }
+    const panel = ensureLayBayCheckoutPanel();
+    const lines = $("layBayCheckoutLines");
+    lines.innerHTML = "";
+    checkoutItems.forEach((item,index) => {
+      const total = Number((Number(item.unit_price) * Number(item.quantity)).toFixed(2));
+      const minimum = Number((total * 0.5).toFixed(2));
+      const card = createElement("article","lb-basket-card lb-checkout-line");
+      const variant = [item.size ? "Size: "+item.size : "", item.colour ? "Colour: "+item.colour : ""].filter(Boolean).join(" | ") || "Standard product";
+      const title = createElement("h4","",item.product_name+" — "+variant);
+      const amountLabel = createElement("label","","Deposit allocation for this plan (minimum "+money(minimum)+")");
+      const amount = createElement("input");
+      amount.type="number"; amount.min=String(minimum); amount.max=String(total); amount.step="0.01"; amount.value=String(minimum); amount.required=true;
+      amount.inputMode="decimal";
+      amount.dataset.checkoutAmount=String(index);
+      const remaining=createElement("p","lb-muted","Remaining after this deposit: "+money(total-minimum));
+      remaining.dataset.checkoutRemaining=String(index);
+      card.append(title,createElement("p","","Quantity: "+item.quantity),createElement("p","","Plan total: "+money(total)),amountLabel,amount,remaining);
+      lines.appendChild(card);
+      amount.addEventListener("input",updateLayBayCheckoutTotals);
+    });
+    panel.style.display="block";
+    $("layBaySelectionBasketList").style.display="none";
+    $("layBaySelectionBasketTotal").style.display="none";
+    const note = $("layBaySelectionBasket")?.querySelector(".lb-basket-plan-note");
+    if (note) note.style.display="none";
+    $("layBayCheckoutMessage").textContent="";
+    updateLayBayCheckoutTotals();
+    panel.scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+
+  async function submitLayBayCheckout() {
+    const button=$("layBayCheckoutSubmit");
+    const status=$("layBayCheckoutMessage");
+    if(button.disabled) return;
+    if (!currentUser) { status.textContent="Your session has expired. Please sign in again."; return; }
+    const checkoutItems=getLayBayCheckoutLines();
+    if (!checkoutItems.length) { status.textContent="Your basket is empty."; return; }
+    const method=$("layBayCheckoutMethod")?.value;
+    const reference=$("layBayCheckoutReference")?.value.trim();
+    const proofFile=$("layBayCheckoutProof")?.files?.[0] || null;
+    if (!method) { status.textContent="Choose a payment method."; return; }
+    if (!reference || reference.length<3) { status.textContent="Enter the actual transaction reference."; return; }
+    if (proofFile && (!["image/jpeg","image/png","image/webp","application/pdf"].includes(proofFile.type) || proofFile.size>5*1024*1024)) {
+      status.textContent="Payment proof must be JPG, PNG, WEBP or PDF and no larger than 5 MB."; return;
+    }
+    const amounts=[...document.querySelectorAll("[data-checkout-amount]")];
+    if (amounts.length!==checkoutItems.length) { status.textContent="Your basket changed. Reopen checkout and try again."; return; }
+    const items=[];
+    let combinedPayment=0;
+    for(let i=0;i<checkoutItems.length;i++){
+      const item=checkoutItems[i];
+      const total=Number((Number(item.unit_price)*Number(item.quantity)).toFixed(2));
+      const amount=Number(amounts[i].value);
+      const minimum=Number((total*0.5).toFixed(2));
+      if(!Number.isFinite(amount)||amount<minimum||amount>total){
+        status.textContent="Deposit allocation for "+item.product_name+" must be between "+money(minimum)+" and "+money(total)+"."; return;
+      }
+      combinedPayment+=amount;
+      items.push({product_id:item.product_id,size:item.size,colour:item.colour,quantity:Number(item.quantity),deposit_amount:Number(amount.toFixed(2))});
+    }
+    if(!Number.isFinite(combinedPayment)||combinedPayment<=0){status.textContent="Enter valid deposit amounts.";return;}
+    button.disabled=true; button.textContent="Submitting checkout...";
+    status.textContent="Submitting one payment allocation across "+items.length+" separate product plan(s)...";
+    let proofPath=null;
+    try {
+      if(proofFile){
+        const ext=proofFile.type==="application/pdf"?"pdf":proofFile.type==="image/png"?"png":proofFile.type==="image/webp"?"webp":"jpg";
+        proofPath=currentUser.id+"/payment-proof-"+Date.now()+"."+ext;
+        const upload=await db.storage.from("lay-bay-payment-proofs").upload(proofPath,proofFile,{upsert:false,contentType:proofFile.type,cacheControl:"3600"});
+        if(upload.error) throw upload.error;
+      }
+      let proofUrl=null;
+      if(proofPath){
+        const signed=await db.storage.from("lay-bay-payment-proofs").createSignedUrl(proofPath,31536000);
+        if(signed.error) throw signed.error;
+        proofUrl=signed.data.signedUrl;
+      }
+      const {data,error}=await db.rpc("submit_lay_bay_checkout",{
+        p_items:items,p_payment_method:method,p_payment_reference:reference,p_proof_url:proofUrl
+      });
+      if(error) throw error;
+      // The server has accepted the payment evidence and created the plans.
+      // Refreshing the dashboard must not turn a successful checkout into a
+      // displayed failure or cause the uploaded proof to be deleted.
+      const count=Number(data?.checkout_lines||items.length);
+      layBaySelectionCart=[];
+      const launcher=$("layBayBasketLauncher");
+      if(launcher){launcher.textContent="Lay-Bay Basket (0)";launcher.classList.remove("visible");}
+      $("layBaySelectionBasketList").textContent="Your basket is now empty.";
+      $("layBaySelectionBasketTotal").textContent="Estimated total: K0.00";
+      $("layBaySelectionBasketList").style.display="none";
+      $("layBaySelectionBasketTotal").style.display="none";
+      const note=$("layBaySelectionBasket")?.querySelector(".lb-basket-plan-note");
+      if(note) note.style.display="none";
+      $("layBayCheckoutLines").textContent="";
+      $("layBayCheckoutMethod").value="";
+      $("layBayCheckoutReference").value="";
+      $("layBayCheckoutProof").value="";
+      status.textContent="Checkout submitted successfully. One combined payment of "+money(combinedPayment)+" has been allocated across "+count+" separate product-specific plan(s). All deposits are awaiting LBM verification. Your plan balances remain separate; receipts are generated after approval.";
+      status.style.padding="14px";
+      status.style.border="1px solid #8b702c";
+      status.style.borderRadius="10px";
+      status.style.background="#29220f";
+      button.textContent="Checkout Submitted";
+      button.disabled=true;
+      try { await loadPlans(); } catch(refreshError) { console.warn("Checkout accepted; dashboard refresh will retry later.",refreshError); }
+      return;
+    } catch(error) {
+      if(proofPath) {
+        await db.storage.from("lay-bay-payment-proofs").remove([proofPath]).catch(()=>{});
+      }
+      status.textContent=error.message||"Checkout could not be submitted. Please review your basket and try again.";
+      button.disabled=false; button.textContent="Submit Lay-Bay Checkout";
+    }
+  }
 
   // =======================================================
   // 11. DISPLAY ALL PRODUCTS
@@ -3344,6 +3652,7 @@ let layBaySelectionCart = [];
 
       card.append(
         title,
+        createElement("p", "lb-plan-variant", "Quantity: " + Math.max(1, Number(plan.quantity || 1))),
         status,
         total,
         saved,
