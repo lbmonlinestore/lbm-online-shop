@@ -175,14 +175,17 @@ let layBaySelectionCart = [];
 
   function productPrice(product) {
     const normal = Number(product.price);
-    const layBay = Number(product.lay_bay_price);
+    const configured = Number(product.lay_bay_price);
 
-    if (
-      !Number.isFinite(normal) ||
-      normal <= 0 ||
-      !Number.isFinite(layBay) ||
-      layBay <= normal
-    ) return 0;
+    if (!Number.isFinite(normal) || normal <= 0) return 0;
+
+    // The customer-facing Lay-Bay price is always calculated at the
+    // agreed 22% markup when no valid database snapshot is present.
+    // The database remains authoritative when it contains a valid price.
+    const calculated = Number((normal * 1.22).toFixed(2));
+    const layBay = Number.isFinite(configured) && configured > normal
+      ? configured
+      : calculated;
 
     return Number(layBay.toFixed(2));
   }
